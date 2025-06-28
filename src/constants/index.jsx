@@ -9,19 +9,14 @@ export const navbarLinks = [
         path: "/",
     },
     {
-        label: "Cases",
+        label: "Clients & Cases",
         icon: Folders,
-        path: "/cases",
+        path: "/clients-cases",
     },
     {
         label: "Documents",
         icon: FileText,
         path: "/documents",
-    },
-    {
-        label: "Clients",
-        icon: Users,
-        path: "/clients",
     },
     {
         label: "Tasks",
@@ -31,7 +26,7 @@ export const navbarLinks = [
 
     {
         label: "Users",
-        icon: ShieldUser,
+        icon: Users,
         path: "/users",
     },
     {
