@@ -28,6 +28,7 @@ const documents = [
 const ClientAndCase = () => {
   const [selectedDoc, setSelectedDoc] = useState(null);
   const [uploadedFile, setUploadedFile] = useState(null);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const fileInputRef = useRef(null);
 
   const handleDocClick = (doc) => setSelectedDoc(doc);
@@ -136,7 +137,10 @@ const ClientAndCase = () => {
             <p className="text-sm">Total Fee: <strong>35,000.00</strong></p>
             <p className="text-sm">Total Amount Paid: <strong>- 10,500.00</strong></p>
             <p className="text-sm font-bold mt-2">Remaining Balance: <span className="text-green-600">25,000.00</span></p>
-            <button className="mt-3 w-full bg-green-600 text-white py-1.5 rounded text-sm">
+            <button
+              className="mt-3 w-full bg-green-600 text-white py-1.5 rounded text-sm"
+              onClick={() => setShowPaymentModal(true)}
+            >
               View Payment Record
             </button>
           </div>
@@ -199,6 +203,32 @@ const ClientAndCase = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Payment Modal */}
+        {showPaymentModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Payment Record</h3>
+                <X className="cursor-pointer" onClick={() => setShowPaymentModal(false)} />
+              </div>
+              <p className="text-sm mb-2">Case: {caseInfo.caseName}</p>
+              <ul className="text-sm space-y-1">
+                <li>Total Fee: <strong>35,000.00</strong></li>
+                <li>Total Paid: <strong>10,500.00</strong></li>
+                <li>Remaining Balance: <strong className="text-green-600">25,000.00</strong></li>
+              </ul>
+              <div className="mt-4 text-right">
+                <button
+                  className="bg-blue-600 text-white px-4 py-2 rounded"
+                  onClick={() => setShowPaymentModal(false)}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

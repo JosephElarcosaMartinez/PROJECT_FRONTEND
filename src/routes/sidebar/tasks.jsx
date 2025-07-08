@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Filter, Plus, Trash2, Pencil, X } from "lucide-react";
+import { Filter, Plus, Trash2, Pencil, X, Upload, UploadCloud } from "lucide-react";
 
-const tasks = [
+const initialTasks = [
   {
     id: 1,
     title: "Draft incorporation documents",
@@ -41,10 +41,21 @@ const statusColor = {
 };
 
 const Tasks = () => {
+  const [tasks, setTasks] = useState(initialTasks);
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedType, setSelectedType] = useState("");
   const [selectedUploader, setSelectedUploader] = useState("");
+
+  const [newDoc, setNewDoc] = useState({
+    title: "",
+    case: "",
+    description: "",
+    assignedTo: "",
+    status: "Pending",
+    dueDate: "",
+    file: null,
+  });
 
   const toggleFilterModal = () => setShowFilterModal(!showFilterModal);
   const toggleUploadModal = () => setShowUploadModal(!showUploadModal);
@@ -54,9 +65,41 @@ const Tasks = () => {
     toggleFilterModal();
   };
 
+  const handleFileSelect = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setNewDoc({ ...newDoc, file });
+    }
+  };
+
+  const handleUpload = () => {
+    if (!newDoc.title || !newDoc.case || !newDoc.description) {
+      alert("Please fill all fields.");
+      return;
+    }
+
+    const newTask = {
+      ...newDoc,
+      id: tasks.length + 1,
+      completedDate: null,
+    };
+
+    setTasks([...tasks, newTask]);
+    setNewDoc({
+      title: "",
+      case: "",
+      description: "",
+      assignedTo: "",
+      status: "Pending",
+      dueDate: "",
+      file: null,
+    });
+    toggleUploadModal();
+  };
+
   return (
     <div className="min-h-screen p-6 text-black">
-      {/* Header without Search */}
+      {/* Header */}
       <div className="flex justify-end items-center mb-6 gap-2">
         <button
           className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded-md text-gray-700 hover:bg-gray-100 text-sm"
@@ -87,7 +130,6 @@ const Tasks = () => {
             <div className="absolute top-3 right-4 text-sm font-medium">
               <span className={statusColor[task.status]}>{task.status}</span>
             </div>
-
             <h3 className="font-semibold text-blue-700 hover:underline cursor-pointer mb-1">
               {task.title}
             </h3>
@@ -105,8 +147,6 @@ const Tasks = () => {
                 <strong>Completed:</strong> {task.completedDate}
               </p>
             )}
-
-            {/* Actions */}
             <div className="mt-3 flex justify-between items-center">
               {task.status !== "Completed" && (
                 <button className="bg-gray-100 text-sm px-3 py-1 rounded text-blue-700">
@@ -114,12 +154,8 @@ const Tasks = () => {
                 </button>
               )}
               <div className="flex gap-2">
-                <button className="text-blue-600">
-                  <Pencil size={16} />
-                </button>
-                <button className="text-red-500">
-                  <Trash2 size={16} />
-                </button>
+                <button className="text-blue-600"><Pencil size={16} /></button>
+                <button className="text-red-500"><Trash2 size={16} /></button>
               </div>
             </div>
           </div>
@@ -177,18 +213,59 @@ const Tasks = () => {
         </div>
       )}
 
-      {/* Upload Modal Placeholder */}
+      {/* Upload Modal */}
       {showUploadModal && (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded shadow text-black">
-            <h3 className="text-lg font-semibold mb-4">Upload Document</h3>
-            <p>Upload modal content here.</p>
+        <div className="fixed inset-0 z-50 bg-black/50 flex justify-center items-center">
+          <div className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6 relative">
             <button
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded"
               onClick={toggleUploadModal}
+              className="absolute top-3 right-3 text-gray-500 hover:text-black"
             >
-              Close
+              <X size={20} />
             </button>
+            <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <UploadCloud size={20} /> Add New Tasks
+            </h2>
+
+            <div className="space-y-4">
+              <input
+                type="text"
+                placeholder="Task Title"
+                value={newDoc.title}
+                onChange={(e) => setNewDoc({ ...newDoc, title: e.target.value })}
+                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+              />
+              <input
+                type="text"
+                placeholder="Case"
+                value={newDoc.case}
+                onChange={(e) => setNewDoc({ ...newDoc, case: e.target.value })}
+                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+              />
+              <input
+                type="text"
+                placeholder="Description"
+                value={newDoc.description}
+                onChange={(e) => setNewDoc({ ...newDoc, description: e.target.value })}
+                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+              />
+              <input
+                type="text"
+                placeholder="Assigned To"
+                value={newDoc.assignedTo}
+                onChange={(e) => setNewDoc({ ...newDoc, assignedTo: e.target.value })}
+                className="border border-gray-300 rounded-md px-3 py-2 w-full"
+              />
+
+              <div className="flex justify-end">
+                <button
+                  onClick={handleUpload}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                >
+                  Add Task
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
