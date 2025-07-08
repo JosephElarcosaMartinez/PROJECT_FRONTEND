@@ -57,7 +57,7 @@ const ClientAndCase = () => {
         category: "Litigation",
         client: selectedDoc.uploadedBy,
         description: `Document ID: ${selectedDoc.id}, File: ${selectedDoc.file}`,
-        lawyer: "TBD",
+        lawyer: "NOELGO",
         cabinet: "001",
         drawer: "002",
         location: "Dumanjug",
