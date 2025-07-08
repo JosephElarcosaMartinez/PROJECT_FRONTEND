@@ -6,6 +6,8 @@ import Login from "./auth/login";
 import ForgotPassword from "./auth/forgotpassword";
 import UsersPage from "./routes/sidebar/users";
 import Documents from "./routes/sidebar/documents";
+import Tasks from "./routes/sidebar/tasks";
+import ClientAndCase from "./routes/sidebar/clientandcase";
 
 export default function App() {
   const router = createBrowserRouter([
@@ -27,27 +29,23 @@ export default function App() {
         },
         {
           path: "users",
-          element: <UsersPage />, 
+          element: <UsersPage />,
         },
         {
           path: "documents",
-          element:<Documents/>,
+          element: <Documents />,
         },
         {
           path: "cases",
           element: <h1 className="title">Cases</h1>,
         },
         {
-          path: "documents",
-          element: <h1 className="title">Documents</h1>,
-        },
-        {
           path: "clients-cases",
-          element: <h1 className="title">Clients & Cases</h1>,
+          element: <ClientAndCase />,
         },
         {
           path: "tasks",
-          element: <h1 className="title">Tasks</h1>,
+          element: <Tasks />,
         },
         {
           path: "user-logs",

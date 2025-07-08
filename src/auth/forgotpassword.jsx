@@ -1,15 +1,14 @@
 import { useState } from "react";
 import boslogo from "@/assets/light_logo.png";
-import { Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Mail } from "lucide-react";
 
-const ForgotPassword = () => {
-    const navigate = useNavigate();
+export default function ForgotPassword() {
+    const [email, setEmail] = useState("");
 
-    const [showPassword, setShowPassword] = useState(false);
-
-    const handleLogin = () => {
-        navigate("/layout");
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        // TODO: Call backend to initiate password reset
+        alert(`Password reset link sent to ${email}`);
     };
 
     return (
@@ -24,37 +23,48 @@ const ForgotPassword = () => {
                     />
                 </div>
 
-                {/* ForgotPassword Form Section */}
+                {/* Forgot Password Form Section */}
                 <div
                     className="flex h-auto w-full flex-col justify-center rounded-2xl p-8 text-white shadow-2xl md:h-[600px] md:w-[50%] md:p-10"
                     style={{ backgroundColor: "#173B7E" }}
                 >
-                    <h2 className="mb-10 text-center text-2xl font-bold md:text-left">Forgot Password?</h2>
-                    <h2 className="mb-3 text-center text-1xl font-semi md:text-left">Please enter your email</h2>
+                    <h2 className="mb-2 text-center text-3xl font-bold md:text-left">Forgot Password</h2>
+                    <p className="mb-6 text-center text-sm text-blue-200 md:text-left">Enter your email address to receive a password reset link.</p>
 
-                    <form className="space-y-4">
-                        {/* Username Input */}
+                    <form
+                        className="space-y-6"
+                        onSubmit={handleSubmit}
+                    >
                         <div className="relative">
                             <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
                             <input
-                                type="text"
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Email"
                                 className="w-full rounded-md border border-blue-300 px-4 py-2 pl-10 text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                required
                             />
                         </div>
-                        {/* Reset Password button */}
+
                         <button
                             type="submit"
                             className="w-full rounded-md bg-white py-2 font-semibold text-blue-900 transition hover:bg-gray-100"
-                            onClick={handleLogin}
                         >
-                            Reset Password
+                            Send Reset Link
                         </button>
+
+                        <div className="mt-2 text-center text-sm text-blue-200">
+                            <a
+                                href="/login"
+                                className="hover:underline"
+                            >
+                                Back to login
+                            </a>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     );
-};
-
-export default ForgotPassword;
+}
