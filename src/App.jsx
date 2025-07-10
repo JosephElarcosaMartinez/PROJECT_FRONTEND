@@ -1,7 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { ThemeProvider } from "@/context/theme-context";
 
-// Pages & Layout
 import Layout from "./routes/layout";
 import DashboardPage from "./routes/dashboard/page";
 import Login from "./auth/login";
