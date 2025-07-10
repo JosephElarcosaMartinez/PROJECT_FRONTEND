@@ -12,6 +12,8 @@ import Tasks from "./routes/sidebar/tasks";
 import ClientAndCase from "./routes/sidebar/clientandcase";
 import Archives from "./routes/sidebar/archives";
 import Userlogs from "./routes/sidebar/userlogs";
+import Reports from "./routes/sidebar/reports";
+
 
 export default function App() {
   const router = createBrowserRouter([
@@ -35,7 +37,7 @@ export default function App() {
         { path: "archives", element: <Archives /> },
         { path: "user-logs", element: <Userlogs /> },
         { path: "notifications", element: <h1 className="title">Notifications</h1> },
-        { path: "reports", element: <h1 className="title">Reports ni Noel</h1> },
+        { path: "reports", element: <Reports /> },
       ],
     },
   ]);
