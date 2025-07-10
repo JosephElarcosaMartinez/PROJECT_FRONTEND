@@ -182,7 +182,7 @@ export default function Users() {
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-xl shadow-lg relative">
-            <form className="space-y-3">
+            <form className="space-y-0">
               <div>
                 <label className="block text-sm font-medium text-blue-900 dark:text-white">Firstname</label>
                 <input type="text" placeholder="Enter Firstname" className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg dark:bg-slate-700 dark:text-white" />
@@ -192,8 +192,8 @@ export default function Users() {
                 <input type="text" placeholder="Enter Lastname" className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg dark:bg-slate-700 dark:text-white" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-blue-900 dark:text-white">Username</label>
-                <input type="text" placeholder="Enter Username" className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg dark:bg-slate-700 dark:text-white" />
+                <label className="block text-sm font-medium text-blue-900 dark:text-white">Middlename</label>
+                <input type="text" placeholder="Enter Middlename (optional)" className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg dark:bg-slate-700 dark:text-white" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-blue-900 dark:text-white">Email</label>
@@ -202,6 +202,10 @@ export default function Users() {
               <div>
                 <label className="block text-sm font-medium text-blue-900 dark:text-white">Password</label>
                 <input type="password" placeholder="Password" className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg dark:bg-slate-700 dark:text-white" />
+              </div>
+               <div>
+                <label className="block text-sm font-medium text-blue-900 dark:text-white">PhoneNumber</label>
+                <input type="password" placeholder="Phone Number" className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg dark:bg-slate-700 dark:text-white" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-blue-900 dark:text-white">Confirm Password</label>
@@ -213,6 +217,15 @@ export default function Users() {
                   <option>Admin</option>
                   <option>Lawyer</option>
                   <option>Paralegal</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-blue-900 dark:text-white">Select Branch</label>
+                <select className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-blue-900 dark:bg-slate-700 dark:text-white">
+                  <option>Select Branch</option>
+                  <option>Dumanjug</option>
+                  <option>Fuente</option>
+                  <option>Camotes</option>
                 </select>
               </div>
               <div className="flex justify-end gap-2 pt-4">

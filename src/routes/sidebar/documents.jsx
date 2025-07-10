@@ -80,7 +80,7 @@ const Documents = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-800 dark:text-white">Documents</h1>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Documents</h1>
           <p className="text-sm text-gray-500">
             Manage and organize case-related documents
           </p>

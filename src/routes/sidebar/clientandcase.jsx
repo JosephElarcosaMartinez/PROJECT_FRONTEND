@@ -25,13 +25,11 @@ const documents = [
   },
 ];
 
-const ClientAndCase = () => {
-  const [selectedDoc, setSelectedDoc] = useState(null);
+const ClientAndCase = ({ caseData, onClose }) => {
   const [uploadedFile, setUploadedFile] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const fileInputRef = useRef(null);
 
-  const handleDocClick = (doc) => setSelectedDoc(doc);
   const handleUploadClick = () => fileInputRef.current.click();
   const handleFileChange = (e) => setUploadedFile(e.target.files[0]);
   const handleClear = () => {
@@ -43,20 +41,19 @@ const ClientAndCase = () => {
     caseName: "Davis Incorporation",
     category: "Corporate",
     client: "Davis Corp",
-    description:
-      "A dispute between about Davis corporation over a denied claim for post-surgery rehabilitation expenses following a car accident",
+    description: "Default description",
     lawyer: "Atty. Julie Ann Uy",
     cabinet: "001",
     drawer: "002",
     location: "Dumanjug",
   };
 
-  const caseInfo = selectedDoc
+  const caseInfo = caseData
     ? {
-        caseName: selectedDoc.name,
+        caseName: caseData.name,
         category: "Litigation",
-        client: selectedDoc.uploadedBy,
-        description: `Document ID: ${selectedDoc.id}, File: ${selectedDoc.file}`,
+        client: caseData.client,
+        description: `Case Number: ${caseData.id}`,
         lawyer: "NOELGO",
         cabinet: "001",
         drawer: "002",
@@ -66,7 +63,7 @@ const ClientAndCase = () => {
 
   return (
     <div className="min-h-screen p-6 flex justify-center items-center">
-      <div className="rounded-lg p-6 w-full max-w-6xl shadow-lg relative border">
+      <div className="rounded-lg p-6 w-full max-w-6xl shadow-lg relative border bg-white">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Case: {caseInfo.caseName}</h2>
@@ -76,13 +73,12 @@ const ClientAndCase = () => {
             <span className="flex items-center gap-1">
               <span className="text-gray-400">📍</span> {caseInfo.location}
             </span>
-            <X className="cursor-pointer" onClick={() => setSelectedDoc(null)} />
+            <X className="cursor-pointer" onClick={onClose} />
           </div>
         </div>
 
         {/* Grid layout */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          {/* Left Inputs */}
           <div className="col-span-2 grid grid-cols-2 gap-4">
             <div>
               <label className="text-sm text-gray-600">Case Name</label>
@@ -157,16 +153,10 @@ const ClientAndCase = () => {
               <button className="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm" onClick={handleClear}>
                 Clear
               </button>
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                className="hidden"
-              />
+              <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" />
             </div>
           </div>
 
-          {/* File name preview */}
           {uploadedFile && (
             <p className="text-sm text-gray-600 mb-3">Selected File: {uploadedFile.name}</p>
           )}
@@ -184,11 +174,7 @@ const ClientAndCase = () => {
             </thead>
             <tbody>
               {documents.map((doc) => (
-                <tr
-                  key={doc.id}
-                  className="border-b cursor-pointer hover:bg-gray-50"
-                  onClick={() => handleDocClick(doc)}
-                >
+                <tr key={doc.id} className="border-b hover:bg-gray-50 cursor-pointer">
                   <td className="p-2">{doc.id}</td>
                   <td className="p-2">{doc.name}</td>
                   <td className="p-2">{doc.status}</td>
@@ -212,7 +198,6 @@ const ClientAndCase = () => {
                 <h3 className="text-lg font-semibold">Payment Record</h3>
                 <X className="cursor-pointer" onClick={() => setShowPaymentModal(false)} />
               </div>
-              <p className="text-sm mb-2">Case: {caseInfo.caseName}</p>
               <ul className="text-sm space-y-1">
                 <li>Total Fee: <strong>35,000.00</strong></li>
                 <li>Total Paid: <strong>10,500.00</strong></li>
