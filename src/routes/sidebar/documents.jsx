@@ -214,6 +214,7 @@ const Documents = () => {
       )}
 
       {/* Upload Modal */}
+      {/* Upload Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 z-50 bg-black/50 flex justify-center items-center">
           <div className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6 relative">
