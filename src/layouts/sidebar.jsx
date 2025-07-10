@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import {LayoutDashboard, User, Folder, ListTodo, FileText, Archive, AreaChart , Bell, Clock,} from "lucide-react";
 
 import light_logo from "@/assets/light_logo.png";
-import light_logo2 from "@/assets/light_logo2.png";
+import light_logo2 from "@/assets/BOS_LEGS.png";
 import { cn } from "@/utils/cn";
 
 const links = [
