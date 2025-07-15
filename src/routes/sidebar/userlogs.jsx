@@ -72,7 +72,7 @@ const Userlogs = () => {
           placeholder="Search..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full sm:w-64 px-3 py-2 border rounded text-black"
+          className="w-full sm:w-64 px-3 py-2 border rounded text-black "
         />
         <select
           value={selectedUser}

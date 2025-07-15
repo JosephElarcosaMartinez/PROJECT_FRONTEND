@@ -108,7 +108,7 @@ const Documents = () => {
         <div className="flex items-center gap-2 border border-gray-300 dark:border-slate-600 rounded-md px-3 py-2 bg-gray-100 dark:bg-slate-800">
           <Search size={18} className="text-gray-600 dark:text-gray-400" />
           <input
-            type="text" 
+            type="text"
             placeholder="Search documents by name, type, or case..."
             className="w-full outline-none bg-transparent text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
             value={search}
