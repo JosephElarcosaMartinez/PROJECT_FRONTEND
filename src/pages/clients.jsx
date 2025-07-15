@@ -8,23 +8,11 @@ const InitialData = [
   { id: 3, name: "Davis Incorporation", client: "Davis Corp", category: "Corporate", status: "Completed", lawyer: "Emma Thompson", balance: "P 12, 500.00" },
 ];
 
-const getStatusColor = (status) => {
-  switch (status) {
-    case "Pending":
-      return "text-red-600 font-semibold";
-    case "Processing":
-      return "text-yellow-500 font-semibold";
-    case "Completed":
-      return "text-green-600 font-semibold";
-    default:
-      return "text-gray-500 font-semibold";
-  }
-};
 
-const ClientAndCase = () => {
+const Client = () => {
   const [data, setData] = useState(InitialData);
   const navigate = useNavigate();
-  
+
   return (
     <div className="bg-blue rounded-xl p-4 sm:p-6 shadow-sm dark:bg-slate-900">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -34,23 +22,28 @@ const ClientAndCase = () => {
         </div>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-between items-center mb-6">
         <button
-          onClick={() => navigate("/clients")}
-          className="mt-2 md:mt-0 flex items-center gap-2 mb-6 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow"
+            onClick={() => navigate("/clients-cases")}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-400 hover:bg-gray-700 rounded-lg shadow"
         >
-          View Clients
+            Back
         </button>
-      </div>
+
+        <button
+            onClick={() => alert("Button is clicked")}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow"
+        >
+            Add Client
+        </button>
+        </div>
+
+
       <div className="w-full overflow-x-auto rounded-xl border border-gray-200">
         <table className="min-w-full text-sm text-left table-auto">
           <thead className="card-title uppercase text-xs">
             <tr>
-              <th className="px-4 py-3 whitespace-nowrap">Case ID</th>
-              <th className="px-4 py-3 whitespace-nowrap">Name</th>
               <th className="px-4 py-3 whitespace-nowrap">Client</th>
-              <th className="px-4 py-3 whitespace-nowrap">Category</th>
-              <th className="px-4 py-3 whitespace-nowrap">Status</th>
               <th className="px-4 py-3 whitespace-nowrap">Lawyer</th>
               <th className="px-4 py-3 whitespace-nowrap">Balance</th>
               <th className="px-4 py-3 whitespace-nowrap">Actions</th>
@@ -62,15 +55,7 @@ const ClientAndCase = () => {
                 key={item.id}
                 className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition"
               >
-                <td className="px-4 py-3 whitespace-nowrap">{item.id}</td>
-                <td className="px-4 py-3 whitespace-nowrap">{item.name}</td>
                 <td className="px-4 py-3 whitespace-nowrap">{item.client}</td>
-                <td className="px-4 py-3 whitespace-nowrap">{item.category}</td>
-                <td className="px-4 py-3">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
-                    {item.status}
-                  </span>
-                </td>
                 <td className="px-4 py-3 whitespace-nowrap">{item.lawyer}</td>
                 <td className="px-4 py-3 whitespace-nowrap">{item.balance}</td>
                 <td className="px-4 py-3">
@@ -104,4 +89,4 @@ const ClientAndCase = () => {
   );
 }
 
-export default ClientAndCase;
+export default Client;

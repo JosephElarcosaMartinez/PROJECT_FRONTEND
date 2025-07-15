@@ -22,6 +22,7 @@ import NotificationSettings from "./pages/notif-settings";
 import { ChangePass } from "./auth/changepass";
 import Verify from "./auth/verification";
 import Register from "./components/registration";
+import Clients from "./pages/clients";
 
 
 export default function App() {
@@ -57,6 +58,7 @@ export default function App() {
             { index: true, element: <DashboardPage /> },
             { path: "users", element: <UsersPage /> },
             { path: "clients-cases", element: <ClientAndCase /> },
+            { path: "clients", element: <Clients /> },
             { path: "tasks", element: <Tasks /> },
             { path: "documents", element: <Documents /> },
             { path: "archives", element: <Archives /> },
