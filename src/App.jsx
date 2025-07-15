@@ -9,20 +9,20 @@ import ProtectedRoute from "./components/protected-route";
 import DashboardPage from "./routes/dashboard/page";
 import Login from "./auth/login";
 import ForgotPassword from "./auth/forgotpassword";
-import UsersPage from "./routes/sidebar/users";
+import Users from "./routes/sidebar/users";
 import Documents from "./routes/sidebar/documents";
 import Tasks from "./routes/sidebar/tasks";
-import ClientAndCase from "./routes/sidebar/clientandcase";
+import Cases from "./routes/sidebar/cases";
 import Archives from "./routes/sidebar/archives";
 import Userlogs from "./routes/sidebar/userlogs";
 import Reports from "./routes/sidebar/reports";
-import Activity from "./pages/activity";
+import Activity from "./components/activity";
 import Notification from "./routes/sidebar/notification";
-import NotificationSettings from "./pages/notif-settings";
+import NotificationSettings from "./components/notif-settings";
 import { ChangePass } from "./auth/changepass";
 import Verify from "./auth/verification";
 import Register from "./components/registration";
-import Clients from "./pages/clients";
+import Clients from "./routes/sidebar/clients";
 
 
 export default function App() {
@@ -56,17 +56,17 @@ export default function App() {
           element: <Layout />,
           children: [
             { index: true, element: <DashboardPage /> },
-            { path: "users", element: <UsersPage /> },
-            { path: "clients-cases", element: <ClientAndCase /> },
+            { path: "cases", element: <Cases /> },
+            { path: "documents", element: <Documents /> },
             { path: "clients", element: <Clients /> },
             { path: "tasks", element: <Tasks /> },
-            { path: "documents", element: <Documents /> },
-            { path: "archives", element: <Archives /> },
-            { path: "user-logs", element: <Userlogs /> },
-            { path: "notifications", element: <Notification /> },
+            { path: "users", element: <Users /> },
             { path: "reports", element: <Reports /> },
-            { path: "activity", element: <Activity /> },
-            { path: "notif-settings", element: <NotificationSettings /> },
+            { path: "reports/activity", element: <Activity /> },
+            { path: "user-logs", element: <Userlogs /> },
+            { path: "case-archive", element: <Archives /> },
+            { path: "notifications", element: <Notification /> },
+            { path: "notifications/notif-settings", element: <NotificationSettings /> },
           ]
         }
       ]

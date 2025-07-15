@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Filter, X } from "lucide-react";
-import ClientAndCase from "./clientandcase";
+import ClientAndCase from "./cases";
 
 const initialCases = [
   {

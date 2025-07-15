@@ -21,7 +21,7 @@ const getStatusColor = (status) => {
   }
 };
 
-const ClientAndCase = () => {
+const Cases = () => {
   const [data, setData] = useState(InitialData);
   const navigate = useNavigate();
   
@@ -29,8 +29,8 @@ const ClientAndCase = () => {
     <div className="bg-blue rounded-xl p-4 sm:p-6 shadow-sm dark:bg-slate-900">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Clients & Cases</h2>
-          <p className="text-sm text-gray-500">Manage all client information and case details</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Cases</h2>
+          <p className="text-sm text-gray-500">Manage all case details here...</p>
         </div>
       </div>
 
@@ -104,4 +104,4 @@ const ClientAndCase = () => {
   );
 }
 
-export default ClientAndCase;
+export default Cases;

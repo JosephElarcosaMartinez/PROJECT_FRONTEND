@@ -12,7 +12,7 @@ const initialUsers = [
 
 const roles = ["All", "Admin", "Lawyer", "Paralegal"];
 
-const User = () => {
+const Users = () => {
 
   const [users, setUsers] = useState(initialUsers);
   const [searchTerm, setSearchTerm] = useState("");
@@ -67,11 +67,10 @@ const User = () => {
           <button
             key={role}
             onClick={() => setSelectedRole(role)}
-            className={`px-4 py-1.5 rounded-full text-sm border ${
-              selectedRole === role
-                ? "bg-blue-600 text-white"
-                : "border-gray-300 text-gray-800 dark:text-white"
-            }`}
+            className={`px-4 py-1.5 rounded-full text-sm border ${selectedRole === role
+              ? "bg-blue-600 text-white"
+              : "border-gray-300 text-gray-800 dark:text-white"
+              }`}
           >
             {role}
           </button>
@@ -209,22 +208,22 @@ const User = () => {
                   className="w-full mt-1 px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white"
                 />
                 <div>
-                <select className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-blue-900 dark:bg-slate-700 dark:text-white">
-                  <option>Role</option>
-                  <option>Admin</option>
-                  <option>Lawyer</option>
-                  <option>Paralegal</option>
-                </select>
-              </div>
-              <div>
-                <select className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-blue-900 dark:bg-slate-700 dark:text-white">
-                  <option>Select Branch</option>
-                  <option>Dumanjug</option>
-                  <option>Fuente</option>
-                  <option>Camotes</option>
-                </select>
-              </div>
-              <div></div>
+                  <select className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-blue-900 dark:bg-slate-700 dark:text-white">
+                    <option>Role</option>
+                    <option>Admin</option>
+                    <option>Lawyer</option>
+                    <option>Paralegal</option>
+                  </select>
+                </div>
+                <div>
+                  <select className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-blue-900 dark:bg-slate-700 dark:text-white">
+                    <option>Select Branch</option>
+                    <option>Dumanjug</option>
+                    <option>Fuente</option>
+                    <option>Camotes</option>
+                  </select>
+                </div>
+                <div></div>
               </div>
 
               <div className="flex justify-end gap-2 pt-4">
@@ -291,4 +290,4 @@ const User = () => {
   );
 }
 
-export default User;
+export default Users;

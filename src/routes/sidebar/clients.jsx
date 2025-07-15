@@ -11,32 +11,24 @@ const InitialData = [
 
 const Client = () => {
   const [data, setData] = useState(InitialData);
-  const navigate = useNavigate();
 
   return (
     <div className="bg-blue rounded-xl p-4 sm:p-6 shadow-sm dark:bg-slate-900">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Clients & Cases</h2>
-          <p className="text-sm text-gray-500">Manage all client information and case details</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Clients</h2>
+          <p className="text-sm text-gray-500">Manage all client information here...</p>
         </div>
       </div>
 
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-end mb-6">
         <button
-            onClick={() => navigate("/clients-cases")}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-400 hover:bg-gray-700 rounded-lg shadow"
+          onClick={() => alert("Adding a client...")}
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow"
         >
-            Back
+          Add Client
         </button>
-
-        <button
-            onClick={() => alert("Button is clicked")}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow"
-        >
-            Add Client
-        </button>
-        </div>
+      </div>
 
 
       <div className="w-full overflow-x-auto rounded-xl border border-gray-200">

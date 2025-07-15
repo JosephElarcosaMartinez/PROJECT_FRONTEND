@@ -2,23 +2,10 @@ import { forwardRef } from "react";
 import { NavLink } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import {LayoutDashboard, User, Folder, ListTodo, FileText, Archive, AreaChart , Bell, Clock,} from "lucide-react";
-
+import { navbarLinks } from "../constants";
 import light_logo from "@/assets/light_logo.png";
 import light_logo2 from "@/assets/BOS_LEGS.png";
 import { cn } from "@/utils/cn";
-
-const links = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/" },
-  { label: "Users", icon: User, path: "/users" },
-  { label: "Clients & Cases", icon: Folder, path: "/clients-cases" },
-  { label: "Tasks", icon: ListTodo, path: "/tasks" },
-  { label: "Documents", icon: FileText, path: "/documents" },
-  { label: "Archives", icon: Archive, path: "/archives" },
-  { label: "Reports", icon: AreaChart, path: "/reports" },
-  { label: "Notifications", icon: Bell, path: "/notifications" },
-  { label: "User logs", icon: Clock, path: "/user-logs" },
-];
 
 export const Sidebar = forwardRef(({ collapsed }, ref) => {
   return (
@@ -51,7 +38,7 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
 
       {/* Navigation Links */}
       <div className="flex flex-col gap-y-2 px-2 pb-6">
-        {links.map((link) => (
+        {navbarLinks.map((link) => (
           <NavLink
             key={link.label}
             to={link.path}

@@ -75,7 +75,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                 </button>
 
                 {/* Notifications */}
-                <button className="btn-ghost size-10">
+                <button onClick={() => navigate("notifications")} className="btn-ghost size-10">
                     <Bell size={20} />
                 </button>
 

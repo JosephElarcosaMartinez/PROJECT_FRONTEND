@@ -24,7 +24,7 @@ const Notifications = () => {
             </p>
           </div>
           <button
-            onClick={() => navigate("/notif-settings")}
+            onClick={() => navigate("/notifications/notif-settings")}
             className="text-blue-700 hover:text-blue-900"
           >
             <Settings size={24} />

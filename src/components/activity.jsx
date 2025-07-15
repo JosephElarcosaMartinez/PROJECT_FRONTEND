@@ -15,7 +15,7 @@ export const Activity = () => {
 
   return (
     <div className="space-y-6 p-4 md:p-6">
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Reports & Analytics</h1>
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Reports & Analytics / User Activity</h1>
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
         <div className="flex gap-4">
@@ -63,9 +63,8 @@ export const Activity = () => {
                 </td>
                 <td className="p-2 text-slate-700 dark:text-slate-300">{item.action}</td>
                 <td
-                  className={`p-2 font-medium ${
-                    item.status.toLowerCase() === "active" ? "text-green-600" : "text-red-600"
-                  }`}
+                  className={`p-2 font-medium ${item.status.toLowerCase() === "active" ? "text-green-600" : "text-red-600"
+                    }`}
                 >
                   {item.status}
                 </td>
