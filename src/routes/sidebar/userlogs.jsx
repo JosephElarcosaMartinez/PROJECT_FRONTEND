@@ -66,18 +66,18 @@ const Userlogs = () => {
       </p>
 
       {/* Filter Section */}
-      <div className="bg-white p-4 rounded-xl shadow-md flex flex-wrap gap-4 items-center mb-8">
+      <div className="bg-white dark:bg-slate-900 p-4 rounded-xl shadow-md flex flex-wrap gap-4 items-center mb-8">
         <input
           type="text"
           placeholder="Search..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full sm:w-64 px-3 py-2 border rounded text-black "
+          className="card w-full sm:w-64 px-3 py-2 border rounded text-black "
         />
         <select
           value={selectedUser}
           onChange={(e) => setSelectedUser(e.target.value)}
-          className="px-3 py-2 border rounded text-black"
+          className="card px-3 py-2 border rounded dark:text-white"
         >
           <option>All Users</option>
           <option>John Cooper</option>
@@ -88,7 +88,7 @@ const Userlogs = () => {
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="px-3 py-2 border rounded text-black"
+          className="card px-3 py-2 border rounded dark:text-white"
         />
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ml-auto"
@@ -104,7 +104,7 @@ const Userlogs = () => {
           {filteredLogs.map((log, index) => (
             <div
               key={index}
-              className="bg-white text-black p-4 rounded-lg shadow-md flex items-start"
+              className="card bg-white text-black p-4 rounded-lg shadow-md flex items-start"
             >
               {/* Avatar */}
               <img
@@ -114,11 +114,11 @@ const Userlogs = () => {
               />
 
               {/* Details */}
-              <div className="flex-1">
+              <div className="dark:text-white flex-1">
                 <div className="flex items-center gap-3 mb-1">
-                  <span className="font-semibold">{log.user}</span>
+                  <span className="font-semibold ">{log.user}</span>
                 </div>
-                <div className="text-sm text-gray-700 mb-1 flex items-center gap-2">
+                <div className="text-sm dark:text-white mb-1 flex items-center gap-2">
                   <img src={log.icon} alt="icon" className="w-5 h-5" />
                   {log.action}
                 </div>
@@ -130,7 +130,7 @@ const Userlogs = () => {
               </div>
 
               {/* Timestamp */}
-              <div className="ml-auto text-sm text-gray-500 whitespace-nowrap">
+              <div className="ml-auto text-sm dark:text-white whitespace-nowrap">
                 {log.time}
               </div>
             </div>
