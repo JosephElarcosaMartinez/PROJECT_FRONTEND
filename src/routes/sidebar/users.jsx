@@ -12,7 +12,8 @@ const initialUsers = [
 
 const roles = ["All", "Admin", "Lawyer", "Paralegal"];
 
-export default function Users() {
+const User = () => {
+
   const [users, setUsers] = useState(initialUsers);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState("All");
@@ -289,3 +290,5 @@ export default function Users() {
     </div>
   );
 }
+
+export default User;
