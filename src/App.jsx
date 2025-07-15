@@ -17,7 +17,7 @@ import Archives from "./routes/sidebar/archives";
 import Userlogs from "./routes/sidebar/userlogs";
 import Reports from "./routes/sidebar/reports";
 import Activity from "./components/activity";
-import Notification from "./routes/sidebar/notification";
+import Notification from "./components/notification";
 import NotificationSettings from "./components/notif-settings";
 import { ChangePass } from "./auth/changepass";
 import Verify from "./auth/verification";

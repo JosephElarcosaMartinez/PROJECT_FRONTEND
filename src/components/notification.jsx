@@ -57,11 +57,10 @@ const Notifications = () => {
             {[1, 2, 3].map((page) => (
               <button
                 key={page}
-                className={`w-6 h-6 rounded text-center ${
-                  page === 1
-                    ? "bg-blue-600 text-white"
-                    : "bg-white text-gray-700 border"
-                }`} >
+                className={`w-6 h-6 rounded text-center ${page === 1
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-gray-700 border"
+                  }`} >
                 {page}
               </button>
             ))}
