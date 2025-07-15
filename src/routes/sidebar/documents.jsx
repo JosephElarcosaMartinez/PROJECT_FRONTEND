@@ -76,7 +76,7 @@ const Documents = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-7 space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
@@ -87,7 +87,7 @@ const Documents = () => {
         </div>
         <div className="mt-4 md:mt-0 flex gap-2">
           <button
-            className="flex items-center gap-2 border border-white/30 px-4 py-2 rounded-md text-white hover:bg-white/10"
+            className="flex items-center gap-2 border border-slate-300  px-4 py-2 rounded-md text-gray-800 dark:text-white"
             onClick={toggleFilterModal}
           >
             <Filter size={16} />
@@ -104,9 +104,9 @@ const Documents = () => {
       </div>
 
       {/* Search Input */}
-      <div className="bg-white rounded-md p-3 shadow-md">
+      <div className="card bg-white rounded-md p-3 shadow-md">
         <div className="flex items-center gap-2 border border-gray-300 rounded-md px-3 py-2">
-          <Search size={18} className="text-gray-500" />
+          <Search size={18} className="text-gray-600 dark:text-white" />
           <input
             type="text"
             placeholder="Search documents by name, type, or case..."
@@ -118,9 +118,9 @@ const Documents = () => {
       </div>
 
       {/* Document Table */}
-      <div className="bg-white rounded-md shadow-md overflow-x-auto">
-        <table className="w-full text-sm text-left">
-          <thead className="text-gray-500 border-b">
+      <div className="card bg-white rounded-md shadow-md overflow-x-auto">
+        <table className="text-gray-800 dark:text-white w-full text-sm text-left">
+          <thead className="text-gray-800 dark:text-white border-b">
             <tr>
               <th className="px-4 py-3 font-medium">Document</th>
               <th className="px-4 py-3 font-medium">Case</th>
