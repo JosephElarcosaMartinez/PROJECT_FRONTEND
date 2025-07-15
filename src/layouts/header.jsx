@@ -1,101 +1,127 @@
-import { useState, useRef, useEffect } from "react";
 import { useTheme } from "@/hooks/use-theme";
+import { useAuth } from "@/context/auth-context";
+import { useClickOutside } from "@/hooks/use-click-outside";
+
 import { ChevronsLeft, Search, Sun, Moon, Bell } from "lucide-react";
-import profileImage from "@/assets/Joseph_prof.png";
+
+import { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 
 export const Header = ({ collapsed, setCollapsed }) => {
-  const { theme, setTheme } = useTheme();
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const dropdownRef = useRef(null);
+    const { theme, setTheme } = useTheme();
+    const { logout, user, loading } = useAuth();
+    const navigate = useNavigate();
 
-  // Close dropdown on outside click
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setDropdownOpen(false);
-      }
-    }
+    const [open, setOpen] = useState(false);
+    const dropdownRef = useRef(null);
 
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+    useClickOutside([dropdownRef], () => {
+        setOpen(false);
+    });
+
+    const handleLogout = async () => {
+        const confirmLogout = window.confirm("Are you sure you want to logout?");
+
+        if (confirmLogout) {
+            await logout();
+            // navigate("/login");
+        }
     };
-  }, []);
 
-  return (
-    <header className="relative z-10 flex h-[60px] items-center justify-between border-b border-slate-200 bg-[#eef4ff] px-4 shadow-sm transition-colors dark:bg-slate-900">
-      {/* Left Section */}
-      <div className="flex items-center gap-x-4">
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="btn-ghost size-10 text-slate-600 dark:text-white"
-        >
-          <ChevronsLeft className={collapsed ? "rotate-180" : ""} />
-        </button>
+    const handleProfile = () => {
+        window.confirm("Profile info in modal should appear...");
+    };
 
-        {/* Search Input */}
-        <div className="relative w-[300px]">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="w-full rounded-md border border-slate-300 bg-white py-2 pl-10 pr-3 text-sm text-slate-700 placeholder:text-slate-500 focus:outline-none dark:border-slate-600 dark:bg-slate-800 dark:text-white dark:placeholder:text-slate-400"
-          />
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-500 dark:text-slate-400" />
-        </div>
-      </div>
-
-      {/* Right Section */}
-      <div className="flex items-center gap-x-4">
-        {/* Theme Toggle */}
-        <button
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="btn-ghost size-10 text-slate-600 dark:text-white"
-        >
-          <Sun className="block dark:hidden" size={20} />
-          <Moon className="hidden dark:block" size={20} />
-        </button>
-
-        {/* Bell Icon */}
-        <button className="btn-ghost size-10 text-slate-600 dark:text-white">
-          <Bell size={20} />
-        </button>
-
-        {/* Profile Dropdown */}
-        <div className="relative" ref={dropdownRef}>
-          <button
-            onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-x-2 rounded-md border border-slate-300 bg-white px-3 py-1 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-          >
-            <span>Admin User</span>
-            <img
-              src={profileImage}
-              alt="profile"
-              className="h-8 w-8 rounded-full object-cover"
-            />
-          </button>
-
-          {/* Dropdown Menu */}
-          {dropdownOpen && (
-            <div className="absolute right-0 mt-2 w-40 rounded-md border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-800">
-              <ul className="text-sm text-slate-700 dark:text-white">
-                <li className="cursor-pointer px-4 py-2 font-semibold hover:bg-slate-100 dark:hover:bg-slate-700">
-                  Joseph Martinez
-                </li>
-                <li className="cursor-pointer px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700">
-                  Logout
-                </li>
-              </ul>
+    return (
+        <header className="relative z-10 ml-4 flex h-[60px] items-center justify-between rounded-lg bg-white px-4 shadow-md transition-colors dark:bg-slate-900">
+            <div className="flex items-center gap-x-3">
+                <button
+                    className="btn-ghost size-10"
+                    onClick={() => setCollapsed(!collapsed)}
+                >
+                    <ChevronsLeft className={collapsed && "rotate-180"} />
+                </button>
+                <div className="input">
+                    <Search
+                        size={20}
+                        className="text-slate-500"
+                    />
+                    <input
+                        type="text"
+                        name="search"
+                        id="search"
+                        placeholder="Search..."
+                        className="w-full bg-transparent text-slate-900 outline-0 placeholder:text-slate-500 dark:text-slate-50"
+                    />
+                </div>
             </div>
-          )}
-        </div>
-      </div>
-    </header>
-  );
+
+            <div className="relative flex items-center gap-x-2">
+                <button
+                    className="btn-ghost size-10"
+                    onClick={() => {
+                        setTheme(theme === "dark" ? "light" : "dark");
+                    }}
+                >
+                    <Sun
+                        size={20}
+                        className="dark:hidden"
+                    />
+                    <Moon
+                        size={20}
+                        className="hidden dark:block"
+                    />
+                </button>
+
+                {/* Notifications */}
+                <button className="btn-ghost size-10">
+                    <Bell size={20} />
+                </button>
+
+                {/* Profile Image Dropdown for options Profile and Logout */}
+                <div
+                    className="relative"
+                    ref={dropdownRef}
+                >
+                    <button
+                        className="flex h-10 items-center rounded-full bg-blue-900 p-1 pr-0 transition hover:bg-blue-800 dark:bg-blue-950 dark:hover:bg-[#173B7E]"
+                        onClick={() => setOpen(!open)}
+                    >
+                        <span className="px-3 text-sm font-medium text-white">Hi, {user.user_role}</span>
+                        <img
+                            src={`http://localhost:3000${user.user_profile}`}
+                            alt="profile"
+                            className="h-11 w-11 rounded-full object-cover outline outline-2 outline-gray-200 dark:outline-gray-500"
+                        />
+                    </button>
+
+                    {open && (
+                        <div className="absolute right-0 mt-2 w-48 rounded-md bg-white p-2 shadow-lg dark:bg-slate-800">
+                            <div className="max-w-full truncate px-2 py-1 text-sm font-bold text-gray-500 dark:text-gray-300">
+                                {loading ? "Loading..." : user ? `${user.user_fname} ${user.user_lname}` : "No user"}
+                            </div>
+                            <button
+                                onClick={handleProfile}
+                                className="w-full rounded px-2 py-1 text-left text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                            >
+                                Profile
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                className="w-full rounded px-2 py-1 text-left text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                            >
+                                Logout
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </header>
+    );
 };
 
 Header.propTypes = {
-  collapsed: PropTypes.bool,
-  setCollapsed: PropTypes.func,
+    collapsed: PropTypes.bool,
+    setCollapsed: PropTypes.func,
 };
-

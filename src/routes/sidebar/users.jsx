@@ -86,9 +86,9 @@ export default function Users() {
         </button>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-gray-200">
+      <div className="card overflow-x-auto rounded-xl border border-gray-200">
         <table className="w-full table-auto text-sm text-left">
-          <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
+          <thead className="card-title uppercase text-xs">
             <tr>
               <th className="px-4 py-3">User</th>
               <th className="px-4 py-3">Username</th>
@@ -97,16 +97,16 @@ export default function Users() {
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="dark:text-slate-50">
             {filteredUsers.map(user => (
-              <tr key={user.id} className="border-t border-gray-200 hover:bg-gray-50 transition">
+              <tr key={user.id} className="border-t border-gray-200 hover:bg-blue-50 dark:hover:bg-blue-950 transition">
                 <td className="px-4 py-5 flex items-center gap-3">
                   <img src={user.image} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
-                  <span className="font-medium text-gray-800">{user.name}</span>
+                  <span className="font-medium ">{user.name}</span>
                 </td>
-                <td className="px-4 py-3 text-gray-700">{user.username}</td>
-                <td className="px-4 py-3 text-gray-700">{user.email}</td>
-                <td className="px-4 py-3 capitalize text-gray-700">{user.role}</td>
+                <td className="px-4 py-3 ">{user.username}</td>
+                <td className="px-4 py-3 ">{user.email}</td>
+                <td className="px-4 py-3 capitalize ">{user.role}</td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex justify-end gap-2">
                     <button className="text-blue-600 hover:text-blue-800">
@@ -207,7 +207,23 @@ export default function Users() {
                   placeholder="Phone Number"
                   className="w-full mt-1 px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white"
                 />
-                
+                <div>
+                <select className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-blue-900 dark:bg-slate-700 dark:text-white">
+                  <option>Role</option>
+                  <option>Admin</option>
+                  <option>Lawyer</option>
+                  <option>Paralegal</option>
+                </select>
+              </div>
+              <div>
+                <select className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-blue-900 dark:bg-slate-700 dark:text-white">
+                  <option>Select Branch</option>
+                  <option>Dumanjug</option>
+                  <option>Fuente</option>
+                  <option>Camotes</option>
+                </select>
+              </div>
+              <div></div>
               </div>
 
               <div className="flex justify-end gap-2 pt-4">
