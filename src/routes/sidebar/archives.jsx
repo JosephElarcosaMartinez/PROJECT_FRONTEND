@@ -54,14 +54,15 @@ const Archives = () => {
       <h1 className="text-2xl font-bold mb-1 dark:text-white">Archives</h1>
       <p className="text-sm mb-6 text-gray-600">Browse and search completed and archived cases</p>
 
-      <div className="bg-white rounded-lg shadow-lg p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
+      <div className="card bg-white dark:bg-slate-800 rounded-lg shadow-lg p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
         <input
           type="text"
           placeholder="Search archives..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:flex-1 px-4 py-2 border rounded-md text-black"
+          className="w-full md:flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none"
         />
+        
         <button
           onClick={() => setIsFilterOpen(true)}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -71,10 +72,10 @@ const Archives = () => {
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-lg p-4 overflow-x-auto">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Archived Cases</h2>
+      <div className="card bg-white rounded-lg shadow-lg p-4 overflow-x-auto">
+        <h2 className="dark:text-white text-xl font-semibold text-gray-800 mb-4">Archived Cases</h2>
         <table className="w-full text-sm text-left text-gray-700">
-          <thead className="text-xs uppercase border-b text-gray-500">
+          <thead className="text-xs uppercase border-b dark:text-white">
             <tr>
               <th className="py-3 px-4">Case Number</th>
               <th className="py-3 px-4">Name</th>
@@ -86,7 +87,7 @@ const Archives = () => {
           </thead>
           <tbody>
             {filteredCases.map((item) => (
-              <tr key={item.id} className="border-b hover:bg-gray-50">
+              <tr key={item.id} className="dark:text-white border-b hover:bg-blue-500 ">
                 <td className="py-2 px-4">{item.id}</td>
                 <td className="py-2 px-4">{item.name}</td>
                 <td className="py-2 px-4">{item.client}</td>
@@ -103,7 +104,7 @@ const Archives = () => {
       </div>
 
       {viewCaseData && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 overflow-y-auto">
+        <div className=" fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 overflow-y-auto">
           <ClientAndCase caseData={viewCaseData} onClose={() => setViewCaseData(null)} />
         </div>
       )}
