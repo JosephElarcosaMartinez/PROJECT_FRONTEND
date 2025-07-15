@@ -61,7 +61,7 @@ export default function Users() {
         </div>
       </div>
 
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="card-title flex flex-wrap gap-2 mb-6">
         {roles.map(role => (
           <button
             key={role}
@@ -69,7 +69,7 @@ export default function Users() {
             className={`px-4 py-1.5 rounded-full text-sm border ${
               selectedRole === role
                 ? "bg-blue-600 text-white"
-                : "border-gray-300 text-gray-700 hover:bg-blue-100"
+                : "border-gray-300 text-gray-800 dark:text-white"
             }`}
           >
             {role}
@@ -280,10 +280,10 @@ export default function Users() {
       <div className="mt-4 flex justify-between items-center text-sm text-gray-500">
         <span>Showing 1 to {filteredUsers.length} of {users.length} entries</span>
         <div className="space-x-1">
-          <button className="px-2 py-1 rounded border text-gray-600 hover:bg-gray-100">Previous</button>
+          <button className="px-2 py-1 rounded border text-gray-800 dark:text-white">Previous</button>
           <button className="px-3 py-1 rounded bg-blue-600 text-white">1</button>
-          <button className="px-2 py-1 rounded border text-gray-600 hover:bg-gray-100">2</button>
-          <button className="px-2 py-1 rounded border text-gray-600 hover:bg-gray-100">Next</button>
+          <button className="px-2 py-1 rounded border text-gray-800 dark:text-white">2</button>
+          <button className="px-2 py-1 rounded border text-gray-600 dark:text-white">Next</button>
         </div>
       </div>
     </div>
