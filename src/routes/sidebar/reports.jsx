@@ -1,5 +1,6 @@
 import { UserRoundMinus, FileCheck, ShieldUser, User, FileText, Archive, FolderKanban,  ListTodo } from "lucide-react";
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { useNavigate } from "react-router-dom";
 import user1 from "@/assets/Joseph_prof.png";
 import user2 from "@/assets/Joseph_prof.png";
 import user3 from "@/assets/Joseph_prof.png";
@@ -54,6 +55,8 @@ const ChartPlaceholder = ({ title, dataKey }) => (
 );
 
 export const Reports = () => {
+    const navigate = useNavigate();
+
   return (
     <div className="space-y-6 p-4 md:p-6">
       <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Reports & Analytics</h1>
@@ -80,9 +83,12 @@ export const Reports = () => {
                 <h2 className="text-xl font-bold text-slate-900 dark:text-white">
                 User Activity
                 </h2>
-                <button className="text-blue-800 font-bold hover:underline text-xl">
-                View all
-                </button>
+                 <button
+                    onClick={() => navigate("/activity")} 
+                    className="text-blue-800 font-bold hover:underline text-xl"
+                    >
+                    View all
+                 </button>
             </div>
 
             <table className="w-full text-sm border-t">
