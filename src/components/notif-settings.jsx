@@ -1,3 +1,5 @@
+// Notification Settings
+
 import React, { useState } from "react";
 
 const NotificationSettings = () => {
