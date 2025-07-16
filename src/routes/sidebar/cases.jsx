@@ -32,35 +32,27 @@ const Cases = () => {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Cases</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-300">Manage all case details here...</p>
+          <p className="text-sm text-gray-500">Manage all case details here...</p>
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 mb-6">
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg shadow"
-        >
-          + Add New Case
-        </button>
+      <div className="flex justify-end">
         <button
           onClick={() => navigate("/clients")}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow"
+          className="mt-2 md:mt-0 flex items-center gap-2 mb-6 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow"
         >
           View Clients
         </button>
       </div>
-
-      <div className="w-full overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+      <div className="w-full overflow-x-auto rounded-xl border border-gray-200">
         <table className="min-w-full text-sm text-left table-auto">
-          <thead className="uppercase text-xs dark:text-white">
+          <thead className="card-title uppercase text-xs">
             <tr>
               <th className="px-4 py-3 whitespace-nowrap">Name</th>
               <th className="px-4 py-3 whitespace-nowrap">Client</th>
               <th className="px-4 py-3 whitespace-nowrap">Category</th>
               <th className="px-4 py-3 whitespace-nowrap">Status</th>
               <th className="px-4 py-3 whitespace-nowrap">Lawyer</th>
-              <th className="px-4 py-3 whitespace-nowrap">Fee</th>
               <th className="px-4 py-3 whitespace-nowrap">Balance</th>
               <th className="px-4 py-3 whitespace-nowrap">Actions</th>
             </tr>
@@ -81,7 +73,6 @@ const Cases = () => {
                   </span>
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">{item.lawyer}</td>
-                <td className="px-4 py-3 whitespace-nowrap">{item.fee}</td>
                 <td className="px-4 py-3 whitespace-nowrap">{item.balance}</td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap items-center gap-2">
@@ -103,6 +94,6 @@ const Cases = () => {
       </div>
     </div>
   );
-};
+}
 
 export default Cases;
