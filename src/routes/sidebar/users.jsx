@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Pencil, Trash2, Image } from "lucide-react";
 import user1 from "@/assets/Joseph_prof.png";
 import user2 from "@/assets/Joseph_prof.png";
 import user3 from "@/assets/Joseph_prof.png";
+import { useClickOutside } from "@/hooks/use-click-outside";
 
 const initialUsers = [
   { id: 1, name: "Sarah Wilson", username: "admin", email: "admin@example.com", role: "admin", image: user1 },
@@ -13,14 +14,18 @@ const initialUsers = [
 const roles = ["All", "Admin", "Lawyer", "Paralegal"];
 
 const Users = () => {
-
+  const [search, setSearch] = useState("");
   const [users, setUsers] = useState(initialUsers);
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState("All");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
   const [userToRemove, setUserToRemove] = useState(null);
   const [profileImage, setProfileImage] = useState(null);
+
+  const modalRef = useRef(null);
+  useClickOutside([modalRef], () => {
+    if (isModalOpen) setIsModalOpen(false);
+  });
 
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => {
@@ -45,10 +50,9 @@ const Users = () => {
 
   const filteredUsers = users.filter(user => {
     const matchesSearch =
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
-
+      user.name.toLowerCase().includes(search.toLowerCase()) ||
+      user.username.toLowerCase().includes(search.toLowerCase()) ||
+      user.email.toLowerCase().includes(search.toLowerCase());
     const matchesRole = selectedRole === "All" || user.role.toLowerCase() === selectedRole.toLowerCase();
     return matchesSearch && matchesRole;
   });
@@ -77,10 +81,17 @@ const Users = () => {
         ))}
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex flex-col md:flex-row gap-4 mb-6 items-stretch md:items-center">
+        <input
+          type="text"
+          placeholder="Search users..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full md:flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none"
+        />
         <button
           onClick={handleOpenModal}
-          className="mt-2 md:mt-0 flex items-center gap-2 mb-6 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow"
         >
           Add User
         </button>
@@ -102,20 +113,17 @@ const Users = () => {
               <tr key={user.id} className="border-t border-gray-200 hover:bg-blue-50 dark:hover:bg-blue-950 transition">
                 <td className="px-4 py-5 flex items-center gap-3">
                   <img src={user.image} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
-                  <span className="font-medium ">{user.name}</span>
+                  <span className="font-medium">{user.name}</span>
                 </td>
-                <td className="px-4 py-3 ">{user.username}</td>
-                <td className="px-4 py-3 ">{user.email}</td>
-                <td className="px-4 py-3 capitalize ">{user.role}</td>
+                <td className="px-4 py-3">{user.username}</td>
+                <td className="px-4 py-3">{user.email}</td>
+                <td className="px-4 py-3 capitalize">{user.role}</td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex justify-end gap-2">
                     <button className="text-blue-600 hover:text-blue-800">
                       <Pencil className="w-4 h-4" />
                     </button>
-                    <button
-                      onClick={() => openRemoveModal(user)}
-                      className="text-red-500 hover:text-red-700"
-                    >
+                    <button onClick={() => openRemoveModal(user)} className="text-red-500 hover:text-red-700">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -136,10 +144,12 @@ const Users = () => {
       {/* Add User Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-3xl shadow-lg relative">
+          <div
+            ref={modalRef}
+            className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-3xl shadow-lg relative"
+          >
             <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Add New User</h2>
             <form className="space-y-6">
-              {/* Upload Profile Picture */}
               <div className="flex justify-center">
                 <div className="flex flex-col items-center gap-2">
                   {profileImage ? (
@@ -180,50 +190,24 @@ const Users = () => {
                 </div>
               </div>
 
-              {/*  Form Grid  */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  placeholder="First Name"
-                  className="w-full mt-1 px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white"
-                />
-                <input
-                  type="text"
-                  placeholder="Last Name"
-                  className="w-full mt-1 px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white"
-                />
-                <input
-                  type="text"
-                  placeholder="Middle Name"
-                  className="w-full mt-1 px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white"
-                />
-                <input
-                  type="text"
-                  placeholder="Enter Email"
-                  className="w-full mt-1 px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white"
-                />
-                <input
-                  type="text"
-                  placeholder="Phone Number"
-                  className="w-full mt-1 px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white"
-                />
-                <div>
-                  <select className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-blue-900 dark:bg-slate-700 dark:text-white">
-                    <option>Role</option>
-                    <option>Admin</option>
-                    <option>Lawyer</option>
-                    <option>Paralegal</option>
-                  </select>
-                </div>
-                <div>
-                  <select className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg text-blue-900 dark:bg-slate-700 dark:text-white">
-                    <option>Select Branch</option>
-                    <option>Dumanjug</option>
-                    <option>Fuente</option>
-                    <option>Camotes</option>
-                  </select>
-                </div>
-                <div></div>
+                <input type="text" placeholder="First Name" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
+                <input type="text" placeholder="Last Name" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
+                <input type="text" placeholder="Middle Name" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
+                <input type="email" placeholder="Enter Email" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
+                <input type="text" placeholder="Phone Number" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white">
+                  <option>Role</option>
+                  <option>Admin</option>
+                  <option>Lawyer</option>
+                  <option>Paralegal</option>
+                </select>
+                <select className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white">
+                  <option>Select Branch</option>
+                  <option>Dumanjug</option>
+                  <option>Fuente</option>
+                  <option>Camotes</option>
+                </select>
               </div>
 
               <div className="flex justify-end gap-2 pt-4">
@@ -243,29 +227,15 @@ const Users = () => {
         </div>
       )}
 
-      {/* Remove Confirmation Modal */}
+      {/* Remove User Modal */}
       {isRemoveModalOpen && userToRemove && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-sm shadow-lg relative">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">
-              Admin Removal
-            </h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
-              Are you sure to remove this admin?
-            </p>
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Admin Removal</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">Are you sure to remove this admin?</p>
             <div className="flex justify-end gap-3">
-              <button
-                onClick={closeRemoveModal}
-                className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmRemoveUser}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg"
-              >
-                Remove
-              </button>
+              <button onClick={closeRemoveModal} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700">Cancel</button>
+              <button onClick={confirmRemoveUser} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">Remove</button>
             </div>
             <button
               onClick={closeRemoveModal}
@@ -288,6 +258,6 @@ const Users = () => {
       </div>
     </div>
   );
-}
+};
 
 export default Users;

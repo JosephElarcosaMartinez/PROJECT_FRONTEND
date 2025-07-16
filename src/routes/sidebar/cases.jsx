@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Pencil, Trash2, Eye, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useClickOutside } from "@/hooks/use-click-outside";
@@ -50,11 +50,15 @@ const getStatusColor = (status) => {
 };
 
 const Cases = () => {
+  const [search, setSearch] = useState("");
   const [data, setData] = useState(InitialData);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCase, setSelectedCase] = useState(null);
   const modalRef = useRef();
+  const addCaseModalRef = useRef(); // ✅ new ref
   const fileInputRef = useRef();
+  const navigate = useNavigate();
+
   const [newCase, setNewCase] = useState({
     id: "",
     name: "",
@@ -70,8 +74,18 @@ const Cases = () => {
   });
 
   useClickOutside([modalRef], () => setSelectedCase(null));
+  useClickOutside([addCaseModalRef], () => setIsModalOpen(false)); // ✅ new hook
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIsModalOpen(false);
+        setSelectedCase(null);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const handleAddCase = () => {
     const formattedFee = newCase.fee.startsWith("P") ? newCase.fee : `P ${newCase.fee}`;
@@ -102,6 +116,7 @@ const Cases = () => {
 
   return (
     <div className="bg-blue rounded-xl p-4 sm:p-6 shadow-sm bg-slate-50 dark:bg-slate-900">
+      {/* Header and Actions */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Cases</h2>
@@ -109,7 +124,15 @@ const Cases = () => {
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 mb-6">
+      {/* Search and Buttons */}
+      <div className="card bg-white dark:bg-slate-800 rounded-lg shadow-lg p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
+        <input
+          type="text"
+          placeholder="Search case..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full md:flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none"
+        />
         <button
           onClick={() => setIsModalOpen(true)}
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg shadow"
@@ -124,6 +147,7 @@ const Cases = () => {
         </button>
       </div>
 
+      {/* Case Table */}
       <div className="w-full overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
         <table className="min-w-full text-sm text-left table-auto">
           <thead className="uppercase text-xs dark:text-white">
@@ -141,10 +165,7 @@ const Cases = () => {
           </thead>
           <tbody className="text-gray-700 dark:text-white">
             {data.map((item) => (
-              <tr
-                key={item.id}
-                className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition"
-              >
+              <tr key={item.id} className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition">
                 <td className="px-4 py-3">C{item.id}</td>
                 <td className="px-4 py-3">{item.name}</td>
                 <td className="px-4 py-3">{item.client}</td>
@@ -179,7 +200,10 @@ const Cases = () => {
       {/* Add Case Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg w-full max-w-3xl overflow-y-auto max-h-[90vh]">
+          <div
+            ref={addCaseModalRef}
+            className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg w-full max-w-3xl overflow-y-auto max-h-[90vh]"
+          >
             <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Add New Case</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {[
