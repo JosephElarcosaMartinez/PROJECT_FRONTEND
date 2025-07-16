@@ -12,7 +12,7 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
         <aside
             ref={ref}
             className={cn(
-                "fixed z-50 flex h-full w-[240px] flex-col overflow-x-hidden rounded-none bg-[#1c3482] text-white shadow-md transition-all dark:bg-slate-900",
+                "fixed z-[50] flex h-full w-[240px] flex-col overflow-x-hidden rounded-none bg-[#1c3482] text-white shadow-md transition-all dark:bg-slate-900",
                 collapsed ? "md:w-[70px] md:items-center" : "md:w-[240px]",
                 collapsed ? "max-md:left-full" : "max-md:left-0",
             )}
@@ -27,7 +27,7 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
                 <img
                     src={light_logo}
                     alt="legalvault_logo_dark"
-                    className="w-19 ml-1 hidden h-20 brightness-150 dark:block"
+                    className="h-23 hidden w-20 brightness-150 dark:block"
                 />
                 {!collapsed && <p className="font-serif text-2xl font-semibold text-white">Legal Vault</p>}
             </div>
