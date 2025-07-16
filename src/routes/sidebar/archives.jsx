@@ -60,7 +60,7 @@ const Archives = () => {
   });
 
   return (
-    <div className="p-6 text-gray-800 min-h-screen">
+    <div className="p-1 text-gray-800 min-h-screen">
       <h1 className="text-2xl font-bold mb-1 dark:text-white">Archives</h1>
       <p className="text-sm mb-6 text-gray-600">Browse and search completed and archived cases</p>
 
@@ -82,7 +82,7 @@ const Archives = () => {
         </button>
       </div>
 
-      <div className="card bg-white rounded-lg shadow-lg p-4 overflow-x-auto">
+      <div className="card bg-white rounded-lg shadow-lg p-4x overflow-x-auto">
         <h2 className="dark:text-white text-xl font-semibold text-gray-800 mb-4">Archived Cases</h2>
         <table className="w-full text-sm text-left text-gray-700">
           <thead className="text-xs uppercase border-b dark:text-white">
@@ -97,7 +97,7 @@ const Archives = () => {
           </thead>
           <tbody>
             {filteredCases.map((item) => (
-              <tr key={item.id} className="dark:text-white border-b hover:bg-blue-500">
+              <tr key={item.id} className="dark:text-white border-b hover:bg-blue-100 dark:hover:bg-blue-950">
                 <td className="py-2 px-4">{item.id}</td>
                 <td className="py-2 px-4">{item.name}</td>
                 <td className="py-2 px-4">{item.client}</td>

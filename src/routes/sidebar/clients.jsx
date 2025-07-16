@@ -22,7 +22,7 @@ const Client = () => {
   });
 
   const handleAddClient = () => {
-    setData([...data, { ...newClient, id: parseInt(newClient.id)}]);
+    setData([...data, { ...newClient, id: parseInt(newClient.id) }]);
     setNewClient({
       Fullname: "",
       ContactNumber: "",
@@ -30,10 +30,10 @@ const Client = () => {
       Address: "",
       ContactPerson: "",
       ContactPersonNumber: "",
-      });
-      setIsModalOpen(false);
-      alert("New client has been added successfully!");
-    };
+    });
+    setIsModalOpen(false);
+    alert("New client has been added successfully!");
+  };
 
   return (
     <div className="bg-blue rounded-xl p-4 sm:p-6 shadow-sm dark:bg-slate-900">
@@ -54,7 +54,7 @@ const Client = () => {
       </div>
 
 
-      <div className="w-full overflow-x-auto rounded-xl border border-gray-200">
+      <div className="w-full overflow-x-auto rounded-xl border border-gray-400">
         <table className="min-w-full text-sm text-left table-auto">
           <thead className="card-title uppercase text-xs">
             <tr>
@@ -68,7 +68,7 @@ const Client = () => {
             {data.map((item) => (
               <tr
                 key={item.id}
-                className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition"
+                className="border-t border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition"
               >
                 <td className="px-4 py-3 whitespace-nowrap">{item.client}</td>
                 <td className="px-4 py-3 whitespace-nowrap">{item.lawyer}</td>
@@ -114,7 +114,7 @@ const Client = () => {
                 ["Address", "address"],
                 ["Contact Person", "ContactPerson"],
                 ["Contact Person Number ", "ContactPersonNum"],
-                
+
               ].map(([label, name, type = "text"]) => (
                 <div key={name}>
                   <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>

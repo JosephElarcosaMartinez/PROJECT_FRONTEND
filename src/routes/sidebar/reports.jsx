@@ -151,7 +151,7 @@ export const Reports = () => {
       </div>
 
       <div className="relative rounded-xl bg-white p-4 shadow dark:bg-gray-800">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-4 ">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">
             User Activity
           </h2>
