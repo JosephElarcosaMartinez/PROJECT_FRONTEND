@@ -8,64 +8,55 @@ import light_logo2 from "@/assets/BOS_LEGS.png";
 import { cn } from "@/utils/cn";
 
 export const Sidebar = forwardRef(({ collapsed }, ref) => {
-  return (
-    <aside
-      ref={ref}
-      className={cn(
-        "fixed z-50 flex h-full w-[240px] flex-col overflow-x-hidden rounded-none bg-[#1c3482] text-white shadow-md transition-all dark:bg-slate-900",
-        collapsed ? "md:w-[70px] md:items-center" : "md:w-[240px]",
-        collapsed ? "max-md:left-full" : "max-md:left-0"
-      )}
-    >
-      {/* Logo Section */}
-      <div className="flex items-center gap-x-3 p-4">
-        <img
-          src={light_logo2}
-          alt="legalvault_logo_light"
-          className="h-[60px] w-[60px] dark:hidden"
-        />
-        <img
-          src={light_logo}
-          alt="legalvault_logo_dark"
-          className="hidden h-[60px] w-[60px] dark:block"
-        />
-        {!collapsed && (
-          <p className="text-2xl font-semibold text-white font-serif">
-            Legal Vault
-          </p>
-        )}
-      </div>
+    return (
+        <aside
+            ref={ref}
+            className={cn(
+                "fixed z-50 flex h-full w-[240px] flex-col overflow-x-hidden rounded-none bg-[#1c3482] text-white shadow-md transition-all dark:bg-slate-900",
+                collapsed ? "md:w-[70px] md:items-center" : "md:w-[240px]",
+                collapsed ? "max-md:left-full" : "max-md:left-0",
+            )}
+        >
+            {/* Logo Section */}
+            <div className="flex items-center gap-x-3 p-4">
+                <img
+                    src={light_logo2}
+                    alt="legalvault_logo_light"
+                    className="h-23 w-20 dark:hidden"
+                />
+                <img
+                    src={light_logo}
+                    alt="legalvault_logo_dark"
+                    className="w-19 ml-1 hidden h-20 brightness-150 dark:block"
+                />
+                {!collapsed && <p className="font-serif text-2xl font-semibold text-white">Legal Vault</p>}
+            </div>
 
-      {/* Navigation Links */}
-      <div className="flex flex-col gap-y-2 px-2 pb-6">
-        {navbarLinks.map((link) => (
-          <NavLink
-            key={link.label}
-            to={link.path}
-            className={({ isActive }) =>
-              cn(
-                "flex items-center gap-x-3 rounded-lg border border-white px-4 py-2 text-sm font-medium transition-all hover:bg-white hover:text-[#1c3482]",
-                isActive ? "bg-white text-[#1c3482]" : "text-white",
-                collapsed && "justify-center px-2"
-              )
-            }
-          >
-            <link.icon size={26} />
-            {!collapsed && <span>{link.label}</span>}
-          </NavLink>
-
-           
-        ))}
-      </div>
-
-      
-    </aside>
-  );
+            {/* Navigation Links */}
+            <div className="flex flex-col gap-y-2 px-2 pb-6">
+                {navbarLinks.map((link) => (
+                    <NavLink
+                        key={link.label}
+                        to={link.path}
+                        className={({ isActive }) =>
+                            cn(
+                                "flex items-center gap-x-3 rounded-lg border border-white px-4 py-2 text-sm font-medium transition-all hover:bg-white hover:text-[#1c3482]",
+                                isActive ? "bg-white text-[#1c3482]" : "text-white",
+                                collapsed && "justify-center px-2",
+                            )
+                        }
+                    >
+                        <link.icon size={26} />
+                        {!collapsed && <span>{link.label}</span>}
+                    </NavLink>
+                ))}
+            </div>
+        </aside>
+    );
 });
 
 Sidebar.displayName = "Sidebar";
 
 Sidebar.propTypes = {
-  collapsed: PropTypes.bool,
+    collapsed: PropTypes.bool,
 };
-
