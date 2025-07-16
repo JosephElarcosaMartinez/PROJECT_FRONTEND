@@ -77,7 +77,7 @@ const Userlogs = () => {
         <select
           value={selectedUser}
           onChange={(e) => setSelectedUser(e.target.value)}
-          className="card px-3 py-2 border rounded dark:text-white"
+          className=" card px-3 py-2 border rounded dark:text-white "
         >
           <option>All Users</option>
           <option>John Cooper</option>
@@ -118,7 +118,7 @@ const Userlogs = () => {
                 <div className="flex items-center gap-3 mb-1">
                   <span className="font-semibold ">{log.user}</span>
                 </div>
-                <div className="text-sm dark:text-white mb-1 flex items-center gap-2">
+                <div className="text-sm text-dark-700 mb-1 flex items-center gap-2">
                   <img src={log.icon} alt="icon" className="w-5 h-5" />
                   {log.action}
                 </div>

@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Filter, X } from "lucide-react";
-import ClientAndCase from "./cases";
+import Cases from "./cases";
+import { useClickOutside } from "@/hooks/use-click-outside";
 
 const initialCases = [
   {
@@ -34,6 +35,15 @@ const Archives = () => {
   const [clientFilter, setClientFilter] = useState("");
   const [archivedDateFilter, setArchivedDateFilter] = useState("");
 
+  const viewModalRef = useRef();
+  const filterModalRef = useRef();
+
+  // Handle clicks outside both modals
+  useClickOutside([viewModalRef, filterModalRef], () => {
+    if (viewCaseData) setViewCaseData(null);
+    if (isFilterOpen) setIsFilterOpen(false);
+  });
+
   const handleUnarchive = (id) => {
     setCases((prev) => prev.filter((item) => item.id !== id));
   };
@@ -62,7 +72,7 @@ const Archives = () => {
           onChange={(e) => setSearch(e.target.value)}
           className="w-full md:flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none"
         />
-        
+
         <button
           onClick={() => setIsFilterOpen(true)}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -87,7 +97,7 @@ const Archives = () => {
           </thead>
           <tbody>
             {filteredCases.map((item) => (
-              <tr key={item.id} className="dark:text-white border-b hover:bg-blue-500 ">
+              <tr key={item.id} className="dark:text-white border-b hover:bg-blue-500">
                 <td className="py-2 px-4">{item.id}</td>
                 <td className="py-2 px-4">{item.name}</td>
                 <td className="py-2 px-4">{item.client}</td>
@@ -104,14 +114,16 @@ const Archives = () => {
       </div>
 
       {viewCaseData && (
-        <div className=" fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 overflow-y-auto">
-          <ClientAndCase caseData={viewCaseData} onClose={() => setViewCaseData(null)} />
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 overflow-y-auto">
+          <div ref={viewModalRef}>
+            <Cases />
+          </div>
         </div>
       )}
 
       {isFilterOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 shadow-lg w-full max-w-md">
+          <div ref={filterModalRef} className="bg-white rounded-lg p-6 shadow-lg w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Filter Archives</h2>
               <X className="cursor-pointer" onClick={() => setIsFilterOpen(false)} />

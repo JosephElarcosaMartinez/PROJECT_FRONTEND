@@ -24,9 +24,10 @@ const getStatusColor = (status) => {
 const Cases = () => {
   const [data, setData] = useState(InitialData);
   const navigate = useNavigate();
-  
+
+
   return (
-    <div className="bg-blue rounded-xl p-4 sm:p-6 shadow-sm dark:bg-slate-900">
+    <div className="bg-blue rounded-xl p-4 sm:p-6 shadow-sm bg-slate-50 dark:bg-slate-900">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Cases</h2>
