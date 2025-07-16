@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, Trash2, FileText, Search, Filter, Plus, X, UploadCloud, Upload, } from "lucide-react";
+import { Download, Trash2, FileText, Search, Filter, Plus, X, } from "lucide-react";
 
 const initialDocuments = [
   {
@@ -92,13 +92,6 @@ const Documents = () => {
           >
             <Filter size={16} />
             Filters
-          </button>
-          <button
-            className="flex items-center gap-2 bg-blue-600 text-white font-medium px-4 py-2 rounded-md hover:bg-white"
-            onClick={toggleUploadModal}
-          >
-            <Plus size={16} />
-            Upload Document
           </button>
         </div>
       </div>
