@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { Mail, Phone, BadgeCheck, UserCheck, Building2, XCircle } from "lucide-react";
+import { useClickOutside } from "@/hooks/use-click-outside";
 
 export const ProfileModal = ({ user, onClose }) => {
     const [branchName, setBranchName] = useState("Loading...");
     const [loadingBranch, setLoadingBranch] = useState(true);
+
+    const [open, SetOpen] = useState(false);
+
 
     useEffect(() => {
         const fetchBranchName = async () => {
