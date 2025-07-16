@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Pencil, Trash2, Eye } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";//
 
 const InitialData = [
   { id: 1, name: "Davis Incorporation", client: "Davis Corp", category: "Corporate", status: "Pending", lawyer: "Sarah Wilson", balance: "P 35, 000.00" },
