@@ -73,6 +73,11 @@ const Cases = () => {
 
   const navigate = useNavigate();
 
+  const modalRef = useRef(null);
+  useClickOutside([modalRef], () => {
+    if (isModalOpen) setIsModalOpen(false);
+  });
+
   const handleAddCase = () => {
     const formattedFee = newCase.fee.startsWith("P") ? newCase.fee : `P ${newCase.fee}`;
     setData([...data, { ...newCase, id: parseInt(newCase.id), fee: formattedFee }]);
@@ -179,7 +184,10 @@ const Cases = () => {
       {/* Add Case Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg w-full max-w-3xl overflow-y-auto max-h-[90vh]">
+          <div
+            ref={modalRef}
+            className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg w-full max-w-3xl overflow-y-auto max-h-[90vh]"
+          >
             <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Add New Case</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {[
