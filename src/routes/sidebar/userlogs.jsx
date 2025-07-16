@@ -59,7 +59,7 @@ const Userlogs = () => {
   return (
     <div className="min-h-screen p-6 text-white">
       <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-        User Activity Logs
+        User Logs
       </h1>
       <p className="text-sm mb-6 text-gray-500">
         Track and monitor user activities across the platform.
