@@ -12,8 +12,8 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
         <aside
             ref={ref}
             className={cn(
-                "fixed z-[50] flex h-full w-[240px] flex-col overflow-x-hidden rounded-none bg-[#1c3482] text-white shadow-md transition-all dark:bg-slate-900",
-                collapsed ? "md:w-[70px] md:items-center" : "md:w-[240px]",
+                "fixed z-[50] flex h-full w-[240px] flex-col overflow-x-hidden rounded-lg bg-[#1c3482] p-2 text-white shadow-md transition-all dark:bg-slate-900",
+                collapsed ? "p-0 md:w-[70px] md:items-center" : "md:w-[240px]",
                 collapsed ? "max-md:left-full" : "max-md:left-0",
             )}
         >
@@ -33,7 +33,7 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
             </div>
 
             {/* Navigation Links */}
-            <div className="flex flex-col gap-y-2 px-2 pb-6">
+            <div className="flex flex-col gap-y-3 px-2 pb-6">
                 {navbarLinks.map((link) => (
                     <NavLink
                         key={link.label}
