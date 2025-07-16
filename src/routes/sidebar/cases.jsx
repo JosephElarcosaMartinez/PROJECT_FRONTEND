@@ -179,7 +179,9 @@ const Cases = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {[
-                ["Case ID", "id"],
+                ["Cabinet Number", "CabinetNum"],
+                ["Drawer Number", "DrawerNum"],
+                ["Folder Number", "FolderNum"],
                 ["Case Name", "name"],
                 ["Case Category", "category"],
                 ["Client", "client"],
