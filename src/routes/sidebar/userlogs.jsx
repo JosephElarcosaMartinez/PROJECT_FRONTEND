@@ -77,7 +77,7 @@ const Userlogs = () => {
         <select
           value={selectedUser}
           onChange={(e) => setSelectedUser(e.target.value)}
-          className=" card px-3 py-2 border rounded dark:text-white "
+          className="card px-3 py-2 border border-gray-300 bg-white text-black rounded dark:bg-slate-800 dark:text-white dark:border-slate-600"
         >
           <option>All Users</option>
           <option>John Cooper</option>
@@ -88,7 +88,7 @@ const Userlogs = () => {
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="card px-3 py-2 border rounded dark:text-white"
+          className="card px-3 py-2 border border-gray-300 bg-white text-black rounded dark:bg-slate-800 dark:text-white dark:border-slate-600"
         />
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 ml-auto"
@@ -104,7 +104,7 @@ const Userlogs = () => {
           {filteredLogs.map((log, index) => (
             <div
               key={index}
-              className="card bg-white text-black p-4 rounded-lg shadow-md flex items-start"
+              className="bg-white text-black dark:bg-slate-800 dark:text-white p-4 rounded-lg shadow-md flex items-start"
             >
               {/* Avatar */}
               <img
