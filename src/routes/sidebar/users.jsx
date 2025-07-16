@@ -13,7 +13,7 @@ const initialUsers = [
 const roles = ["All", "Admin", "Lawyer", "Paralegal"];
 
 const Users = () => {
-
+  const [search, setSearch] = useState("");
   const [users, setUsers] = useState(initialUsers);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState("All");
@@ -77,7 +77,14 @@ const Users = () => {
         ))}
       </div>
 
-      <div className="flex justify-end">
+      <div className="mb-6 flex flex-col md:flex-row gap-3 items-start md:items-center justify-between">
+        <input
+          type="text"
+          placeholder="Search user..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full md:w-1/2 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none"
+        />
         <button
           onClick={handleOpenModal}
           className="mt-2 md:mt-0 flex items-center gap-2 mb-6 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow"

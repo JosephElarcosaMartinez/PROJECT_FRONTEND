@@ -50,6 +50,7 @@ const getStatusColor = (status) => {
 };
 
 const Cases = () => {
+  const [search, setSearch] = useState("");
   const [data, setData] = useState(InitialData);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newCase, setNewCase] = useState({
@@ -65,16 +66,18 @@ const Cases = () => {
     lawyer: "Unassigned",
     balance: "P 0.00",
   });
-  const navigate = useNavigate();
 
   const modalRef = useRef(null);
+  const navigate = useNavigate();
+
   useClickOutside([modalRef], () => {
     if (isModalOpen) setIsModalOpen(false);
   });
 
   const handleAddCase = () => {
     const formattedFee = newCase.fee.startsWith("P") ? newCase.fee : `P ${newCase.fee}`;
-    setData([...data, { ...newCase, id: parseInt(newCase.id), fee: formattedFee }]);
+    const formattedId = parseInt(newCase.id) || data.length + 1;
+    setData([...data, { ...newCase, id: formattedId, fee: formattedFee }]);
     setNewCase({
       id: "",
       name: "",
@@ -92,6 +95,12 @@ const Cases = () => {
     alert("New case has been added successfully!");
   };
 
+  const filteredCases = data.filter(
+    (item) =>
+      item.name.toLowerCase().includes(search.toLowerCase()) ||
+      item.client.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="bg-blue rounded-xl p-4 sm:p-6 shadow-sm bg-slate-50 dark:bg-slate-900">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
@@ -101,19 +110,28 @@ const Cases = () => {
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 mb-6">
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg shadow"
-        >
-          + Add New Case
-        </button>
-        <button
-          onClick={() => navigate("/clients")}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow"
-        >
-          View Clients
-        </button>
+      <div className="mb-6 flex flex-col md:flex-row gap-3 items-start md:items-center justify-between">
+        <input
+          type="text"
+          placeholder="Search by name or client..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full md:w-1/2 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none"
+        />
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg shadow"
+          >
+            + Add New Case
+          </button>
+          <button
+            onClick={() => navigate("/clients")}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow"
+          >
+            View Clients
+          </button>
+        </div>
       </div>
 
       <div className="w-full overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
@@ -132,47 +150,55 @@ const Cases = () => {
             </tr>
           </thead>
           <tbody className="text-gray-700 dark:text-white">
-            {data.map((item) => (
-              <tr
-                key={item.id}
-                className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition"
-              >
-                <td className="px-4 py-3 whitespace-nowrap">{item.id}</td>
-                <td className="px-4 py-3 whitespace-nowrap">{item.name}</td>
-                <td className="px-4 py-3 whitespace-nowrap">{item.client}</td>
-                <td className="px-4 py-3 whitespace-nowrap">{item.category}</td>
-                <td className="px-4 py-3">
-                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
-                    {item.status}
-                  </span>
-                </td>
-                <td className="px-4 py-3 whitespace-nowrap">{item.lawyer}</td>
-                <td className="px-4 py-3 whitespace-nowrap">{item.fee}</td>
-                <td className="px-4 py-3 whitespace-nowrap">{item.balance}</td>
-                <td className="px-4 py-3">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      className="p-1.5 text-blue-600 hover:text-blue-800"
-                      onClick={() => alert(`Viewing ${item.name}`)}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                    <button
-                      className="p-1.5 text-yellow-500 hover:text-yellow-700"
-                      onClick={() => alert(`Editing ${item.name}`)}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
-                    <button
-                      className="p-1.5 text-red-600 hover:text-red-800"
-                      onClick={() => alert(`Deleting ${item.name}`)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+            {filteredCases.length > 0 ? (
+              filteredCases.map((item) => (
+                <tr
+                  key={item.id}
+                  className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition"
+                >
+                  <td className="px-4 py-3 whitespace-nowrap">{item.id}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{item.name}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{item.client}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{item.category}</td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
+                      {item.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">{item.lawyer}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{item.fee}</td>
+                  <td className="px-4 py-3 whitespace-nowrap">{item.balance}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        className="p-1.5 text-blue-600 hover:text-blue-800"
+                        onClick={() => alert(`Viewing ${item.name}`)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
+                        className="p-1.5 text-yellow-500 hover:text-yellow-700"
+                        onClick={() => alert(`Editing ${item.name}`)}
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        className="p-1.5 text-red-600 hover:text-red-800"
+                        onClick={() => alert(`Deleting ${item.name}`)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={9} className="text-center py-4 text-gray-500 dark:text-gray-400">
+                  No matching cases found.
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
@@ -188,6 +214,7 @@ const Cases = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {[
+                ["Case ID", "id"],
                 ["Cabinet Number", "CabinetNum"],
                 ["Drawer Number", "DrawerNum"],
                 ["Folder Number", "FolderNum"],
@@ -209,7 +236,6 @@ const Cases = () => {
                   />
                 </div>
               ))}
-
               <div className="md:col-span-2">
                 <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                 <textarea
