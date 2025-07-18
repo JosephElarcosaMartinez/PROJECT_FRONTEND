@@ -1,4 +1,3 @@
-// src/context/auth-context.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
@@ -26,7 +25,6 @@ export const AuthProvider = ({ children }) => {
                 });
 
                 const data = await res.json();
-                // console.log("Verify response:", data);
 
                 if (res.ok && data.user) {
                     login(data.user);
@@ -58,7 +56,7 @@ export const AuthProvider = ({ children }) => {
         localStorage.removeItem("user");
     };
 
-    return <AuthContext.Provider value={{ user, login, logout, loading }}>{children}</AuthContext.Provider>;
+    return <AuthContext.Provider value={{ user, setUser, login, logout, loading }}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);
