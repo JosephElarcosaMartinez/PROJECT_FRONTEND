@@ -25,7 +25,7 @@ const Register = () => {
 
     useEffect(() => {
         if (!user || user.user_role !== "Admin") {
-            navigate("/unauthorized");
+            navigate("unauthorized");
         }
     }, [user, navigate]);
 
