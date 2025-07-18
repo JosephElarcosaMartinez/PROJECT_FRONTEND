@@ -1,26 +1,20 @@
-import { useRef, useState } from "react";
-import { Image, User } from "lucide-react";
+import { useState, useRef } from "react";
+import { User, Image } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 
-const AddUserModal = ({ isOpen, onClose }) => {
+const AddUser = ({ onClose }) => {
     const [profileImage, setProfileImage] = useState(null);
     const modalRef = useRef(null);
 
     useClickOutside([modalRef], () => {
-        if (isOpen) onClose();
+        onClose();
+        setProfileImage(null);
     });
-
-    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div
-                ref={modalRef}
-                className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-3xl shadow-lg relative"
-            >
-                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">
-                    Add New User
-                </h2>
+            <div ref={modalRef} className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-3xl shadow-lg relative">
+                <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Add New User</h2>
                 <form className="space-y-6">
                     <div className="flex justify-center">
                         <div className="flex flex-col items-center gap-2">
@@ -57,39 +51,17 @@ const AddUserModal = ({ isOpen, onClose }) => {
                             </label>
 
                             {profileImage && (
-                                <p className="text-xs text-gray-500 dark:text-gray-400">
-                                    File uploaded
-                                </p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">File uploaded</p>
                             )}
                         </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input
-                            type="text"
-                            placeholder="First Name"
-                            className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white"
-                        />
-                        <input
-                            type="text"
-                            placeholder="Last Name"
-                            className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white"
-                        />
-                        <input
-                            type="text"
-                            placeholder="Middle Name"
-                            className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white"
-                        />
-                        <input
-                            type="email"
-                            placeholder="Enter Email"
-                            className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white"
-                        />
-                        <input
-                            type="text"
-                            placeholder="Phone Number"
-                            className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white"
-                        />
+                        <input type="text" placeholder="First Name" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
+                        <input type="text" placeholder="Last Name" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
+                        <input type="text" placeholder="Middle Name" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
+                        <input type="email" placeholder="Enter Email" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
+                        <input type="text" placeholder="Phone Number" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
                         <select className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white">
                             <option>Role</option>
                             <option>Admin</option>
@@ -105,10 +77,7 @@ const AddUserModal = ({ isOpen, onClose }) => {
                     </div>
 
                     <div className="flex justify-end gap-2 pt-4">
-                        <button
-                            type="submit"
-                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white"
-                        >
+                        <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white">
                             Save
                         </button>
                     </div>
@@ -125,4 +94,4 @@ const AddUserModal = ({ isOpen, onClose }) => {
     );
 };
 
-export default AddUserModal;
+export default AddUser;

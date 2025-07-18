@@ -1,10 +1,9 @@
-import { useRef, useState } from "react";
-import { User } from "lucide-react";
-import { Pencil, Trash2, Image } from "lucide-react";
+import { useState } from "react";
+import { Pencil, Trash2 } from "lucide-react";
 import user1 from "@/assets/Joseph_prof.png";
 import user2 from "@/assets/Joseph_prof.png";
 import user3 from "@/assets/Joseph_prof.png";
-import { useClickOutside } from "@/hooks/use-click-outside";
+import AddUserModal from "@/components/add-users";
 
 const initialUsers = [
   { id: 1, name: "Sarah Wilson", username: "admin", email: "admin@example.com", role: "admin", image: user1 },
@@ -21,18 +20,6 @@ const Users = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
   const [userToRemove, setUserToRemove] = useState(null);
-  const [profileImage, setProfileImage] = useState(null);
-
-  const modalRef = useRef(null);
-  useClickOutside([modalRef], () => {
-    if (isModalOpen) setIsModalOpen(false);
-  });
-
-  const handleOpenModal = () => setIsModalOpen(true);
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setProfileImage(null);
-  };
 
   const openRemoveModal = (user) => {
     setUserToRemove(user);
@@ -60,14 +47,14 @@ const Users = () => {
 
   return (
     <div className="bg-blue rounded-xl p-6 shadow-sm dark:bg-slate-900">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+      <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Users</h2>
           <p className="text-sm text-gray-500">Manage system users and their roles</p>
         </div>
       </div>
 
-      <div className="card-title flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 mb-4">
         {roles.map(role => (
           <button
             key={role}
@@ -82,25 +69,25 @@ const Users = () => {
         ))}
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-6 items-stretch md:items-center">
+      <div className="flex flex-col md:flex-row gap-4 mb-6 items-center">
         <input
           type="text"
           placeholder="Search users..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none"
+          className="w-full md:flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white"
         />
         <button
-          onClick={handleOpenModal}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow"
+          onClick={() => setIsModalOpen(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
         >
           Add User
         </button>
       </div>
 
-      <div className="card overflow-x-auto shadow-md rounded-xl border border-gray-200">
+      <div className="overflow-x-auto border rounded-xl shadow">
         <table className="w-full table-auto text-sm text-left">
-          <thead className="card-title uppercase text-xs">
+          <thead className="uppercase text-xs">
             <tr>
               <th className="px-4 py-3">User</th>
               <th className="px-4 py-3">Username</th>
@@ -111,7 +98,7 @@ const Users = () => {
           </thead>
           <tbody className="dark:text-slate-50">
             {filteredUsers.map(user => (
-              <tr key={user.id} className="border-t border-gray-200 hover:bg-blue-50 dark:hover:bg-blue-950 transition">
+              <tr key={user.id} className="border-t hover:bg-blue-50 dark:hover:bg-blue-950">
                 <td className="px-4 py-5 flex items-center gap-3">
                   <img src={user.image} alt={user.name} className="w-8 h-8 rounded-full object-cover" />
                   <span className="font-medium">{user.name}</span>
@@ -142,121 +129,30 @@ const Users = () => {
         </table>
       </div>
 
-      {/* Add User Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div
-            ref={modalRef}
-            className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-3xl shadow-lg relative"
-          >
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Add New User</h2>
-            <form className="space-y-6">
-              <div className="flex justify-center">
-                <div className="flex flex-col items-center gap-2">
-                  {profileImage ? (
-                    <img
-                      src={profileImage}
-                      alt="Preview"
-                      className="w-24 h-24 object-cover rounded-full border border-gray-300 dark:border-slate-700"
-                    />
-                  ) : (
-                    <div className="w-24 h-24 flex items-center justify-center rounded-full bg-gray-100 border text-gray-400 text-sm dark:bg-slate-700 dark:border-slate-600">
-                      <User className="w-10 h-10" />
-                    </div>
-                  )}
+      {isModalOpen && <AddUserModal onClose={() => setIsModalOpen(false)} />}
 
-                  <label className="flex items-center gap-2 cursor-pointer text-blue-600 hover:underline text-sm">
-                    <Image className="w-4 h-4" />
-                    <span>Upload Profile Picture</span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                          const reader = new FileReader();
-                          reader.onloadend = () => {
-                            setProfileImage(reader.result);
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                      className="hidden"
-                    />
-                  </label>
-
-                  {profileImage && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400">File uploaded</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" placeholder="First Name" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
-                <input type="text" placeholder="Last Name" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
-                <input type="text" placeholder="Middle Name" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
-                <input type="email" placeholder="Enter Email" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
-                <input type="text" placeholder="Phone Number" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
-                <select className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white">
-                  <option>Role</option>
-                  <option>Admin</option>
-                  <option>Lawyer</option>
-                  <option>Paralegal</option>
-                </select>
-                <select className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white">
-                  <option>Select Branch</option>
-                  <option>Dumanjug</option>
-                  <option>Fuente</option>
-                  <option>Camotes</option>
-                </select>
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4">
-                <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white">
-                  Save
-                </button>
-              </div>
-            </form>
-
-            <button
-              onClick={handleCloseModal}
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl"
-            >
-              &times;
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Remove User Modal */}
+      {/* Remove Modal */}
       {isRemoveModalOpen && userToRemove && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-sm shadow-lg relative">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Admin Removal</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">Are you sure to remove this admin?</p>
+            <h2 className="text-lg font-semibold mb-4 dark:text-white">Admin Removal</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
+              Are you sure you want to remove this admin?
+            </p>
             <div className="flex justify-end gap-3">
-              <button onClick={closeRemoveModal} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700">Cancel</button>
-              <button onClick={confirmRemoveUser} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">Remove</button>
+              <button onClick={closeRemoveModal} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700">
+                Cancel
+              </button>
+              <button onClick={confirmRemoveUser} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">
+                Remove
+              </button>
             </div>
-            <button
-              onClick={closeRemoveModal}
-              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-xl"
-            >
+            <button onClick={closeRemoveModal} className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-xl">
               &times;
             </button>
           </div>
         </div>
       )}
-
-      <div className="mt-4 flex justify-between items-center text-sm text-gray-500">
-        <span>Showing 1 to {filteredUsers.length} of {users.length} entries</span>
-        <div className="space-x-1">
-          <button className="px-2 py-1 rounded border text-gray-800 dark:text-white">Previous</button>
-          <button className="px-3 py-1 rounded bg-blue-600 text-white">1</button>
-          <button className="px-2 py-1 rounded border text-gray-800 dark:text-white">2</button>
-          <button className="px-2 py-1 rounded border text-gray-600 dark:text-white">Next</button>
-        </div>
-      </div>
     </div>
   );
 };
