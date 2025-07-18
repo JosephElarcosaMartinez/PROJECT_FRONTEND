@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { User } from "lucide-react";
 import { Pencil, Trash2, Image } from "lucide-react";
 import user1 from "@/assets/Joseph_prof.png";
 import user2 from "@/assets/Joseph_prof.png";
@@ -11,7 +12,7 @@ const initialUsers = [
   { id: 3, name: "Emma Thompson", username: "emma.thompson", email: "emma@example.com", role: "lawyer", image: user3 },
 ];
 
-const roles = ["All", "Admin", "Lawyer", "Paralegal"];
+const roles = ["All", "Admin", "Lawyer", "Paralegal", "Staff"];
 
 const Users = () => {
   const [search, setSearch] = useState("");
@@ -160,7 +161,7 @@ const Users = () => {
                     />
                   ) : (
                     <div className="w-24 h-24 flex items-center justify-center rounded-full bg-gray-100 border text-gray-400 text-sm dark:bg-slate-700 dark:border-slate-600">
-                      No Image
+                      <User className="w-10 h-10" />
                     </div>
                   )}
 
