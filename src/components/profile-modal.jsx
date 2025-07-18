@@ -88,7 +88,7 @@ export const ProfileModal = ({ onClose }) => {
             label: "User ID",
             name: "user_id",
             icon: <User size={16} />,
-            editable: true,
+            editable: false,
         },
         {
             label: "Email",
@@ -112,7 +112,7 @@ export const ProfileModal = ({ onClose }) => {
             label: "Status",
             name: "user_status",
             icon: <UserCheck size={16} />,
-            editable: true,
+            editable: false,
         },
         {
             label: "Branch",
