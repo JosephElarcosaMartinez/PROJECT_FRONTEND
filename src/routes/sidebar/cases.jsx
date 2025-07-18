@@ -115,7 +115,7 @@ const Cases = () => {
   };
 
   return (
-    <div className="bg-blue rounded-xl p-4 sm:p-6 shadow-sm bg-slate-50 dark:bg-slate-900">
+    <div className="bg-blue rounded-xl p-4 sm:p-6 shadow-lg bg-slate-50 dark:bg-slate-900">
       {/* Header and Actions */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
@@ -125,7 +125,7 @@ const Cases = () => {
       </div>
 
       {/* Search and Buttons */}
-      <div className="card bg-white dark:bg-slate-800 rounded-lg shadow-lg p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
+      <div className="card bg-white dark:bg-slate-800 rounded-lg shadow-md p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
         <input
           type="text"
           placeholder="Search case..."
