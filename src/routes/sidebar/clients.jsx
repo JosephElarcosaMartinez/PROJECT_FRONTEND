@@ -85,7 +85,7 @@ const Client = () => {
   );
 
   return (
-    <div className="bg-blue rounded-xl p-4 sm:p-6 shadow-sm dark:bg-slate-900">
+    <div className="bg-blue rounded-xl p-4 sm:p-6 shadow-lg bg-slate-50 dark:bg-slate-900">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Clients</h2>
@@ -93,7 +93,7 @@ const Client = () => {
         </div>
       </div>
 
-      <div className="card bg-white dark:bg-slate-800 rounded-lg shadow-lg p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
+      <div className="card bg-white dark:bg-slate-800 rounded-lg shadow-md p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
         <input
           type="text"
           placeholder="Search clients..."

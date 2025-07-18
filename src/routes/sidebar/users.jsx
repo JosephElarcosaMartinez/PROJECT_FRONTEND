@@ -98,7 +98,7 @@ const Users = () => {
         </button>
       </div>
 
-      <div className="card overflow-x-auto rounded-xl border border-gray-200">
+      <div className="card overflow-x-auto shadow-md rounded-xl border border-gray-200">
         <table className="w-full table-auto text-sm text-left">
           <thead className="card-title uppercase text-xs">
             <tr>
