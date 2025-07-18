@@ -23,61 +23,64 @@ import { ChangePass } from "./auth/changepass";
 import Verify from "./auth/verification";
 import Register from "./components/registration";
 import Clients from "./routes/sidebar/clients";
-
+import { UnauthorizedAccess } from "./auth/unauthorized";
 
 export default function App() {
-  const router = createBrowserRouter([
-    {
-      path: "/login",
-      element: <Login />,
-    },
-    {
-      path: "/forgot-password",
-      element: <ForgotPassword />,
-    },
-    {
-      path: "/verify",
-      element: <Verify />,
-    },
-    {
-      path: "/change-password",
-      element: <ChangePass />,
-    },
-    {
-      path: "register",
-      element: <Register />,
-    },
-
-    {
-      element: <ProtectedRoute />,
-      children: [
+    const router = createBrowserRouter([
         {
-          path: "/",
-          element: <Layout />,
-          children: [
-            { index: true, element: <DashboardPage /> },
-            { path: "cases", element: <Cases /> },
-            { path: "documents", element: <Documents /> },
-            { path: "clients", element: <Clients /> },
-            { path: "tasks", element: <Tasks /> },
-            { path: "users", element: <Users /> },
-            { path: "reports", element: <Reports /> },
-            { path: "reports/activity", element: <Activity /> },
-            { path: "user-logs", element: <Userlogs /> },
-            { path: "case-archive", element: <Archives /> },
-            { path: "notifications", element: <Notification /> },
-            { path: "notifications/notif-settings", element: <NotificationSettings /> },
-          ]
-        }
-      ]
-    }
-  ]);
+            path: "/login",
+            element: <Login />,
+        },
+        {
+            path: "/forgot-password",
+            element: <ForgotPassword />,
+        },
+        {
+            path: "/verify",
+            element: <Verify />,
+        },
+        {
+            path: "/change-password",
+            element: <ChangePass />,
+        },
+        {
+            path: "register",
+            element: <Register />,
+        },
+        {
+            path: "unauthorized",
+            element: <UnauthorizedAccess />,
+        },
+        {
+            element: <ProtectedRoute />,
+            children: [
+                {
+                    path: "/",
+                    element: <Layout />,
+                    children: [
+                        { index: true, element: <DashboardPage /> },
+                        { path: "cases", element: <Cases /> },
+                        { path: "documents", element: <Documents /> },
+                        { path: "clients", element: <Clients /> },
+                        { path: "tasks", element: <Tasks /> },
+                        { path: "users", element: <Users /> },
+                        { path: "reports", element: <Reports /> },
+                        { path: "reports/activity", element: <Activity /> },
+                        { path: "user-logs", element: <Userlogs /> },
+                        { path: "case-archive", element: <Archives /> },
+                        { path: "notifications", element: <Notification /> },
+                        { path: "notifications/notif-settings", element: <NotificationSettings /> },
+                    ],
+                },
+            ],
+        },
+    ]);
 
-  return (
-    <ThemeProvider storageKey="theme">
-      <AuthProvider>
-        <RouterProvider router={router} />
-      </AuthProvider>
-    </ThemeProvider>
-  );
+    return (
+        <ThemeProvider storageKey="theme">
+            <AuthProvider>
+                <RouterProvider router={router} />
+            </AuthProvider>
+        </ThemeProvider>
+    );
 }
