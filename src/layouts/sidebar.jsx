@@ -40,7 +40,7 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
                         to={link.path}
                         className={({ isActive }) =>
                             cn(
-                                "flex items-center gap-x-3 rounded-lg border border-white px-4 py-2 text-sm font-medium transition-all hover:bg-white hover:text-[#1c3482]",
+                                "flex items-center gap-x-3 rounded-lg border border-white px-4 py-2 text-sm font-medium transition-all hover:bg-slate-200 hover:text-blue-950 dark:hover:bg-slate-500 dark:hover:text-white",
                                 isActive ? "bg-white text-[#1c3482]" : "text-white",
                                 collapsed && "justify-center px-2",
                             )
