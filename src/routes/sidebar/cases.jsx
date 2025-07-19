@@ -255,9 +255,7 @@ const Cases = () => {
             </div>
           </div>
         </div>
-      )}
-
-      {/* Eye View Modal */}
+      )}      {/* Eye View Modal */}
       {selectedCase && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
           <div ref={modalRef} className="bg-white dark:bg-slate-900 text-black dark:text-white rounded-xl w-[90%] max-w-6xl p-6 relative shadow-xl overflow-y-auto max-h-[90vh]">
@@ -368,6 +366,8 @@ const Cases = () => {
           </div>
         </div>
       )}
+
+
     </div>
   );
 };
