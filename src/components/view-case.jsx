@@ -101,7 +101,7 @@ const ViewModal = ({ selectedCase, setSelectedCase }) => {
                     </div>
                 </div>
 
-                <div className="border rounded-lg mt-6">
+                <div className="border rounded-lg mt-6 overflow-x-auto">
                     <div className="flex justify-between items-center p-4 bg-gray-100 dark:bg-slate-800">
                         <h3 className="text-sm font-semibold">Documents</h3>
                         <div className="flex gap-2">

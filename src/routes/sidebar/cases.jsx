@@ -139,8 +139,8 @@ const Cases = () => {
       </div>
 
       {/* Case Table */}
-      <div className="card">
-        <table className="min-w-full text-sm text-left table-auto">
+      <div className="card overflow-x-auto">
+        <table className="min-w-full text-sm text-left table-auto ">
           <thead className="uppercase text-xs dark:text-white border-b border-gray-200 dark:border-gray-700">
             <tr>
               <th className="px-4 py-3">Case ID</th>
