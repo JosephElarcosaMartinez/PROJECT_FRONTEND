@@ -20,6 +20,8 @@ const Users = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
   const [userToRemove, setUserToRemove] = useState(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [userToEdit, setUserToEdit] = useState(null);
 
   const openRemoveModal = (user) => {
     setUserToRemove(user);
@@ -36,12 +38,30 @@ const Users = () => {
     closeRemoveModal();
   };
 
+  const openEditModal = (user) => {
+    setUserToEdit(user);
+    setIsEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setIsEditModalOpen(false);
+    setUserToEdit(null);
+  };
+
+  const saveEditedUser = (updatedUser) => {
+    setUsers(prev =>
+      prev.map(u => (u.id === updatedUser.id ? updatedUser : u))
+    );
+    closeEditModal();
+  };
+
   const filteredUsers = users.filter(user => {
     const matchesSearch =
       user.name.toLowerCase().includes(search.toLowerCase()) ||
       user.username.toLowerCase().includes(search.toLowerCase()) ||
       user.email.toLowerCase().includes(search.toLowerCase());
-    const matchesRole = selectedRole === "All" || user.role.toLowerCase() === selectedRole.toLowerCase();
+    const matchesRole =
+      selectedRole === "All" || user.role.toLowerCase() === selectedRole.toLowerCase();
     return matchesSearch && matchesRole;
   });
 
@@ -108,7 +128,7 @@ const Users = () => {
                 <td className="px-4 py-3 capitalize">{user.role}</td>
                 <td className="px-4 py-3 text-right">
                   <div className="flex justify-end gap-2">
-                    <button className="text-blue-600 hover:text-blue-800">
+                    <button onClick={() => openEditModal(user)} className="text-blue-600 hover:text-blue-800">
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button onClick={() => openRemoveModal(user)} className="text-red-500 hover:text-red-700">
@@ -131,13 +151,79 @@ const Users = () => {
 
       {isModalOpen && <AddUserModal onClose={() => setIsModalOpen(false)} />}
 
+      {/* Edit Modal */}
+      {isEditModalOpen && userToEdit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-slate-800 p-6 rounded-xl w-full max-w-md shadow-lg relative">
+            <h2 className="text-lg font-semibold mb-4 dark:text-white">Edit User</h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                saveEditedUser(userToEdit);
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="text-sm font-medium dark:text-white">Name</label>
+                <input
+                  type="text"
+                  value={userToEdit.name}
+                  onChange={(e) => setUserToEdit({ ...userToEdit, name: e.target.value })}
+                  className="w-full mt-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium dark:text-white">Username</label>
+                <input
+                  type="text"
+                  value={userToEdit.username}
+                  onChange={(e) => setUserToEdit({ ...userToEdit, username: e.target.value })}
+                  className="w-full mt-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium dark:text-white">Email</label>
+                <input
+                  type="email"
+                  value={userToEdit.email}
+                  onChange={(e) => setUserToEdit({ ...userToEdit, email: e.target.value })}
+                  className="w-full mt-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium dark:text-white">Role</label>
+                <select
+                  value={userToEdit.role}
+                  onChange={(e) => setUserToEdit({ ...userToEdit, role: e.target.value })}
+                  className="w-full mt-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white"
+                >
+                  <option value="admin">Admin</option>
+                  <option value="lawyer">Lawyer</option>
+                  <option value="paralegal">Paralegal</option>
+                  <option value="staff">Staff</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-2 pt-4">
+                <button type="button" onClick={closeEditModal} className="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg text-gray-800">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white">Save Changes</button>
+              </div>
+            </form>
+            <button onClick={closeEditModal} className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-xl">
+              &times;
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Remove Modal */}
       {isRemoveModalOpen && userToRemove && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-sm shadow-lg relative">
-            <h2 className="text-lg font-semibold mb-4 dark:text-white">Admin Removal</h2>
+            <h2 className="text-lg font-semibold mb-4 dark:text-white">
+              {userToRemove.role.charAt(0).toUpperCase() + userToRemove.role.slice(1)} Removal
+            </h2>
             <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
-              Are you sure you want to remove this admin?
+              Are you sure you want to remove this {userToRemove.role.toLowerCase()}?
             </p>
             <div className="flex justify-end gap-3">
               <button onClick={closeRemoveModal} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700">

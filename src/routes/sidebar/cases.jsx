@@ -11,7 +11,7 @@ const InitialData = [
     category: "Corporate",
     status: "Pending",
     lawyer: "Sarah Wilson",
-    balance: "P 35,000.00",
+    balance: "P 40,000.00",
     fee: "P 50,000.00",
   },
   {
@@ -21,7 +21,7 @@ const InitialData = [
     category: "Property",
     status: "Processing",
     lawyer: "John Cooper",
-    balance: "P 7,000.00",
+    balance: "P 0,000.00",
     fee: "P 10,000.00",
   },
   {
@@ -31,7 +31,7 @@ const InitialData = [
     category: "Corporate",
     status: "Completed",
     lawyer: "Emma Thompson",
-    balance: "P 12,500.00",
+    balance: "P 2,500.00",
     fee: "P 12,500.00",
   },
 ];
@@ -50,6 +50,7 @@ const getStatusColor = (status) => {
 };
 
 const Cases = () => {
+
   const [search, setSearch] = useState("");
   const [data, setData] = useState(InitialData);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -255,7 +256,9 @@ const Cases = () => {
             </div>
           </div>
         </div>
-      )}      {/* Eye View Modal */}
+      )}
+
+      {/* Eye View Modal */}
       {selectedCase && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
           <div ref={modalRef} className="bg-white dark:bg-slate-900 text-black dark:text-white rounded-xl w-[90%] max-w-6xl p-6 relative shadow-xl overflow-y-auto max-h-[90vh]">

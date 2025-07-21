@@ -10,7 +10,11 @@ const InitialData = [
     category: "Corporate",
     status: "Pending",
     lawyer: "Sarah Wilson",
-    balance: "P 35,000.00"
+    balance: "P 35,000.00",
+    email: "daviscorp@gmail.com",
+    phone: "09392233450",
+    emergency: "09323136701",
+    role: "Client"
   },
   {
     id: 2,
@@ -19,7 +23,11 @@ const InitialData = [
     category: "Property",
     status: "Processing",
     lawyer: "John Cooper",
-    balance: "P 7,000.00"
+    balance: "P 7,000.00",
+    email: "johnsmith@gmail.com",
+    phone: "09228889999",
+    emergency: "09112223333",
+    role: "Client"
   },
   {
     id: 3,
@@ -28,7 +36,11 @@ const InitialData = [
     category: "Corporate",
     status: "Completed",
     lawyer: "Emma Thompson",
-    balance: "P 12,500.00"
+    balance: "P 12,500.00",
+    email: "corp@email.com",
+    phone: "09445556666",
+    emergency: "09551112222",
+    role: "Client"
   }
 ];
 
@@ -36,6 +48,11 @@ const Client = () => {
   const [search, setSearch] = useState("");
   const [data, setData] = useState(InitialData);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewClient, setViewClient] = useState(null);
+  const [editClient, setEditClient] = useState(null);
+  const [userToRemove, setUserToRemove] = useState(null);
+  const [isRemoveModalOpen, setIsRemoveModalOpen] = useState(false);
+
   const [newClient, setNewClient] = useState({
     Fullname: "",
     ContactNumber: "",
@@ -46,7 +63,6 @@ const Client = () => {
   });
 
   const modalRef = useRef(null);
-
   useClickOutside([modalRef], () => {
     if (isModalOpen) setIsModalOpen(false);
   });
@@ -54,19 +70,21 @@ const Client = () => {
   const handleAddClient = () => {
     const newId = data.length ? data[data.length - 1].id + 1 : 1;
 
-    setData([
-      ...data,
-      {
-        id: newId,
-        name: `${newClient.Fullname} Case`,
-        client: newClient.Fullname,
-        category: "General",
-        status: "Pending",
-        lawyer: "Assigned Soon",
-        balance: "P 0.00"
-      }
-    ]);
+    const newEntry = {
+      id: newId,
+      name: `${newClient.Fullname} Case`,
+      client: newClient.Fullname,
+      category: "General",
+      status: "Pending",
+      lawyer: "Assigned Soon",
+      balance: "P 0.00",
+      email: newClient.Email,
+      phone: newClient.ContactNumber,
+      emergency: newClient.ContactPersonNumber,
+      role: "Client"
+    };
 
+    setData([...data, newEntry]);
     setNewClient({
       Fullname: "",
       ContactNumber: "",
@@ -75,14 +93,37 @@ const Client = () => {
       ContactPerson: "",
       ContactPersonNumber: ""
     });
-
     setIsModalOpen(false);
     alert("New client has been added successfully!");
+  };
+
+  const handleEditSave = () => {
+    setData((prev) =>
+      prev.map((item) =>
+        item.id === editClient.id ? { ...item, ...editClient } : item
+      )
+    );
+    setEditClient(null);
   };
 
   const filteredClients = data.filter((item) =>
     item.client.toLowerCase().includes(search.toLowerCase())
   );
+
+  const openRemoveModal = (client) => {
+    setUserToRemove(client);
+    setIsRemoveModalOpen(true);
+  };
+
+  const closeRemoveModal = () => {
+    setUserToRemove(null);
+    setIsRemoveModalOpen(false);
+  };
+
+  const confirmRemoveUser = () => {
+    setData((prev) => prev.filter((item) => item.id !== userToRemove.id));
+    closeRemoveModal();
+  };
 
   return (
     <div className="bg-blue rounded-xl p-4 sm:p-6 shadow-lg bg-slate-50 dark:bg-slate-900">
@@ -132,19 +173,19 @@ const Client = () => {
                   <div className="flex flex-wrap items-center gap-2">
                     <button
                       className="p-1.5 text-blue-600 hover:text-blue-800"
-                      onClick={() => alert(`Viewing ${item.name}`)}
+                      onClick={() => setViewClient(item)}
                     >
                       <Eye className="w-4 h-4" />
                     </button>
                     <button
                       className="p-1.5 text-yellow-500 hover:text-yellow-700"
-                      onClick={() => alert(`Editing ${item.name}`)}
+                      onClick={() => setEditClient({ ...item })}
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button
                       className="p-1.5 text-red-600 hover:text-red-800"
-                      onClick={() => alert(`Deleting ${item.name}`)}
+                      onClick={() => openRemoveModal(item)}
                     >
                       <Trash2 className="w-4 h-4" />
                     </button>
@@ -156,53 +197,102 @@ const Client = () => {
         </table>
       </div>
 
-      {isModalOpen && (
+      {/* View Client Modal */}
+      {viewClient && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div
-            ref={modalRef}
-            className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg w-full max-w-3xl overflow-y-auto max-h-[90vh]"
-          >
-            <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Add New Client</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[
-                ["Fullname", "Fullname"],
-                ["Contact Number", "ContactNumber"],
-                ["Email", "Email"],
-                ["Address", "Address"],
-                ["Contact Person", "ContactPerson"],
-                ["Contact Person Number", "ContactPersonNumber"]
-              ].map(([label, key]) => (
-                <div key={key}>
-                  <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {label}
+          <div className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg w-full max-w-md">
+            <h3 className="text-xl font-bold mb-4 text-blue-900">Client Information</h3>
+            <div className="grid grid-cols-2 gap-4 text-sm text-blue-900">
+              <div>
+                <p className="font-semibold">Name</p>
+                <p className="text-gray-600 dark:text-white">{viewClient.client}</p>
+              </div>
+              <div>
+                <p className="font-semibold">Email</p>
+                <p className="text-gray-600 dark:text-white">{viewClient.email || "-"}</p>
+              </div>
+              <div>
+                <p className="font-semibold">Phone</p>
+                <p className="text-gray-600 dark:text-white">{viewClient.phone || "-"}</p>
+              </div>
+              <div>
+                <p className="font-semibold">Emergency</p>
+                <p className="text-gray-600 dark:text-white">{viewClient.emergency || "-"}</p>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-2">
+              <button
+                onClick={() => setViewClient(null)}
+                className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-100"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Client Modal */}
+      {editClient && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg w-full max-w-md">
+            <h3 className="text-xl font-bold mb-6 text-blue-900">Edit Client</h3>
+            <div className="grid grid-cols-1 gap-4">
+              {["client", "email", "phone", "emergency"].map((field) => (
+                <div key={field}>
+                  <label className="block mb-1 text-sm font-medium capitalize text-gray-700 dark:text-gray-300">
+                    {field}
                   </label>
                   <input
                     type="text"
-                    name={key}
-                    value={newClient[key]}
+                    value={editClient[field]}
                     onChange={(e) =>
-                      setNewClient({ ...newClient, [key]: e.target.value })
+                      setEditClient({ ...editClient, [field]: e.target.value })
                     }
                     className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:border-gray-600 dark:text-white"
                   />
                 </div>
               ))}
             </div>
-
-            <div className="mt-6 flex justify-end gap-3">
+            <div className="mt-6 flex justify-end gap-2">
               <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-800 bg-gray-200 rounded-lg hover:bg-gray-300 dark:text-white dark:bg-gray-600 dark:hover:bg-gray-500"
+                onClick={() => setEditClient(null)}
+                className="px-4 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-100"
               >
                 Cancel
               </button>
               <button
-                onClick={handleAddClient}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                onClick={handleEditSave}
+                className="px-4 py-2 text-sm bg-blue-900 text-white rounded-lg hover:bg-blue-800"
               >
-                Add Client
+                Save
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Remove Modal */}
+      {isRemoveModalOpen && userToRemove && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-slate-800 rounded-lg p-6 w-full max-w-sm shadow-lg relative">
+            <h2 className="text-lg font-semibold mb-4 dark:text-white">
+              Are you sure?
+            </h2>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-6">
+              Are you sure you want to remove this client?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button onClick={closeRemoveModal} className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg text-gray-700">
+                Cancel
+              </button>
+              <button onClick={confirmRemoveUser} className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg">
+                Remove
+              </button>
+            </div>
+            <button onClick={closeRemoveModal} className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-xl">
+              &times;
+            </button>
           </div>
         </div>
       )}
