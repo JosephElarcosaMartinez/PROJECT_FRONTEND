@@ -77,7 +77,7 @@ const Documents = () => {
       </div>
 
       {/* Document Table */}
-      <div className="flex-col gap-y-2 shadow-lg border-slate-300 rounded-lg bg-white p-4 transition-colors dark:border-slate-700 dark:bg-slate-900 ">
+      <div className="card shadow-lg ">
         <table className="text-gray-800 dark:text-white w-full text-sm text-left">
           <thead className="text-gray-800 dark:text-white border-b">
             <tr>

@@ -116,7 +116,7 @@ const Cases = () => {
       </div>
 
       {/* Search and Buttons */}
-      <div className=" bg-white dark:bg-slate-800 rounded-lg shadow-md p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
+      <div className="card bg-white dark:bg-slate-800 rounded-lg shadow-md p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
         <input
           type="text"
           placeholder="Search case..."
@@ -139,7 +139,7 @@ const Cases = () => {
       </div>
 
       {/* Case Table */}
-      <div className="card overflow-x-auto">
+      <div className="card overflow-x-auto shadow-lg">
         <table className="min-w-full text-sm text-left table-auto ">
           <thead className="uppercase text-xs dark:text-white border-b border-gray-200 dark:border-gray-700">
             <tr>

@@ -100,7 +100,7 @@ const Client = () => {
         </button>
       </div>
 
-      <div className="w-full overflow-x-auto rounded-lg p-4  border-gray-200 shadow-lg bg-slate-50 dark:bg-slate-900">
+      <div className="card shadow-lg">
         <table className="min-w-full text-sm text-left table-auto">
           <thead className="card-title uppercase text-xs">
             <tr>

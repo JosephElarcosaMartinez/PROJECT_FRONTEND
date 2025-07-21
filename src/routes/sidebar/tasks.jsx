@@ -58,14 +58,17 @@ export default function Tasks() {
   };
 
   return (
-    <div className="min-h-screen text-black dark:text-white">
-      <h2 className="text-2xl font-bold mb-4">Tasks</h2>
+    <div className="space-y-6 min-h-screen text-black dark:text-white">
+      <div>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Tasks</h2>
+        <p className="text-sm text-gray-500">Manage and track all case-related tasks</p>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {tasks.map(task => (
           <div
             key={task.id}
-            className=" bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 rounded shadow relative"
+            className=" bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 rounded-lg shadow-lg relative"
           >
             <div className="absolute top-3 right-4 text-sm font-medium">
               <span className={statusColor[task.status]}>
