@@ -238,7 +238,6 @@ const Cases = () => {
         </div>
       )}
 
-      {/* View (Eye) Modal - now in separate file */}
       <ViewModal selectedCase={selectedCase} setSelectedCase={setSelectedCase} />
     </div>
   );
