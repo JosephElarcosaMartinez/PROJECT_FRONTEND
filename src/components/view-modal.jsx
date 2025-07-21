@@ -50,7 +50,7 @@ const ViewModal = ({ selectedCase, setSelectedCase }) => {
                             <span>Drawer #: 002</span>
                         </div>
                     </div>
-                    <div className="text-slate-600 text-sm dark:text-white flex items-center gap-1">
+                    <div className="text-slate-400 text-sm dark:text-white flex items-center gap-1">
                         <span>Dumanjug</span>
                     </div>
                 </div>
