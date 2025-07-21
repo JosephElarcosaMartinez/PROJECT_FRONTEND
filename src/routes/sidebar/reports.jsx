@@ -156,7 +156,7 @@ export const Reports = () => {
             User Activity
           </h2>
           <button
-            onClick={() => navigate("activity")}
+            onClick={() => navigate("/user-logs")}
             className="text-blue-800 font-bold hover:underline text-xl"
           >
             View all

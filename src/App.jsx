@@ -16,7 +16,6 @@ import Cases from "./routes/sidebar/cases";
 import Archives from "./routes/sidebar/archives";
 import Userlogs from "./routes/sidebar/userlogs";
 import Reports from "./routes/sidebar/reports";
-import Activity from "./components/activity";
 import Notification from "./components/notification";
 import NotificationSettings from "./components/notif-settings";
 import { ChangePass } from "./auth/changepass";
@@ -65,7 +64,6 @@ export default function App() {
                         { path: "tasks", element: <Tasks /> },
                         { path: "users", element: <Users /> },
                         { path: "reports", element: <Reports /> },
-                        { path: "reports/activity", element: <Activity /> },
                         { path: "user-logs", element: <Userlogs /> },
                         { path: "case-archive", element: <Archives /> },
                         { path: "notifications", element: <Notification /> },
