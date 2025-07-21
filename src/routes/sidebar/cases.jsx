@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Pencil, Trash2, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useClickOutside } from "@/hooks/use-click-outside";
-import ViewModal from "../../components/view-modal";
+import ViewModal from "../../components/view-case";
 
 const InitialData = [
   {

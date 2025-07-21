@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Filter, X } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
-import ViewModal from "../../components/view-modal";
+import ViewModal from "../../components/view-case";
 
 const initialCases = [
   {
