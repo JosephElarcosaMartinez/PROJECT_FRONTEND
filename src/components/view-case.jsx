@@ -34,7 +34,7 @@ const ViewModal = ({ selectedCase, setSelectedCase }) => {
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
             <div
                 ref={modalRef}
-                className="bg-white dark:bg-slate-900 text-black dark:text-white rounded-xl w-[90%] max-w-6xl p-6 relative shadow-xl overflow-y-auto max-h-[90vh]"
+                className="text-black dark:text-white bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg w-full max-w-3xl overflow-y-auto max-h-[90vh]"
             >
                 <button
                     className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:hover:text-white"
