@@ -112,7 +112,7 @@ export const Reports = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="space-y-6 p-4 md:p-6">
+    <div className="space-y-6 ">
       <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
         Reports & Analytics
       </h1>
