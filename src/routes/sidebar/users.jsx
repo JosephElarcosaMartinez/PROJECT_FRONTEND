@@ -89,7 +89,7 @@ const Users = () => {
         ))}
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-6 items-center">
+      <div className="card bg-white dark:bg-slate-800 rounded-lg shadow-md p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
         <input
           type="text"
           placeholder="Search users..."
