@@ -45,19 +45,6 @@ const initialCases = [
   },
 ];
 
-const getStatusColor = (status) => {
-  switch (status.toLowerCase()) {
-    case "closed":
-      return "text-green-600";
-    case "pending":
-      return "text-yellow-600";
-    case "for review":
-      return "text-blue-600";
-    default:
-      return "text-gray-600";
-  }
-};
-
 const Archives = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const modalRef = useRef();
@@ -73,16 +60,12 @@ const Archives = () => {
   const filterModalRef = useRef();
 
   useClickOutside([viewModalRef, filterModalRef], () => {
-    if (viewCaseData) setViewCaseData(null);
-    if (isFilterOpen) setIsFilterOpen(false);
+    setSelectedCase(null);
+    setIsFilterOpen(false);
   });
 
   const handleUnarchive = (id) => {
     setCases((prev) => prev.filter((item) => item.id !== id));
-  };
-
-  const handleFileUpload = (e) => {
-    console.log("File uploaded:", e.target.files[0]);
   };
 
   const filteredCases = cases.filter((item) => {
@@ -97,19 +80,18 @@ const Archives = () => {
   });
 
   return (
-    <div className="p-1 text-gray-800 min-h-screen">
-      <h1 className="text-2xl font-bold mb-1 dark:text-white">Archives</h1>
-      <p className="text-sm mb-6 text-gray-600">Browse and search completed and archived cases</p>
+    <div className="p-4 text-gray-800 dark:text-white min-h-screen">
+      <h1 className="text-2xl font-bold mb-2">Archives</h1>
+      <p className="text-sm mb-6 text-gray-600 dark:text-gray-400">Browse and search completed and archived cases.</p>
 
-      <div className="card bg-white dark:bg-slate-800 rounded-lg shadow-lg p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-4 mb-6 flex flex-col md:flex-row items-center gap-4">
         <input
           type="text"
           placeholder="Search archives..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 outline-none"
+          className="w-full md:flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
         />
-
         <button
           onClick={() => setIsFilterOpen(true)}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -119,72 +101,94 @@ const Archives = () => {
         </button>
       </div>
 
-      <div className="card bg-white rounded-lg shadow-lg p-4 overflow-x-auto">
-        <h2 className="dark:text-white text-xl font-semibold text-gray-800 mb-4">Archived Cases</h2>
-        <table className="w-full text-sm text-left text-gray-700">
-          <thead className="text-xs uppercase border-b dark:text-white">
-            <tr>
-              <th className="py-3 px-4">Case Number</th>
-              <th className="py-3 px-4">Name</th>
-              <th className="py-3 px-4">Client</th>
-              <th className="py-3 px-4">Date Filed</th>
-              <th className="py-3 px-4">Archived Date</th>
-              <th className="py-3 px-4">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredCases.map((item) => (
-              <tr key={item.id} className="dark:text-white border-b hover:bg-blue-100 dark:hover:bg-blue-950">
-                <td className="py-2 px-4">{item.id}</td>
-                <td className="py-2 px-4">{item.name}</td>
-                <td className="py-2 px-4">{item.client}</td>
-                <td className="py-2 px-4">{item.dateFiled}</td>
-                <td className="py-2 px-4">{item.archivedDate}</td>
-                <td className="py-2 px-4 text-blue-600 font-medium space-x-2">
-                  <button onClick={() => setSelectedCase(item)} className="hover:underline">View</button>
-                  <button onClick={() => handleUnarchive(item.id)} className="hover:underline text-red-600">Unarchive</button>
-                </td>
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-4 overflow-x-auto">
+        <h2 className="text-xl font-semibold mb-4">Archived Cases</h2>
+        <div className="w-full overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+          <table className="min-w-full text-sm text-left table-auto">
+            <thead className="uppercase text-xs dark:text-white border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-700">
+              <tr>
+                <th className="py-3 px-4">Case Number</th>
+                <th className="py-3 px-4">Name</th>
+                <th className="py-3 px-4">Client</th>
+                <th className="py-3 px-4">Date Filed</th>
+                <th className="py-3 px-4">Archived Date</th>
+                <th className="py-3 px-4">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredCases.map((item) => (
+                <tr
+                  key={item.id}
+                  className="border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
+                >
+                  <td className="py-3 px-4">{item.id}</td>
+                  <td className="py-3 px-4">{item.name}</td>
+                  <td className="py-3 px-4">{item.client}</td>
+                  <td className="py-3 px-4">{item.dateFiled}</td>
+                  <td className="py-3 px-4">{item.archivedDate}</td>
+                  <td className="py-3 px-4 space-x-2">
+                    <button
+                      onClick={() => setSelectedCase(item)}
+                      className="text-blue-600 hover:underline"
+                    >
+                      View
+                    </button>
+                    <button
+                      onClick={() => handleUnarchive(item.id)}
+                      className="text-red-600 hover:underline"
+                    >
+                      Unarchive
+                    </button>
+                  </td>
+                </tr>
+              ))}
+              {filteredCases.length === 0 && (
+                <tr>
+                  <td colSpan="6" className="py-4 text-center text-gray-500 dark:text-gray-400">
+                    No archived cases found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Filter Modal */}
       {isFilterOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div ref={filterModalRef} className="bg-white rounded-lg p-6 shadow-lg w-full max-w-md">
+          <div ref={filterModalRef} className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Filter Archives</h2>
-              <X className="cursor-pointer" onClick={() => setIsFilterOpen(false)} />
+              <h2 className="text-lg font-semibold dark:text-white">Filter Archives</h2>
+              <X className="cursor-pointer text-gray-600 dark:text-gray-300" onClick={() => setIsFilterOpen(false)} />
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Client</label>
+                <label className="block text-sm font-medium mb-1">Client</label>
                 <input
                   type="text"
                   value={clientFilter}
                   onChange={(e) => setClientFilter(e.target.value)}
-                  className="w-full border rounded px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 rounded px-3 py-2 text-sm text-gray-900 dark:text-white"
                   placeholder="Enter client name"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Archived Date</label>
+                <label className="block text-sm font-medium mb-1">Archived Date</label>
                 <input
                   type="text"
                   value={archivedDateFilter}
                   onChange={(e) => setArchivedDateFilter(e.target.value)}
-                  className="w-full border rounded px-3 py-2 text-sm"
+                  className="w-full border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 rounded px-3 py-2 text-sm text-gray-900 dark:text-white"
                   placeholder="e.g. 11/5/2022 or N/A"
                 />
               </div>
 
               <div className="flex justify-end gap-2 pt-4">
                 <button
-                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                  className="px-4 py-2 bg-gray-200 dark:bg-slate-600 text-gray-800 dark:text-white rounded hover:bg-gray-300 dark:hover:bg-slate-500"
                   onClick={() => {
                     setClientFilter("");
                     setArchivedDateFilter("");
@@ -206,9 +210,7 @@ const Archives = () => {
       )}
 
       <ViewModal selectedCase={selectedCase} setSelectedCase={setSelectedCase} />
-
     </div>
-
   );
 };
 

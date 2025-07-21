@@ -43,7 +43,7 @@ const Documents = () => {
   };
 
   return (
-    <div className="p-7 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
@@ -63,7 +63,7 @@ const Documents = () => {
       </div>
 
       {/* Search Input */}
-      <div className="card rounded-md p-3 shadow-md">
+      <div className="card p-3 shadow-md">
         <div className="flex items-center gap-2 border border-gray-300 dark:border-slate-600 rounded-md px-3 py-2 bg-gray-100 dark:bg-slate-800">
           <Search size={18} className="text-gray-600 dark:text-gray-400" />
           <input
@@ -77,7 +77,7 @@ const Documents = () => {
       </div>
 
       {/* Document Table */}
-      <div className="card bg-white rounded-md shadow-md overflow-x-auto">
+      <div className="flex-col gap-y-2 shadow-lg border-slate-300 rounded-lg bg-white p-4 transition-colors dark:border-slate-700 dark:bg-slate-900 ">
         <table className="text-gray-800 dark:text-white w-full text-sm text-left">
           <thead className="text-gray-800 dark:text-white border-b">
             <tr>

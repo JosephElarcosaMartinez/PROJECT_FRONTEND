@@ -107,7 +107,7 @@ const Cases = () => {
   };
 
   return (
-    <div className="bg-blue rounded-xl p-4 sm:p-6 shadow-lg bg-slate-50 dark:bg-slate-900">
+    <div className="bg-blue rounded-xl ">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Cases</h2>
@@ -116,7 +116,7 @@ const Cases = () => {
       </div>
 
       {/* Search and Buttons */}
-      <div className="card bg-white dark:bg-slate-800 rounded-lg shadow-md p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
+      <div className=" bg-white dark:bg-slate-800 rounded-lg shadow-md p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
         <input
           type="text"
           placeholder="Search case..."
@@ -139,9 +139,9 @@ const Cases = () => {
       </div>
 
       {/* Case Table */}
-      <div className="w-full overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
+      <div className="card">
         <table className="min-w-full text-sm text-left table-auto">
-          <thead className="uppercase text-xs dark:text-white">
+          <thead className="uppercase text-xs dark:text-white border-b border-gray-200 dark:border-gray-700">
             <tr>
               <th className="px-4 py-3">Case ID</th>
               <th className="px-4 py-3">Name</th>
