@@ -101,7 +101,7 @@ const Archives = () => {
       <h1 className="text-2xl font-bold mb-1 dark:text-white">Archives</h1>
       <p className="text-sm mb-6 text-gray-600">Browse and search completed and archived cases</p>
 
-      <div className="card bg-white dark:bg-slate-800 rounded-lg shadow-lg p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
+      <div className="card bg-white dark:bg-slate-800 rounded-lg shadow-lg p-4 mb-6 flex flex-col md:flex-row gap-10 items-center">
         <input
           type="text"
           placeholder="Search archives..."
