@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import ReactDOM from "react-dom";
 import PropTypes from "prop-types";
 import { Mail, User, Phone, BadgeCheck, UserCheck, Building2, Pencil, Save, X, LockIcon } from "lucide-react";
 
@@ -7,13 +8,12 @@ import { useAuth } from "@/context/auth-context";
 
 export const ProfileModal = ({ onClose }) => {
     const { user, setUser } = useAuth();
-
     const [formData, setFormData] = useState({ ...user });
     const [isEditing, setIsEditing] = useState(false);
     const [branchName, setBranchName] = useState("Loading...");
     const [loadingBranch, setLoadingBranch] = useState(true);
-
     const modalRef = useRef(null);
+
     useClickOutside([modalRef], onClose);
 
     useEffect(() => {
@@ -60,9 +60,7 @@ export const ProfileModal = ({ onClose }) => {
             const res = await fetch(`http://localhost:3000/api/users/${user.user_id}`, {
                 method: "PUT",
                 credentials: "include",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(formData),
             });
 
@@ -71,7 +69,6 @@ export const ProfileModal = ({ onClose }) => {
             const verifyRes = await fetch("http://localhost:3000/api/verify", {
                 credentials: "include",
             });
-
             const { user: updatedUser } = await verifyRes.json();
             setUser(updatedUser);
 
@@ -84,36 +81,11 @@ export const ProfileModal = ({ onClose }) => {
     };
 
     const infoItems = [
-        {
-            label: "User ID",
-            name: "user_id",
-            icon: <User size={16} />,
-            editable: false,
-        },
-        {
-            label: "Email",
-            name: "user_email",
-            icon: <Mail size={16} />,
-            editable: true,
-        },
-        {
-            label: "Password",
-            name: "user_password",
-            icon: <LockIcon size={16} />,
-            editable: true,
-        },
-        {
-            label: "Phone",
-            name: "user_phonenum",
-            icon: <Phone size={16} />,
-            editable: true,
-        },
-        {
-            label: "Status",
-            name: "user_status",
-            icon: <UserCheck size={16} />,
-            editable: false,
-        },
+        { label: "User ID", name: "user_id", icon: <User size={16} />, editable: false },
+        { label: "Email", name: "user_email", icon: <Mail size={16} />, editable: true },
+        { label: "Password", name: "user_password", icon: <LockIcon size={16} />, editable: true },
+        { label: "Phone", name: "user_phonenum", icon: <Phone size={16} />, editable: true },
+        { label: "Status", name: "user_status", icon: <UserCheck size={16} />, editable: false },
         {
             label: "Branch",
             name: "branchName",
@@ -123,16 +95,13 @@ export const ProfileModal = ({ onClose }) => {
         },
     ];
 
-    return (
+    const modalContent = (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
             <div
                 ref={modalRef}
                 className="relative w-full max-w-md rounded-xl bg-white p-4 shadow-xl dark:bg-slate-900 sm:p-6 md:p-8"
             >
-                <button
-                    className="btn-ghost absolute right-2 top-2"
-                    onClick={onClose}
-                >
+                <button className="btn-ghost absolute right-2 top-2" onClick={onClose}>
                     <X size={20} />
                 </button>
 
@@ -159,11 +128,11 @@ export const ProfileModal = ({ onClose }) => {
                                 <span className="text-xs font-medium text-gray-500 dark:text-gray-400">{label}</span>
                                 {isEditing && editable ? (
                                     <input
-                                        type={name == "user_password" ? "password" : "text"}
+                                        type={name === "user_password" ? "password" : "text"}
                                         name={name}
                                         value={formData[name] || ""}
                                         onChange={handleInputChange}
-                                        placeholder={name == "user_password" ? "Enter new password" : formData[name]}
+                                        placeholder={name === "user_password" ? "Enter new password" : formData[name]}
                                         className="rounded bg-white px-2 py-1 text-sm text-gray-800 outline-none dark:bg-slate-700 dark:text-white"
                                     />
                                 ) : (
@@ -208,6 +177,8 @@ export const ProfileModal = ({ onClose }) => {
             </div>
         </div>
     );
+
+    return ReactDOM.createPortal(modalContent, document.getElementById("modal-root"));
 };
 
 ProfileModal.propTypes = {
