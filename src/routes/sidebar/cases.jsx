@@ -55,6 +55,9 @@ const Cases = () => {
   const [data, setData] = useState(InitialData);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCase, setSelectedCase] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
   const modalRef = useRef();
   const addCaseModalRef = useRef(); // ✅ new ref
   const fileInputRef = useRef();
@@ -276,7 +279,7 @@ const Cases = () => {
                   <span>Drawer #: 002</span>
                 </div>
               </div>
-              <div className="text-sm text-gray-700 dark:text-white flex items-center gap-1">
+              <div className="text-slate-600 text-sm dark:text-white flex items-center gap-1">
                 <span>Dumanjug</span>
               </div>
             </div>
@@ -369,8 +372,6 @@ const Cases = () => {
           </div>
         </div>
       )}
-
-
     </div>
   );
 };
