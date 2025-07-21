@@ -66,7 +66,7 @@ const Users = () => {
   });
 
   return (
-    <div className="bg-blue rounded-xl p-6 shadow-sm dark:bg-slate-900">
+    <div className="bg-blue rounded-xl shadow-sm ">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Users</h2>
@@ -89,7 +89,7 @@ const Users = () => {
         ))}
       </div>
 
-      <div className="flex flex-col md:flex-row gap-4 mb-6 items-center">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
         <input
           type="text"
           placeholder="Search users..."
@@ -105,7 +105,7 @@ const Users = () => {
         </button>
       </div>
 
-      <div className="overflow-x-auto border rounded-xl shadow ">
+      <div className="card">
         <table className="w-full table-auto text-slate-900 text-sm text-left">
           <thead className="uppercase text-xs">
             <tr>

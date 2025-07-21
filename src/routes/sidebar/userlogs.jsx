@@ -57,7 +57,7 @@ const Userlogs = () => {
   };
 
   return (
-    <div className="min-h-screen p-6 text-white">
+    <div className="min-h-screen text-white">
       <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
         User Logs
       </h1>

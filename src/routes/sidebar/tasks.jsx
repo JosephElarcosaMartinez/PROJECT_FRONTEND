@@ -58,14 +58,14 @@ export default function Tasks() {
   };
 
   return (
-    <div className="min-h-screen p-6 text-black dark:text-white">
+    <div className="min-h-screen text-black dark:text-white">
       <h2 className="text-2xl font-bold mb-4">Tasks</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {tasks.map(task => (
           <div
             key={task.id}
-            className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 rounded shadow relative"
+            className=" bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 rounded shadow relative"
           >
             <div className="absolute top-3 right-4 text-sm font-medium">
               <span className={statusColor[task.status]}>

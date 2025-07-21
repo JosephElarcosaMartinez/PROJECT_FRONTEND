@@ -1,18 +1,5 @@
-import {
-  ShieldUser,
-  FileText,
-  Archive,
-  FolderKanban,
-} from "lucide-react";
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-} from "recharts";
+import { ShieldUser, FileText, Archive, FolderKanban, } from "lucide-react";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, } from "recharts";
 import { useNavigate } from "react-router-dom";
 import user1 from "@/assets/Joseph_prof.png";
 import user2 from "@/assets/Joseph_prof.png";
@@ -150,7 +137,7 @@ export const Reports = () => {
         </div>
       </div>
 
-      <div className="relative rounded-xl bg-white p-4 shadow dark:bg-gray-800">
+      <div className="card ">
         <div className="flex items-center justify-between mb-4 ">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">
             User Activity
