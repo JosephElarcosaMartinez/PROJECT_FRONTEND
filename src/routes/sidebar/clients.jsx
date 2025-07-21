@@ -126,7 +126,7 @@ const Client = () => {
   };
 
   return (
-    <div className="bg-blue rounded-xl p-4 sm:p-6 shadow-lg bg-slate-50 dark:bg-slate-900">
+    <div className="bg-blue rounded-xl ">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Clients</h2>
@@ -150,7 +150,7 @@ const Client = () => {
         </button>
       </div>
 
-      <div className="w-full overflow-x-auto rounded-xl border border-gray-200">
+      <div className="w-full overflow-x-auto rounded-lg p-4  border-gray-200 shadow-lg bg-slate-50 dark:bg-slate-900">
         <table className="min-w-full text-sm text-left table-auto">
           <thead className="card-title uppercase text-xs">
             <tr>
