@@ -100,7 +100,7 @@ export const Reports = () => {
 
   return (
     <div className="space-y-6 ">
-      <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+      <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
         Reports & Analytics
       </h1>
 

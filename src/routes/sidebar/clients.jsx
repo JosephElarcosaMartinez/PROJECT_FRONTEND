@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { Pencil, Trash2, Eye, Contact } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { useNavigate } from "react-router-dom";
 import AddClient from "../../components/add-client";
@@ -12,6 +12,9 @@ const InitialData = [
     email: "daviscorp@gmail.com",
     phone: "09392233450",
     emergency: "09323136701",
+    ContactPersonName: "John Doe",
+    ContactPersonNumber: "09123456789",
+    RelationRole: "Client"
   },
   {
     id: 2,
@@ -20,6 +23,9 @@ const InitialData = [
     email: "johnsmith@gmail.com",
     phone: "09228889999",
     emergency: "09112223333",
+    ContactPersonName: "Jane Smith",
+    ContactPersonNumber: "09223334455",
+    RelationRole: "Siblings"
   },
   {
     id: 3,
@@ -28,6 +34,9 @@ const InitialData = [
     email: "corp@email.com",
     phone: "09445556666",
     emergency: "09551112222",
+    ContactPersonName: "Alice Davis",
+    ContactPersonNumber: "09662223344",
+    RelationRole: "Business Partner"
   },
 ];
 
@@ -169,6 +178,18 @@ const Client = () => {
                 <p className="font-semibold">Emergency</p>
                 <p className="text-gray-600 dark:text-white">{viewClient.emergency || "-"}</p>
               </div>
+              <div>
+                <p className="font-semibold">Contact Person Name</p>
+                <p className="text-gray-600 dark:text-white">{viewClient.ContactPersonName || "-"}</p>
+              </div>
+              <div>
+                <p className="font-semibold">Contact Person Number</p>
+                <p className="text-gray-600 dark:text-white">{viewClient.ContactPersonNumber || "-"}</p>
+              </div>
+              <div>
+                <p className="font-semibold">Relation / Role</p>
+                <p className="text-gray-600 dark:text-white">{viewClient.RelationRole || "-"}</p>
+              </div>
             </div>
             <div className="mt-6 flex justify-end gap-2">
               <button
@@ -188,7 +209,7 @@ const Client = () => {
           <div className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg w-full max-w-md">
             <h3 className="text-xl font-bold mb-6 text-blue-900">Edit Client</h3>
             <div className="grid grid-cols-1 gap-4">
-              {["client", "email", "phone", "emergency"].map((field) => (
+              {["client", "email", "phone", "emergency", "ContactPersonName", "ContactPersonNumber", "RelationRole"].map((field) => (
                 <div key={field}>
                   <label className="block mb-1 text-sm font-medium capitalize text-gray-700 dark:text-gray-300">
                     {field}

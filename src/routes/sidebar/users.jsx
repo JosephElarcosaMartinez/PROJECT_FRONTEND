@@ -106,7 +106,7 @@ const Users = () => {
       </div>
 
       <div className="card shadow-lg">
-        <table className="w-full table-auto text-slate-900 text-sm text-left">
+        <table className="w-full table-auto text-slate-900 text-sm text-left dark:text-white">
           <thead className="uppercase text-xs">
             <tr>
               <th className="px-4 py-3">User</th>

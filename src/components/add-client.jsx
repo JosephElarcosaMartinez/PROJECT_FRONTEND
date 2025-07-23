@@ -10,7 +10,7 @@ const AddClient = ({ AddClients, setAddClients }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log("Client added");
-        setAddClients(null); 
+        setAddClients(null);
     };
 
     return (
@@ -35,6 +35,7 @@ const AddClient = ({ AddClients, setAddClients }) => {
                         <input type="tel" placeholder="Phone Number" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
                         <input type="text" placeholder="Contact Person Name" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
                         <input type="tel" placeholder="Contact Person Number" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
+                        <input type="tel" placeholder="Relation/Role" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
                     </div>
 
                     <div className="flex justify-end gap-2 pt-4">

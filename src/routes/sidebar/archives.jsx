@@ -80,9 +80,11 @@ const Archives = () => {
   });
 
   return (
-    <div className=" text-gray-800 dark:text-white min-h-screen">
-      <h1 className="text-2xl font-bold mb-2">Archives</h1>
-      <p className="text-sm mb-6 text-gray-600 dark:text-gray-400">Browse and search completed and archived cases.</p>
+    <div className=" space-y-6  text-gray-800 dark:text-white min-h-screen">
+      <div>
+        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Archives</h2>
+        <p className="text-sm text-gray-500">Browse and search completed and archived cases</p>
+      </div>
 
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-4 mb-6 flex flex-col md:flex-row items-center gap-4">
         <input
