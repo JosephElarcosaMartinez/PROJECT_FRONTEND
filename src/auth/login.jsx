@@ -13,8 +13,35 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
 
+    const [loading, setLoading] = useState(false);
+
+    const Spinner = () => (
+        <svg
+            className="ml-2 h-5 w-5 animate-spin text-blue-900"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+        >
+            <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+            />
+            <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            />
+        </svg>
+    );
+
     const handleLogin = async (e) => {
         e.preventDefault();
+        setLoading(true);
+        setError("");
 
         try {
             const res = await fetch("http://localhost:3000/api/login", {
@@ -30,6 +57,7 @@ const Login = () => {
 
             if (!res.ok) {
                 setError(data.error || "Login failed");
+                setLoading(false);
                 return;
             }
 
@@ -37,10 +65,13 @@ const Login = () => {
             login(data.user); // assume backend returns { user: { ... } }
 
             // Redirecting to the dashboard if SUCCESSFUL
-            navigate("/");
+            setTimeout(() => {
+                navigate("/verify");
+            }, 2000);
         } catch (err) {
             console.error("Login error:", err);
             setError("Something went wrong. Please try again.");
+            setLoading(false);
         }
     };
 
@@ -114,9 +145,17 @@ const Login = () => {
                         {/* Submit Button */}
                         <button
                             type="submit"
-                            className="w-full rounded-md bg-white py-2 font-semibold text-blue-900 transition hover:bg-gray-100"
+                            disabled={loading}
+                            className="flex w-full items-center justify-center rounded-md bg-white py-2 font-semibold text-blue-900 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
                         >
-                            Login
+                            {loading ? (
+                                <>
+                                    Logging in...
+                                    <Spinner />
+                                </>
+                            ) : (
+                                "Login"
+                            )}
                         </button>
 
                         {/* Links */}
