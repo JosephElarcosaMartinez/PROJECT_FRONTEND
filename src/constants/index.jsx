@@ -1,6 +1,10 @@
 import { ChartColumn, Folders, Home, ListTodo, Users, Logs, Archive, ShieldUser, FileText } from "lucide-react";
 
-import ProfileImage from "@/assets/JoshuaG..jpg";
+import profile1 from "@/assets/Joseph_prof.png";
+import profile2 from "../../../uploads/joseph.jpg";
+import profile3 from "../../../uploads/joseph.jpg";
+import profile4 from "../../../uploads/joseph.jpg";
+
 
 export const navbarLinks = [
     {
@@ -102,33 +106,45 @@ export const overviewData = [
     },
 ];
 
-export const recentSalesData = [
+export const userRecentActivity = [
     {
         id: 1,
-        name: "Olivia Martin",
-        email: "olivia.martin@email.com",
-        image: ProfileImage,
-        total: 1500,
+        user: {
+            name: "Joshua Garcia",
+            image: profile1,
+        },
+        user_log_description: "Logged in from a new device",
+        user_log_datetime: "2025-07-21T08:45:00Z",
+        user_log_type: "login",
     },
     {
         id: 2,
-        name: "James Smith",
-        email: "james.smith@email.com",
-        image: ProfileImage,
-        total: 2000,
+        user: {
+            name: "Joshua Gocotano",
+            image: profile2,
+        },
+        user_log_description: "Updated profile information",
+        user_log_datetime: "2025-07-20T14:22:00Z",
+        user_log_type: "profile update",
     },
     {
         id: 3,
-        name: "Sophia Brown",
-        email: "sophia.brown@email.com",
-        image: ProfileImage,
-        total: 4000,
+        user: {
+            name: "Angelie Panganiban",
+            image: profile3,
+        },
+        user_log_description: "Reset password",
+        user_log_datetime: "2025-07-19T19:10:00Z",
+        user_log_type: "password reset",
     },
     {
         id: 4,
-        name: "Noah Wilson",
-        email: "noah.wilson@email.com",
-        image: ProfileImage,
-        total: 3000,
+        user: {
+            name: "Ivo Ajeas Gecole",
+            image: profile4,
+        },
+        user_log_description: "Logged out successfully",
+        user_log_datetime: "2025-07-18T23:55:00Z",
+        user_log_type: "logout",
     },
 ];
