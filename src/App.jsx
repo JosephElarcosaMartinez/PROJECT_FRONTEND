@@ -14,7 +14,7 @@ import Documents from "./routes/sidebar/documents";
 import Tasks from "./routes/sidebar/tasks";
 import Cases from "./routes/sidebar/cases";
 import Archives from "./routes/sidebar/archives";
-import Userlogs from "./routes/sidebar/userlogs";
+import Userlogs from "./routes/sidebar/user-logs";
 import Reports from "./routes/sidebar/reports";
 import Notification from "./components/notification";
 import NotificationSettings from "./components/notif-settings";
