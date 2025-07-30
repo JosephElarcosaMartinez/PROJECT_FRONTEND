@@ -56,7 +56,17 @@ const Cases = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCase, setSelectedCase] = useState(null);
 
+  // Edit state
+  const [caseToEdit, setCaseToEdit] = useState(null);
+
+  // Delete state
+  const [caseToDelete, setCaseToDelete] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   const addCaseModalRef = useRef();
+  const editCaseModalRef = useRef();
+  const deleteCaseModalRef = useRef();
+
   const navigate = useNavigate();
 
   const [newCase, setNewCase] = useState({
@@ -73,13 +83,19 @@ const Cases = () => {
     balance: "P 0.00",
   });
 
+  // Click outside for modals
   useClickOutside([addCaseModalRef], () => setIsModalOpen(false));
+  useClickOutside([editCaseModalRef], () => setCaseToEdit(null));
+  useClickOutside([deleteCaseModalRef], () => setIsDeleteModalOpen(false));
 
+  // Close modals with Escape key
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
         setIsModalOpen(false);
         setSelectedCase(null);
+        setCaseToEdit(null);
+        setIsDeleteModalOpen(false);
       }
     };
     document.addEventListener("keydown", handleKeyDown);
@@ -106,8 +122,32 @@ const Cases = () => {
     alert("New case has been added successfully!");
   };
 
+  // Open edit modal
+  const openEditModal = (item) => {
+    setCaseToEdit({ ...item });
+  };
+
+  const handleEditSave = () => {
+    setData((prev) => prev.map((c) => (c.id === caseToEdit.id ? caseToEdit : c)));
+    setCaseToEdit(null);
+    alert("Case updated successfully!");
+  };
+
+  // Open delete modal
+  const openDeleteModal = (item) => {
+    setCaseToDelete(item);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteCase = () => {
+    setData((prev) => prev.filter((c) => c.id !== caseToDelete.id));
+    setIsDeleteModalOpen(false);
+    setCaseToDelete(null);
+    alert("Case deleted successfully!");
+  };
+
   return (
-    <div className="bg-blue rounded-xl ">
+    <div className="bg-blue rounded-xl">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
         <div>
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Cases</h2>
@@ -140,7 +180,7 @@ const Cases = () => {
 
       {/* Case Table */}
       <div className="card overflow-x-auto shadow-lg">
-        <table className="min-w-full text-sm text-left table-auto ">
+        <table className="min-w-full text-sm text-left table-auto">
           <thead className="uppercase text-xs dark:text-white border-b border-gray-200 dark:border-gray-700">
             <tr>
               <th className="px-4 py-3">Case ID</th>
@@ -174,10 +214,10 @@ const Cases = () => {
                     <button className="p-1.5 text-blue-600 hover:text-blue-800" onClick={() => setSelectedCase(item)}>
                       <Eye className="w-4 h-4" />
                     </button>
-                    <button className="p-1.5 text-yellow-500 hover:text-yellow-700" onClick={() => alert(`Editing ${item.name}`)}>
+                    <button className="p-1.5 text-yellow-500 hover:text-yellow-700" onClick={() => openEditModal(item)}>
                       <Pencil className="w-4 h-4" />
                     </button>
-                    <button className="p-1.5 text-red-600 hover:text-red-800" onClick={() => alert(`Deleting ${item.name}`)}>
+                    <button className="p-1.5 text-red-600 hover:text-red-800" onClick={() => openDeleteModal(item)}>
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -191,13 +231,10 @@ const Cases = () => {
       {/* Add Case Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div
-            ref={addCaseModalRef}
-            className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg w-full max-w-3xl overflow-y-auto max-h-[90vh]"
-          >
+          <div ref={addCaseModalRef} className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg w-full max-w-3xl overflow-y-auto max-h-[90vh]">
             <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Add New Case</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[["Cabinet Number", "id"], ["Case Name", "name"], ["Category", "category"], ["Client", "client"], ["Branch", "branch"], ["Filed Date", "filedDate", "date"], ["Fee", "fee"]].map(([label, name, type = "text"]) => (
+              {[["Cabinet Number", "id"], ["Case Name", "name"], ["Folder Number", "id"], ["Category", "category"], ["Client", "client"], ["Branch", "branch"], ["Filed Date", "filedDate", "date"], ["Fee", "fee"]].map(([label, name, type = "text"]) => (
                 <div key={name}>
                   <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>
                   <input
@@ -221,17 +258,70 @@ const Cases = () => {
               </div>
             </div>
             <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-800 bg-gray-200 rounded-lg hover:bg-gray-300 dark:text-white dark:bg-gray-600 dark:hover:bg-gray-500"
-              >
+              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-800 bg-gray-200 rounded-lg hover:bg-gray-300 dark:text-white dark:bg-gray-600 dark:hover:bg-gray-500">
                 Cancel
               </button>
-              <button
-                onClick={handleAddCase}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-              >
+              <button onClick={handleAddCase} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
                 Add Case
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Case Modal */}
+      {caseToEdit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div ref={editCaseModalRef} className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg w-full max-w-3xl overflow-y-auto max-h-[90vh]">
+            <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Edit Case</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[["Case Name", "name"], ["Category", "category"], ["Client", "client"], ["Branch", "branch"], ["Filed Date", "filedDate", "date"], ["Fee", "fee"], ["Status", "status"], ["Lawyer", "lawyer"]].map(([label, name, type = "text"]) => (
+                <div key={name}>
+                  <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>
+                  <input
+                    type={type}
+                    name={name}
+                    value={caseToEdit?.[name] || ""}
+                    onChange={(e) => setCaseToEdit({ ...caseToEdit, [name]: e.target.value })}
+                    className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:border-gray-600 dark:text-white"
+                  />
+                </div>
+              ))}
+              <div className="md:col-span-2">
+                <label className="block mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                <textarea
+                  name="description"
+                  value={caseToEdit?.description || ""}
+                  onChange={(e) => setCaseToEdit({ ...caseToEdit, description: e.target.value })}
+                  className="w-full px-3 py-2 border rounded-lg resize-none dark:bg-slate-700 dark:border-gray-600 dark:text-white"
+                  rows={4}
+                ></textarea>
+              </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button onClick={() => setCaseToEdit(null)} className="px-4 py-2 text-sm font-medium text-gray-800 bg-gray-200 rounded-lg hover:bg-gray-300 dark:text-white dark:bg-gray-600 dark:hover:bg-gray-500">
+                Cancel
+              </button>
+              <button onClick={handleEditSave} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Case Modal */}
+      {isDeleteModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div ref={deleteCaseModalRef} className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-lg w-full max-w-sm">
+            <h3 className="text-lg font-semibold mb-4">Confirm Remove</h3>
+            <p className="mb-6">Are you sure you want to remove case <strong>{caseToDelete?.name}</strong>?</p>
+            <div className="flex justify-end gap-3">
+              <button onClick={() => setIsDeleteModalOpen(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">
+                Cancel
+              </button>
+              <button onClick={handleDeleteCase} className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+                remove
               </button>
             </div>
           </div>

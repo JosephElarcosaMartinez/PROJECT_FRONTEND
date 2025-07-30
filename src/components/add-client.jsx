@@ -14,34 +14,61 @@ const AddClient = ({ AddClients, setAddClients }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div
                 ref={modalRef}
-                className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg w-full max-w-3xl overflow-y-auto max-h-[90vh]"
+                className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800"
             >
                 <button
                     onClick={() => setAddClients(null)}
-                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:hover:text-white"
+                    className="absolute right-4 top-4 text-gray-500 hover:text-gray-800 dark:hover:text-white"
                 >
-                    <X className="w-6 h-6" />
+                    <X className="h-6 w-6" />
                 </button>
 
-                <h2 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Add New Client</h2>
+                <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Add New Client</h2>
 
-                <form className="space-y-6" onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" placeholder="Full Name" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
-                        <input type="email" placeholder="Email" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
-                        <input type="tel" placeholder="Phone Number" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
-                        <input type="text" placeholder="Contact Person Name" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
-                        <input type="tel" placeholder="Contact Person Number" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
-                        <input type="tel" placeholder="Relation/Role" className="w-full px-3 py-2 border rounded-lg dark:bg-slate-700 dark:text-white" />
+                <form
+                    className="space-y-6"
+                    onSubmit={handleSubmit}
+                >
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                        <input
+                            type="text"
+                            placeholder="Full Name"
+                            className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                        />
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                        />
+                        <input
+                            type="tel"
+                            placeholder="Phone Number"
+                            className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                        />
+                        <input
+                            type="text"
+                            placeholder="Contact Person Name"
+                            className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                        />
+                        <input
+                            type="tel"
+                            placeholder="Contact Person Number"
+                            className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                        />
+                        <input
+                            type="tel"
+                            placeholder="Relation/Role"
+                            className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                        />
                     </div>
 
                     <div className="flex justify-end gap-2 pt-4">
                         <button
                             type="submit"
-                            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white"
+                            className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                         >
                             Save
                         </button>

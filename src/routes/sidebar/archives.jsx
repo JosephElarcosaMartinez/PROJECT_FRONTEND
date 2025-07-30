@@ -46,23 +46,21 @@ const initialCases = [
 ];
 
 const Archives = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const modalRef = useRef();
-  const fileInputRef = useRef();
   const [search, setSearch] = useState("");
   const [cases, setCases] = useState(initialCases);
+
+  // View Modal
   const [selectedCase, setSelectedCase] = useState(null);
+  const viewModalRef = useRef();
+  useClickOutside([viewModalRef], () => setSelectedCase(null));
+
+  // Filter Modal
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const filterModalRef = useRef();
+  useClickOutside([filterModalRef], () => setIsFilterOpen(false));
+
   const [clientFilter, setClientFilter] = useState("");
   const [archivedDateFilter, setArchivedDateFilter] = useState("");
-
-  const viewModalRef = useRef();
-  const filterModalRef = useRef();
-
-  useClickOutside([viewModalRef, filterModalRef], () => {
-    setSelectedCase(null);
-    setIsFilterOpen(false);
-  });
 
   const handleUnarchive = (id) => {
     setCases((prev) => prev.filter((item) => item.id !== id));
@@ -80,34 +78,35 @@ const Archives = () => {
   });
 
   return (
-    <div className=" space-y-6  text-gray-800 dark:text-white min-h-screen">
+    <div className="space-y-6 text-gray-800 dark:text-white min-h-screen">
       <div>
-        <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Archives</h2>
+        <h2 className="text-2xl font-bold">Archives</h2>
         <p className="text-sm text-gray-500">Browse and search completed and archived cases</p>
       </div>
 
+      {/* Search + Filter */}
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-4 mb-6 flex flex-col md:flex-row items-center gap-4">
         <input
           type="text"
           placeholder="Search archives..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full md:flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
+          className="w-full md:flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white"
         />
         <button
           onClick={() => setIsFilterOpen(true)}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
         >
-          <Filter size={18} />
-          Filter
+          <Filter size={18} /> Filter
         </button>
       </div>
 
+      {/* Table */}
       <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-4 overflow-x-auto">
         <h2 className="text-xl font-semibold mb-4">Archived Cases</h2>
         <div className="w-full overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
-          <table className="min-w-full text-sm text-left table-auto">
-            <thead className="uppercase text-xs dark:text-white border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-700">
+          <table className="min-w-full text-sm text-left">
+            <thead className="uppercase text-xs border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-700">
               <tr>
                 <th className="py-3 px-4">Case Number</th>
                 <th className="py-3 px-4">Name</th>
@@ -121,7 +120,7 @@ const Archives = () => {
               {filteredCases.map((item) => (
                 <tr
                   key={item.id}
-                  className="border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors"
+                  className="border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-slate-700 transition"
                 >
                   <td className="py-3 px-4">{item.id}</td>
                   <td className="py-3 px-4">{item.name}</td>
@@ -161,8 +160,11 @@ const Archives = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div ref={filterModalRef} className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold dark:text-white">Filter Archives</h2>
-              <X className="cursor-pointer text-gray-600 dark:text-gray-300" onClick={() => setIsFilterOpen(false)} />
+              <h2 className="text-lg font-semibold">Filter Archives</h2>
+              <X
+                className="cursor-pointer text-gray-600 dark:text-gray-300"
+                onClick={() => setIsFilterOpen(false)}
+              />
             </div>
 
             <div className="space-y-4">
@@ -172,25 +174,24 @@ const Archives = () => {
                   type="text"
                   value={clientFilter}
                   onChange={(e) => setClientFilter(e.target.value)}
-                  className="w-full border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 rounded px-3 py-2 text-sm text-gray-900 dark:text-white"
+                  className="w-full border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 rounded px-3 py-2 text-sm"
                   placeholder="Enter client name"
                 />
               </div>
-
               <div>
                 <label className="block text-sm font-medium mb-1">Archived Date</label>
                 <input
                   type="text"
                   value={archivedDateFilter}
                   onChange={(e) => setArchivedDateFilter(e.target.value)}
-                  className="w-full border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 rounded px-3 py-2 text-sm text-gray-900 dark:text-white"
+                  className="w-full border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 rounded px-3 py-2 text-sm"
                   placeholder="e.g. 11/5/2022 or N/A"
                 />
               </div>
 
               <div className="flex justify-end gap-2 pt-4">
                 <button
-                  className="px-4 py-2 bg-gray-200 dark:bg-slate-600 text-gray-800 dark:text-white rounded hover:bg-gray-300 dark:hover:bg-slate-500"
+                  className="px-4 py-2 bg-gray-200 dark:bg-slate-600 rounded hover:bg-gray-300"
                   onClick={() => {
                     setClientFilter("");
                     setArchivedDateFilter("");
@@ -211,7 +212,14 @@ const Archives = () => {
         </div>
       )}
 
-      <ViewModal selectedCase={selectedCase} setSelectedCase={setSelectedCase} />
+      {/* View Modal */}
+      {selectedCase && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div ref={viewModalRef}>
+            <ViewModal selectedCase={selectedCase} setSelectedCase={setSelectedCase} />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
