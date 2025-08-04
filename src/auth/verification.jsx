@@ -2,6 +2,7 @@ import { useAuth } from "@/context/auth-context";
 import { useNavigate } from "react-router-dom";
 import { useState, useRef, useEffect } from "react";
 import boslogo from "@/assets/light_logo.png";
+import toast from "react-hot-toast";
 
 export default function Verify() {
     const { login } = useAuth();
@@ -10,51 +11,44 @@ export default function Verify() {
     const [otp, setOtp] = useState(Array(6).fill(""));
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState(
-        `Enter the 6-digit code sent to ${localStorage.getItem("pendingUserEmail")}`
-    );
-    const [resendTimer, setResendTimer] = useState(0);
+    const [message, setMessage] = useState(`Enter the 6-digit code sent to ${localStorage.getItem("pendingUserEmail")}`);
+    const [resendTimer, setResendTimer] = useState(60);
 
     const inputRefs = useRef([]);
 
-    // Get expiry on mount
-    useEffect(() => {
-        const expiry = localStorage.getItem("pendingOtpExpiry");
-        if (expiry) {
-            const remaining = Math.floor((new Date(expiry).getTime() - Date.now()) / 1000);
-            setResendTimer(remaining > 0 ? remaining : 0);
-        }
-    }, []);
-
     // Countdown for resend
     useEffect(() => {
-        if (resendTimer <= 0) return;
-        const timer = setInterval(() => {
-            setResendTimer((t) => (t > 0 ? t - 1 : 0));
-        }, 1000);
+        const timer = resendTimer > 0 && setInterval(() => setResendTimer((t) => t - 1), 1000);
         return () => clearInterval(timer);
     }, [resendTimer]);
 
-    // Auto-submit when all digits are filled
+    // Auto-submit when all 6 digits are filled
     useEffect(() => {
         if (otp.every((digit) => digit !== "")) {
             handleVerify();
         }
     }, [otp]);
 
+    useEffect(() => {
+        inputRefs.current[0]?.focus();
+    }, []);
+
+    // Handle single digit change
     const handleChange = (e, index) => {
-        const value = e.target.value.replace(/\D/g, "");
+        const value = e.target.value.replace(/\D/g, ""); // Only digits
         if (!value) return;
 
         const updatedOtp = [...otp];
-        updatedOtp[index] = value[0];
+        updatedOtp[index] = value[0]; // Only first digit
         setOtp(updatedOtp);
 
+        // Focus next input
         if (index < 5 && value.length > 0) {
             inputRefs.current[index + 1]?.focus();
         }
     };
 
+    // Handle backspace and navigation
     const handleKeyDown = (e, index) => {
         if (e.key === "Backspace") {
             const updatedOtp = [...otp];
@@ -71,6 +65,7 @@ export default function Verify() {
         }
     };
 
+    // Handle paste
     const handlePaste = (e) => {
         e.preventDefault();
         const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
@@ -80,6 +75,7 @@ export default function Verify() {
         }
     };
 
+    // Submit OTP
     const handleVerify = async () => {
         if (otp.some((digit) => digit === "")) return;
 
@@ -112,9 +108,12 @@ export default function Verify() {
             }
 
             login(data.user);
+            toast.success("Login successful!", {
+                duration: 5000,
+            });
+
             localStorage.removeItem("pendingUserId");
             localStorage.removeItem("pendingUserEmail");
-            localStorage.removeItem("pendingOtpExpiry");
             navigate("/");
         } catch (err) {
             console.error("Verification error:", err);
@@ -124,6 +123,7 @@ export default function Verify() {
         }
     };
 
+    // Handle Resend OTP
     const handleResend = async () => {
         setLoading(true);
         setError("");
@@ -148,24 +148,16 @@ export default function Verify() {
             if (!res.ok) {
                 setError(data.error || "Failed to resend code.");
             } else {
-                setMessage(
-                    `A new OTP was sent to ${localStorage.getItem("pendingUserEmail")}`
-                );
-                if (data.otpExpiry) {
-                    localStorage.setItem("pendingOtpExpiry", data.otpExpiry);
-                    const remaining = Math.floor(
-                        (new Date(data.otpExpiry).getTime() - Date.now()) / 1000
-                    );
-                    setResendTimer(remaining > 0 ? remaining : 0);
-                } else {
-                    setResendTimer(60); // fallback
-                }
+                setMessage(`A new OTP was sent to ${localStorage.getItem("pendingUserEmail")}`);
+                setResendTimer(30);
                 setOtp(Array(6).fill(""));
                 inputRefs.current[0]?.focus();
+                toast.success("New OTP sent!");
             }
         } catch (err) {
             console.error("Resend OTP error:", err);
             setError("Something went wrong.");
+            toast.error(err, { duration: 7000 });
         }
 
         setLoading(false);
@@ -176,7 +168,11 @@ export default function Verify() {
             <div className="flex w-full max-w-[1000px] flex-col items-center justify-center gap-10 md:flex-row">
                 {/* Logo Section */}
                 <div className="flex h-[300px] w-full items-center justify-center rounded-2xl bg-blue-100 shadow-lg md:h-[600px] md:w-full">
-                    <img src={boslogo} alt="BOS Logo" className="w-60 md:w-[400px]" />
+                    <img
+                        src={boslogo}
+                        alt="BOS Logo"
+                        className="w-60 md:w-[400px]"
+                    />
                 </div>
 
                 {/* OTP Form Section */}
@@ -184,21 +180,16 @@ export default function Verify() {
                     className="flex h-auto w-full flex-col justify-center rounded-2xl p-8 text-white shadow-2xl md:h-[600px] md:w-[50%] md:p-10"
                     style={{ backgroundColor: "#173B7E" }}
                 >
-                    <h2 className="mb-2 text-center text-3xl font-bold md:text-left">
-                        Two-Factor Authentication
-                    </h2>
+                    <h2 className="mb-2 text-center text-3xl font-bold md:text-left">Two-Factor Authentication</h2>
 
-                    {error && (
-                        <div className="mb-4 rounded-md bg-white px-4 py-2 text-sm font-medium text-red-600 shadow">
-                            {error}
-                        </div>
-                    )}
+                    {error && <div className="mb-4 rounded-md bg-white px-4 py-2 text-sm font-medium text-red-600 shadow">{error}</div>}
 
-                    <p className="mb-6 text-center text-sm text-blue-200 transition-all duration-300 ease-in-out md:text-left">
-                        {message}
-                    </p>
+                    <p className="mb-6 text-center text-sm text-blue-200 transition-all duration-300 ease-in-out md:text-left">{message}</p>
 
-                    <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+                    <form
+                        onSubmit={(e) => e.preventDefault()}
+                        className="space-y-6"
+                    >
                         <div
                             className="flex justify-between gap-2"
                             onPaste={handlePaste}
@@ -221,9 +212,7 @@ export default function Verify() {
                         <div className="mt-2 text-center text-sm text-blue-200">
                             Didn’t receive a code?{" "}
                             {resendTimer > 0 ? (
-                                <span className="text-white underline opacity-60">
-                                    Resend in {resendTimer}s
-                                </span>
+                                <span className="text-white underline opacity-60">Resend in {resendTimer}s</span>
                             ) : (
                                 <button
                                     type="button"
@@ -240,4 +229,4 @@ export default function Verify() {
             </div>
         </div>
     );
-}
+};
