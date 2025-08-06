@@ -187,7 +187,7 @@ const Client = () => {
 
       {/* Go to contact */}
       <div className="mt-6">
-        <a href="/client-contact" className="text-blue-600 underline">Go to Client Contact</a>
+        <a href="/clients/contacts" className="text-blue-600 underline">Go to Client Contact</a>
       </div>
 
       {/* View Client Modal */}
@@ -239,7 +239,7 @@ const Client = () => {
         </div>
       )}
 
-       {/* Edit Client Modal */}
+      {/* Edit Client Modal */}
       {editClient && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-full max-w-md rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
