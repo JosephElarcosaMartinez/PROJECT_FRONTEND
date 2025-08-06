@@ -84,15 +84,10 @@ const ClientContact = () => {
 
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-<<<<<<< HEAD
-          <h1 className="title">Contacts</h1>
-          <p className="text-sm text-gray-500">Manage all client information here...</p>
-=======
           <h1 className="title">Clients {" > "} Contact</h1>
           <p className="text-sm text-gray-500">
             Manage all client contacts information here...
           </p>
->>>>>>> a211d1853e1114c8308d3b3baaf8d18052c11200
         </div>
       </div>
 
@@ -142,11 +137,10 @@ const ClientContact = () => {
           <button
             key={i}
             onClick={() => paginate(i + 1)}
-            className={`px-3 py-1 border rounded ${
-              currentPage === i + 1
+            className={`px-3 py-1 border rounded ${currentPage === i + 1
                 ? "bg-blue-600 text-white"
                 : "hover:bg-gray-200"
-            }`}
+              }`}
           >
             {i + 1}
           </button>
