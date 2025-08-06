@@ -14,7 +14,6 @@ const InitialData = [
     filedDate: "2025-04-16",
     lawyer: "Sarah Wilson",
     balance: "P 40,000.00",
-    fee: "P 50,000.00",
   },
   {
     id: 2,
@@ -24,8 +23,7 @@ const InitialData = [
     status: "Processing",
     filedDate: "2025-04-17",
     lawyer: "John Cooper",
-    balance: "P 0,000.00",
-    fee: "P 10,000.00",
+    balance: "P 5,000.00",
   },
   {
     id: 3,
@@ -36,20 +34,36 @@ const InitialData = [
     filedDate: "2025-04-18",
     lawyer: "Emma Thompson",
     balance: "P 2,500.00",
-    fee: "P 12,500.00",
   },
 ];
 
+//  Status text colors
 const getStatusColor = (status) => {
   switch (status) {
     case "Pending":
-      return "text-red-600 font-semibold";
+      return "bg-red-200 text-red-700 border border-red-300";    
     case "Processing":
-      return "text-yellow-500 font-semibold";
+      return "bg-yellow-200 text-yellow-700 border border-yellow-300"; 
     case "Completed":
-      return "text-green-600 font-semibold";
+      return "bg-green-200 text-green-700 border border-green-300";  
     default:
-      return "text-gray-500 font-semibold";
+      return "bg-gray-200 text-gray-700 border border-gray-300";
+  }
+};
+
+//  Tab colors
+const getTabColor = (status, selectedStatus) => {
+  const isActive = selectedStatus === status;
+
+  switch (status) {
+    case "Pending":
+      return isActive ? "bg-red-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300";
+    case "Processing":
+      return isActive ? "bg-yellow-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300";
+    case "Completed":
+      return isActive ? "bg-green-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300";
+    default:
+      return isActive ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300";
   }
 };
 
@@ -59,21 +73,17 @@ const Cases = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCase, setSelectedCase] = useState(null);
 
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Edit state
   const [caseToEdit, setCaseToEdit] = useState(null);
-
-  // Delete state
   const [caseToDelete, setCaseToDelete] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  // Filter tab state
   const [selectedStatus, setSelectedStatus] = useState("All");
   const statusTabs = ["All", "Pending", "Processing", "Completed"];
 
+  const viewModalRef = useRef();
   const addCaseModalRef = useRef();
   const editCaseModalRef = useRef();
   const deleteCaseModalRef = useRef();
@@ -94,12 +104,13 @@ const Cases = () => {
     balance: "P 0.00",
   });
 
-  // Click outside for modals
+  //  Click outside modals
+  useClickOutside([viewModalRef], () => setIsModalOpen(false));
   useClickOutside([addCaseModalRef], () => setIsModalOpen(false));
   useClickOutside([editCaseModalRef], () => setCaseToEdit(null));
   useClickOutside([deleteCaseModalRef], () => setIsDeleteModalOpen(false));
 
-  // Close modals with Escape key
+  // Close modals on Esc
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {
@@ -114,7 +125,6 @@ const Cases = () => {
   }, []);
 
   const handleAddCase = () => {
-    const formattedFee = newCase.fee.startsWith("P") ? newCase.fee : `P ${newCase.fee}`;
     setData([...data, { ...newCase, id: parseInt(newCase.id), fee: formattedFee }]);
     setNewCase({
       id: "",
@@ -124,7 +134,6 @@ const Cases = () => {
       branch: "",
       description: "",
       fileDate: "",
-      fee: "",
       status: "Pending",
       lawyer: "Unassigned",
       balance: "P 0.00",
@@ -133,25 +142,19 @@ const Cases = () => {
     alert("New case has been added successfully!");
   };
 
-  //filed Date
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const options = { day: "numeric", month: "numeric", year: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
 
-  // Open edit modal
-  const openEditModal = (item) => {
-    setCaseToEdit({ ...item });
-  };
-
+  const openEditModal = (item) => setCaseToEdit({ ...item });
   const handleEditSave = () => {
     setData((prev) => prev.map((c) => (c.id === caseToEdit.id ? caseToEdit : c)));
     setCaseToEdit(null);
     alert("Case updated successfully!");
   };
 
-  // Open delete modal
   const openDeleteModal = (item) => {
     setCaseToDelete(item);
     setIsDeleteModalOpen(true);
@@ -164,7 +167,6 @@ const Cases = () => {
     alert("Case deleted successfully!");
   };
 
-  // Filter cases based on search & tab
   const filteredData = data.filter((item) => {
     const matchesSearch =
       item.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -173,15 +175,11 @@ const Cases = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // Pagination calculations
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
-  // Reset page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, selectedStatus]);
+  useEffect(() => setCurrentPage(1), [search, selectedStatus]);
 
   return (
     <div className="bg-blue rounded-xl">
@@ -192,23 +190,20 @@ const Cases = () => {
         </div>
       </div>
 
-      {/* Status Tabs */}
+      {/*  Tabs with colors */}
       <div className="flex gap-3 mb-4">
         {statusTabs.map((status) => (
           <button
             key={status}
             onClick={() => setSelectedStatus(status)}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition ${selectedStatus === status
-              ? "bg-blue-600 text-white"
-              : "bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-slate-600"
-              }`}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition ${getTabColor(status, selectedStatus)}`}
           >
             {status}
           </button>
         ))}
       </div>
 
-      {/* Search and Buttons */}
+      {/*  Search & Buttons */}
       <div className="card bg-white dark:bg-slate-800 rounded-lg shadow-md p-4 mb-6 flex flex-col md:flex-row gap-4 items-center">
         <input
           type="text"
@@ -221,7 +216,7 @@ const Cases = () => {
           onClick={() => setIsModalOpen(true)}
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 rounded-lg shadow"
         >
-          + Add New Case
+          New Case
         </button>
         <button
           onClick={() => navigate("/clients")}
@@ -231,74 +226,41 @@ const Cases = () => {
         </button>
       </div>
 
-      {/* Case Table */}
+      {/*  Table */}
       <div className="card overflow-x-auto shadow-lg">
         <table className="min-w-full text-sm text-left table-auto border-separate border-spacing-y-4">
           <thead className="uppercase text-xs dark:text-white border-b border-gray-200 dark:border-gray-700">
             <tr>
-              <th className="px-4 py-3 w-20 truncate max-w-xs">Case ID</th>
-              <th className="px-2 py-3 w-48">Name</th>
-              <th className="px-4 py-3 w-48">Client</th>
-              <th className="px-4 py-3 w-32">Category</th>
-              <th className="px-4 py-3 w-24">Status</th>
-              <th className="px-4 py-3 w-32">Lawyer</th>
-              <th className="px-2 py-3 w-28">Date</th>
-              <th className="px-4 py-3 w-24">Fee</th>
-              <th className="px-4 py-3 w-24">Balance</th>
-              <th className="px-4 py-3 w-32">Actions</th>
+              <th className="px-4 py-3">Case ID</th>
+              <th className="px-2 py-3">Name</th>
+              <th className="px-4 py-3">Client</th>
+              <th className="px-4 py-3">Category</th>
+              <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Lawyer</th>
+              <th className="px-2 py-3">Date</th>
+              <th className="px-4 py-3">Balance</th>
+              <th className="px-4 py-3">Actions</th>
             </tr>
           </thead>
           <tbody className="text-gray-700 dark:text-white divide-y divide-gray-200 dark:divide-gray-700">
             {paginatedData.map((item) => (
-              <tr
-                key={item.id}
-                className="border-t border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-slate-800 transition"
-              >
+              <tr key={item.id} className="hover:bg-gray-50 dark:hover:bg-slate-800 transition">
                 <td className="px-4 py-3">C{item.id}</td>
-                <td className="px-2 py-3 truncate max-w-xs" title={item.name}>
-                  {item.name}
-                </td>
-                <td className="px-4 py-3 truncate max-w-xs" title={item.client}>
-                  {item.client}
-                </td>
+                <td className="px-2 py-3">{item.name}</td>
+                <td className="px-4 py-3">{item.client}</td>
                 <td className="px-4 py-3">{item.category}</td>
                 <td className="px-4 py-3">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                      item.status
-                    )}`}
-                  >
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(item.status)}`}>
                     {item.status}
                   </span>
                 </td>
-                <td className="px-4 py-3 truncate max-w-xs">{item.lawyer}</td>
-                <td className="px-2 py-3 truncate max-w-xs">{item.filedDate}</td>
-                <td className="px-4 py-3 truncate max-w-xs">{item.fee}</td>
-                <td className="px-4 py-3 truncate max-w-xs">{item.balance}</td>
-                <td className="px-4 py-3 max-w-[60px]">
-                  <div className="flex items-center gap-1">
-                    <button
-                      className="p-1 text-blue-600 hover:text-blue-800"
-                      onClick={() => setSelectedCase(item)}
-                      title="View"
-                    >
-                      <Eye className="w-3 h-3" />
-                    </button>
-                    <button
-                      className="p-1 text-yellow-500 hover:text-yellow-700"
-                      onClick={() => openEditModal(item)}
-                      title="Edit"
-                    >
-                      <Pencil className="w-3 h-3" />
-                    </button>
-                    <button
-                      className="p-1 text-red-600 hover:text-red-800"
-                      onClick={() => openDeleteModal(item)}
-                      title="Delete"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
+                <td className="px-4 py-3">{item.lawyer}</td>
+                <td className="px-2 py-3">{item.filedDate}</td>
+                <td className="px-4 py-3">{item.balance}</td>
+                <td className="px-4 py-3 flex gap-1">
+                  <button className="p-1 text-blue-600 hover:text-blue-800" onClick={() => setSelectedCase(item)}><Eye className="w-3 h-3" /></button>
+                  <button className="p-1 text-yellow-500 hover:text-yellow-700" onClick={() => openEditModal(item)}><Pencil className="w-3 h-3" /></button>
+                  <button className="p-1 text-red-600 hover:text-red-800" onClick={() => openDeleteModal(item)}><Trash2 className="w-3 h-3" /></button>
                 </td>
               </tr>
             ))}
@@ -308,50 +270,24 @@ const Cases = () => {
 
       {/* Pagination */}
       <div className="flex justify-end items-center gap-1 mt-4">
-        <button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-          disabled={currentPage === 1}
-          className={`px-3 py-1 border rounded ${currentPage === 1
-            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-            }`}
-        >
-          &lt;
-        </button>
-
+        <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1}
+          className={`px-3 py-1 border rounded ${currentPage === 1 ? "bg-gray-200 text-gray-400" : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"}`}>&lt;</button>
         {Array.from({ length: totalPages }, (_, i) => (
-          <button
-            key={i + 1}
-            onClick={() => setCurrentPage(i + 1)}
-            className={`px-3 py-1 border rounded ${currentPage === i + 1
-              ? "bg-blue-600 text-white"
-              : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-              }`}
-          >
-            {i + 1}
-          </button>
+          <button key={i + 1} onClick={() => setCurrentPage(i + 1)}
+            className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-600 text-white" : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"}`}>{i + 1}</button>
         ))}
-
-        <button
-          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-          disabled={currentPage === totalPages}
-          className={`px-3 py-1 border rounded ${currentPage === totalPages
-            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-            }`}
-        >
-          &gt;
-        </button>
+        <button onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages}
+          className={`px-3 py-1 border rounded ${currentPage === totalPages ? "bg-gray-200 text-gray-400" : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"}`}>&gt;</button>
       </div>
 
-      {/* Add Case Modal */}
-      {isModalOpen && (
+{/* Add Case Modal */}
+       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div
             ref={addCaseModalRef}
             className="bg-white dark:bg-slate-800 p-8 rounded-xl shadow-lg w-full max-w-3xl overflow-y-auto max-h-[90vh]"
           >
-            <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white">Add New Case</h3>
+            <h3 className="text-2xl font-bold mb-6 text-gray-900 dark:text-white"> New Case</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {[["Cabinet Number", "id"], ["Case Name", "name"], ["Folder Number", "id"], ["Category", "category"], ["Client", "client"], ["Branch", "branch"], ["Filed Date", "date"], ["Fee", "fee"]].map(([label, name, type = "text"]) => (
                 <div key={name}>
@@ -470,16 +406,23 @@ const Cases = () => {
         </div>
       )}
 
+
       {/* View Modal */}
       {selectedCase && (
-        <ViewModal
-          isOpen={!!selectedCase}
-          onClose={() => setSelectedCase(null)}
-          caseData={selectedCase}
-        />
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div ref={viewModalRef}>
+            <ViewModal selectedCase={selectedCase} setSelectedCase={setSelectedCase} />
+          </div>
+        </div>
       )}
     </div>
   );
 };
 
 export default Cases;
+
+
+
+
+
+

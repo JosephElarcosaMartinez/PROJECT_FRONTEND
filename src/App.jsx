@@ -23,6 +23,7 @@ import { ChangePass } from "./auth/changepass";
 import Verify from "./auth/verification";
 import Register from "./components/registration";
 import Clients from "./routes/sidebar/clients";
+import ClientContact from "./components/client-contact";
 import { UnauthorizedAccess } from "./auth/unauthorized";
 
 export default function App() {
@@ -62,6 +63,7 @@ export default function App() {
                         { path: "cases", element: <Cases /> },
                         { path: "documents", element: <Documents /> },
                         { path: "clients", element: <Clients /> },
+                        { path: "client-contact", element: <ClientContact /> },
                         { path: "tasks", element: <Tasks /> },
                         { path: "users", element: <Users /> },
                         { path: "reports", element: <Reports /> },
