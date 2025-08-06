@@ -63,7 +63,7 @@ export default function App() {
                         { path: "cases", element: <Cases /> },
                         { path: "documents", element: <Documents /> },
                         { path: "clients", element: <Clients /> },
-                        { path: "client-contact", element: <ClientContact /> },
+                        { path: "clients/contacts", element: <ClientContact /> },
                         { path: "tasks", element: <Tasks /> },
                         { path: "users", element: <Users /> },
                         { path: "reports", element: <Reports /> },

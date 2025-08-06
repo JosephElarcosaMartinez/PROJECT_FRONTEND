@@ -22,7 +22,7 @@ const ClientContact = () => {
 
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="title">Clients</h1>
+          <h1 className="title">Contacts</h1>
           <p className="text-sm text-gray-500">Manage all client information here...</p>
         </div>
       </div>
