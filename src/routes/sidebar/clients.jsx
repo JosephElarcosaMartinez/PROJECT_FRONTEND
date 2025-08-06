@@ -118,7 +118,7 @@ const Client = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 placeholder-gray-500 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 md:flex-1"
         />
-        <button
+        <button 
           onClick={() => setAddClients(true)}
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700"
         >
@@ -133,6 +133,7 @@ const Client = () => {
               <th className="whitespace-nowrap px-4 py-3">Client</th>
               <th className="whitespace-nowrap px-4 py-3">Email</th>
               <th className="whitespace-nowrap px-4 py-3">Phone</th>
+              <th className="whitespace-rowrap px-4 py-3">Date</th>
               <th className="whitespace-nowrap px-4 py-3">Created by</th>
               <th className="whitespace-nowrap px-4 py-3">Action</th>
             </tr>
@@ -146,6 +147,7 @@ const Client = () => {
                 <td className="whitespace-nowrap px-4 py-3">{client.client_fullname}</td>
                 <td className="whitespace-nowrap px-4 py-3">{client.client_email}</td>
                 <td className="whitespace-nowrap px-4 py-3">{client.client_phonenum}</td>
+                <td className="whitespace-nowrap px-4 py-3">{client.client_date_created}</td>
                 <td className="whitespace-nowrap px-4 py-3">{getUserFullName(client.created_by)}</td>
                 <td className="px-4 py-3">
                   <div className="flex flex-wrap items-center gap-2">

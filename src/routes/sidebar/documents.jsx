@@ -42,6 +42,16 @@ const Documents = () => {
     }
   };
 
+  // Close filter modal 
+  const handleFilterOverlayClick = () => {
+    setShowFilterModal(false);
+  };
+
+  // Prevent closing
+  const handleModalContentClick = (e) => {
+    e.stopPropagation();
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -54,7 +64,7 @@ const Documents = () => {
         </div>
         <div className="mt-4 md:mt-0 flex gap-2">
           <button
-            className="flex items-center gap-2 border border-slate-300 px-4 py-2 rounded-md text-gray-800 dark:text-white"
+            className="flex items-center gap-2 border border-blue-600 bg-blue-600 px-3 py-1 rounded-md text-white hover:bg-blue-700"
             onClick={toggleFilterModal}
           >
             <Filter size={16} /> Filters
@@ -129,8 +139,14 @@ const Documents = () => {
 
       {/* Filter Modal */}
       {showFilterModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex justify-center items-center">
-          <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6 relative">
+        <div
+          className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center"
+          onClick={handleFilterOverlayClick}
+        >
+          <div
+            className="bg-white w-full max-w-md rounded-lg shadow-lg p-6 relative"
+            onClick={handleModalContentClick}
+          >
             <button
               onClick={toggleFilterModal}
               className="absolute top-3 right-3 text-gray-500 hover:text-black"
@@ -182,8 +198,14 @@ const Documents = () => {
 
       {/* Delete Confirmation Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex justify-center items-center">
-          <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6 relative">
+        <div
+          className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center"
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <div
+            className="bg-white w-full max-w-md rounded-lg shadow-lg p-6 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setShowDeleteModal(false)}
               className="absolute top-3 right-3 text-gray-500 hover:text-black"
