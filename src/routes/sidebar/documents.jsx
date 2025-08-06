@@ -27,6 +27,10 @@ const Documents = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [docToDelete, setDocToDelete] = useState(null);
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const toggleFilterModal = () => setShowFilterModal(!showFilterModal);
 
   const confirmDelete = (doc) => {
@@ -42,18 +46,19 @@ const Documents = () => {
     }
   };
 
-  // Close filter modal 
-  const handleFilterOverlayClick = () => {
-    setShowFilterModal(false);
-  };
+  // Filtered list
+  const filteredDocs = documents.filter((doc) =>
+    doc.name.toLowerCase().includes(search.toLowerCase())
+  );
 
-  // Prevent closing
-  const handleModalContentClick = (e) => {
-    e.stopPropagation();
-  };
+  // Pagination logic
+  const totalPages = Math.ceil(filteredDocs.length / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedDocs = filteredDocs.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="space-y-6">
+      
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
@@ -87,7 +92,7 @@ const Documents = () => {
       </div>
 
       {/* Document Table */}
-      <div className="card shadow-lg ">
+      <div className="card shadow-lg">
         <table className="text-gray-800 dark:text-white w-full text-sm text-left">
           <thead className="text-gray-800 dark:text-white border-b">
             <tr>
@@ -101,51 +106,84 @@ const Documents = () => {
             </tr>
           </thead>
           <tbody>
-            {documents
-              .filter((doc) =>
-                doc.name.toLowerCase().includes(search.toLowerCase())
-              )
-              .map((doc) => (
-                <tr key={doc.id} className="border-t hover:bg-blue-100 dark:hover:bg-blue-950">
-                  <td className="px-4 py-4 flex items-center gap-2 text-blue-800 font-medium">
-                    <FileText size={18} /> {doc.name}
-                  </td>
-                  <td className="px-4 py-3">{doc.case}</td>
-                  <td className="px-4 py-3">{doc.type}</td>
-                  <td className="px-4 py-3">{doc.size}</td>
-                  <td className="px-4 py-3">{doc.uploadedBy}</td>
-                  <td className="px-4 py-3">{doc.date}</td>
-                  <td className="px-4 py-3 flex justify-center gap-4">
-                    <a
-                      href={`/files/${doc.name}`}
-                      download
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      <Download size={16} />
-                    </a>
-
-                    <button
-                      className="text-red-500 hover:text-red-700"
-                      onClick={() => confirmDelete(doc)}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+            {paginatedDocs.map((doc) => (
+              <tr key={doc.id} className="border-t hover:bg-blue-100 dark:hover:bg-blue-950">
+                <td className="px-4 py-4 flex items-center gap-2 text-blue-800 font-medium">
+                  <FileText size={18} /> {doc.name}
+                </td>
+                <td className="px-4 py-3">{doc.case}</td>
+                <td className="px-4 py-3">{doc.type}</td>
+                <td className="px-4 py-3">{doc.size}</td>
+                <td className="px-4 py-3">{doc.uploadedBy}</td>
+                <td className="px-4 py-3">{doc.date}</td>
+                <td className="px-4 py-3 flex justify-center gap-4">
+                  <a
+                    href={`/files/${doc.name}`}
+                    download
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    <Download size={16} />
+                  </a>
+                  <button
+                    className="text-red-500 hover:text-red-700"
+                    onClick={() => confirmDelete(doc)}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-end items-center gap-1 mt-4">
+        <button
+          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+          disabled={currentPage === 1}
+          className={`px-3 py-1 border rounded ${currentPage === 1
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+            }`}
+        >
+          &lt;
+        </button>
+
+        {Array.from({ length: totalPages }, (_, i) => (
+          <button
+            key={i + 1}
+            onClick={() => setCurrentPage(i + 1)}
+            className={`px-3 py-1 border rounded ${currentPage === i + 1
+                ? "bg-blue-600 text-white"
+                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+              }`}
+          >
+            {i + 1}
+          </button>
+        ))}
+
+        <button
+          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className={`px-3 py-1 border rounded ${currentPage === totalPages
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+            }`}
+        >
+          &gt;
+        </button>
       </div>
 
       {/* Filter Modal */}
       {showFilterModal && (
         <div
           className="fixed inset-0 z-50 bg-black bg-opacity-50 flex justify-center items-center"
-          onClick={handleFilterOverlayClick}
+          onClick={() => setShowFilterModal(false)}
         >
           <div
             className="bg-white w-full max-w-md rounded-lg shadow-lg p-6 relative"
-            onClick={handleModalContentClick}
+            onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={toggleFilterModal}

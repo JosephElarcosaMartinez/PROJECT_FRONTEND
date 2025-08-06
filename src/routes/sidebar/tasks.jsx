@@ -35,6 +35,50 @@ const initialTasks = [
     completedDate: null,
     attachment: null,
   },
+  {
+    id: 4,
+    title: "Contract Review",
+    case: "Anderson vs. Global Corp",
+    description: "Review the contractual obligations",
+    assignedTo: "Michael Brown",
+    status: "Pending",
+    dueDate: "May 5, 2023",
+    completedDate: null,
+    attachment: null,
+  },
+  {
+    id: 5,
+    title: "Witness Interview",
+    case: "Lopez vs. Metro Bank",
+    description: "Interview main witnesses for testimony",
+    assignedTo: "Sarah Wilson",
+    status: "In Progress",
+    dueDate: "May 10, 2023",
+    completedDate: null,
+    attachment: null,
+  },
+  {
+    id: 6,
+    title: "File Court Motion",
+    case: "Davis Incorporation",
+    description: "File motion for summary judgment",
+    assignedTo: "Emma Thompson",
+    status: "Completed",
+    dueDate: "May 15, 2023",
+    completedDate: "May 12, 2023",
+    attachment: null,
+  },
+  {
+    id: 7,
+    title: "Research Case Law",
+    case: "Smith vs. Henderson",
+    description: "Research precedents relevant to case",
+    assignedTo: "John Cooper",
+    status: "Pending",
+    dueDate: "May 20, 2023",
+    completedDate: null,
+    attachment: null,
+  },
 ];
 
 const statusColor = {
@@ -46,13 +90,20 @@ const statusColor = {
 export default function Tasks() {
   const [tasks, setTasks] = useState(initialTasks);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
+  const totalPages = Math.ceil(tasks.length / itemsPerPage);
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentTasks = tasks.slice(indexOfFirstItem, indexOfLastItem);
+
   const handleFileChange = (e, taskId) => {
     const file = e.target.files[0];
     if (file) {
-      setTasks(prev =>
-        prev.map(t =>
-          t.id === taskId ? { ...t, attachment: file } : t
-        )
+      setTasks((prev) =>
+        prev.map((t) => (t.id === taskId ? { ...t, attachment: file } : t))
       );
     }
   };
@@ -60,20 +111,23 @@ export default function Tasks() {
   return (
     <div className="space-y-6 min-h-screen text-black dark:text-white">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Tasks</h2>
-        <p className="text-sm text-gray-500">Manage and track all case-related tasks</p>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+          Tasks
+        </h2>
+        <p className="text-sm text-gray-500">
+          Manage and track all case-related tasks
+        </p>
       </div>
 
+      {/* Tasks Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {tasks.map(task => (
+        {currentTasks.map((task) => (
           <div
             key={task.id}
-            className=" bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 rounded-lg shadow-lg relative"
+            className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 rounded-lg shadow-lg relative"
           >
             <div className="absolute top-3 right-4 text-sm font-medium">
-              <span className={statusColor[task.status]}>
-                {task.status}
-              </span>
+              <span className={statusColor[task.status]}>{task.status}</span>
             </div>
 
             <h3 className="font-semibold text-blue-700 dark:text-blue-400 mb-1">
@@ -120,6 +174,44 @@ export default function Tasks() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Pagination */}
+      <div className="flex justify-end items-center gap-1 mt-4">
+        <button
+          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+          disabled={currentPage === 1}
+          className={`px-3 py-1 border rounded ${currentPage === 1
+            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+            }`}
+        >
+          &lt;
+        </button>
+
+        {Array.from({ length: totalPages }, (_, i) => (
+          <button
+            key={i + 1}
+            onClick={() => setCurrentPage(i + 1)}
+            className={`px-3 py-1 border rounded ${currentPage === i + 1
+              ? "bg-blue-600 text-white"
+              : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+              }`}
+          >
+            {i + 1}
+          </button>
+        ))}
+
+        <button
+          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className={`px-3 py-1 border rounded ${currentPage === totalPages
+            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+            }`}
+        >
+          &gt;
+        </button>
       </div>
     </div>
   );

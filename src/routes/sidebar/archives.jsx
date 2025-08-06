@@ -4,45 +4,16 @@ import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
 
 const initialCases = [
-  {
-    id: "C54321",
-    name: "Davis Incorporation",
-    client: "Davis Corp",
-    dateFiled: "11/5/2022",
-    archivedDate: "11/5/2022",
-    category: "Corporate",
-    lawyer: "Mark Reyes",
-    fee: "₱20,000.00",
-    balance: "₱10,000.00",
-    status: "Closed",
-    description: "Corporate filing case from 2022.",
-  },
-  {
-    id: "A12345",
-    name: "Smith vs. Henderson",
-    client: "John Smith",
-    dateFiled: "1/15/2023",
-    archivedDate: "N/A",
-    category: "Civil",
-    lawyer: "Anna Cruz",
-    fee: "₱50,000.00",
-    balance: "₱30,000.00",
-    status: "For Review",
-    description: "Civil case involving property dispute.",
-  },
-  {
-    id: "B67890",
-    name: "Wilson Property Dispute",
-    client: "Emily Wilson",
-    dateFiled: "2/28/2023",
-    archivedDate: "N/A",
-    category: "Real Estate",
-    lawyer: "James Tan",
-    fee: "₱35,000.00",
-    balance: "₱5,000.00",
-    status: "Pending",
-    description: "Dispute over residential land ownership.",
-  },
+  { id: "C54321", name: "Davis Incorporation", client: "Davis Corp", dateFiled: "11/5/2022", archivedDate: "11/5/2022", category: "Corporate", lawyer: "Mark Reyes", fee: "₱20,000.00", balance: "₱10,000.00", status: "Closed", description: "Corporate filing case from 2022." },
+  { id: "A12345", name: "Smith vs. Henderson", client: "John Smith", dateFiled: "1/15/2023", archivedDate: "N/A", category: "Civil", lawyer: "Anna Cruz", fee: "₱50,000.00", balance: "₱30,000.00", status: "For Review", description: "Civil case involving property dispute." },
+  { id: "B67890", name: "Wilson Property Dispute", client: "Emily Wilson", dateFiled: "2/28/2023", archivedDate: "N/A", category: "Real Estate", lawyer: "James Tan", fee: "₱35,000.00", balance: "₱5,000.00", status: "Pending", description: "Dispute over residential land ownership." },
+  // extra cases for pagination testing
+  { id: "C00001", name: "Example Case 1", client: "Test Client", dateFiled: "3/1/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer A", fee: "₱10,000.00", balance: "₱0.00", status: "Closed", description: "" },
+  { id: "C00002", name: "Example Case 2", client: "Test Client", dateFiled: "3/5/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer B", fee: "₱15,000.00", balance: "₱5,000.00", status: "Closed", description: "" },
+  { id: "C00001", name: "Example Case 1", client: "Test Client", dateFiled: "3/1/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer A", fee: "₱10,000.00", balance: "₱0.00", status: "Closed", description: "" },
+  { id: "C00002", name: "Example Case 2", client: "Test Client", dateFiled: "3/5/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer B", fee: "₱15,000.00", balance: "₱5,000.00", status: "Closed", description: "" },
+  { id: "C00001", name: "Example Case 1", client: "Test Client", dateFiled: "3/1/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer A", fee: "₱10,000.00", balance: "₱0.00", status: "Closed", description: "" },
+  { id: "C00002", name: "Example Case 2", client: "Test Client", dateFiled: "3/5/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer B", fee: "₱15,000.00", balance: "₱5,000.00", status: "Closed", description: "" },
 ];
 
 const Archives = () => {
@@ -62,6 +33,10 @@ const Archives = () => {
   const [clientFilter, setClientFilter] = useState("");
   const [archivedDateFilter, setArchivedDateFilter] = useState("");
 
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
   const handleUnarchive = (id) => {
     setCases((prev) => prev.filter((item) => item.id !== id));
   };
@@ -77,6 +52,12 @@ const Archives = () => {
     return matchesSearch && matchesClient && matchesArchivedDate;
   });
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredCases.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentCases = filteredCases.slice(indexOfFirstItem, indexOfLastItem);
+
   return (
     <div className="space-y-6 text-gray-800 dark:text-white min-h-screen">
       <div>
@@ -90,7 +71,10 @@ const Archives = () => {
           type="text"
           placeholder="Search archives..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setCurrentPage(1);
+          }}
           className="w-full md:flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white"
         />
         <button
@@ -117,33 +101,24 @@ const Archives = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredCases.map((item) => (
-                <tr
-                  key={item.id}
-                  className="border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-slate-700 transition"
-                >
+              {currentCases.map((item) => (
+                <tr key={item.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-slate-700 transition">
                   <td className="py-3 px-4">{item.id}</td>
                   <td className="py-3 px-4">{item.name}</td>
                   <td className="py-3 px-4">{item.client}</td>
                   <td className="py-3 px-4">{item.dateFiled}</td>
                   <td className="py-3 px-4">{item.archivedDate}</td>
                   <td className="py-3 px-4 space-x-2">
-                    <button
-                      onClick={() => setSelectedCase(item)}
-                      className="text-blue-600 hover:underline"
-                    >
+                    <button onClick={() => setSelectedCase(item)} className="text-blue-600 hover:underline">
                       View
                     </button>
-                    <button
-                      onClick={() => handleUnarchive(item.id)}
-                      className="text-red-600 hover:underline"
-                    >
+                    <button onClick={() => handleUnarchive(item.id)} className="text-red-600 hover:underline">
                       Unarchive
                     </button>
                   </td>
                 </tr>
               ))}
-              {filteredCases.length === 0 && (
+              {currentCases.length === 0 && (
                 <tr>
                   <td colSpan="6" className="py-4 text-center text-gray-500 dark:text-gray-400">
                     No archived cases found.
@@ -153,6 +128,43 @@ const Archives = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-end items-center gap-1 mt-4">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 border rounded ${currentPage === 1
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"}`}
+            >
+              &lt;
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`px-3 py-1 border rounded ${currentPage === i + 1
+                  ? "bg-blue-600 text-white"
+                  : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"}`}
+              >
+                {i + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 border rounded ${currentPage === totalPages
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"}`}
+            >
+              &gt;
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Filter Modal */}
@@ -161,49 +173,22 @@ const Archives = () => {
           <div ref={filterModalRef} className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Filter Archives</h2>
-              <X
-                className="cursor-pointer text-gray-600 dark:text-gray-300"
-                onClick={() => setIsFilterOpen(false)}
-              />
+              <X className="cursor-pointer text-gray-600 dark:text-gray-300" onClick={() => setIsFilterOpen(false)} />
             </div>
-
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Client</label>
-                <input
-                  type="text"
-                  value={clientFilter}
-                  onChange={(e) => setClientFilter(e.target.value)}
-                  className="w-full border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 rounded px-3 py-2 text-sm"
-                  placeholder="Enter client name"
-                />
+                <input type="text" value={clientFilter} onChange={(e) => setClientFilter(e.target.value)} className="w-full border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 rounded px-3 py-2 text-sm" placeholder="Enter client name" />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Archived Date</label>
-                <input
-                  type="text"
-                  value={archivedDateFilter}
-                  onChange={(e) => setArchivedDateFilter(e.target.value)}
-                  className="w-full border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 rounded px-3 py-2 text-sm"
-                  placeholder="e.g. 11/5/2022 or N/A"
-                />
+                <input type="text" value={archivedDateFilter} onChange={(e) => setArchivedDateFilter(e.target.value)} className="w-full border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 rounded px-3 py-2 text-sm" placeholder="e.g. 11/5/2022 or N/A" />
               </div>
-
               <div className="flex justify-end gap-2 pt-4">
-                <button
-                  className="px-4 py-2 bg-gray-200 dark:bg-slate-600 rounded hover:bg-gray-300"
-                  onClick={() => {
-                    setClientFilter("");
-                    setArchivedDateFilter("");
-                    setIsFilterOpen(false);
-                  }}
-                >
+                <button className="px-4 py-2 bg-gray-200 dark:bg-slate-600 rounded hover:bg-gray-300" onClick={() => { setClientFilter(""); setArchivedDateFilter(""); setIsFilterOpen(false); }}>
                   Clear
                 </button>
-                <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                  onClick={() => setIsFilterOpen(false)}
-                >
+                <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" onClick={() => setIsFilterOpen(false)}>
                   Apply
                 </button>
               </div>
