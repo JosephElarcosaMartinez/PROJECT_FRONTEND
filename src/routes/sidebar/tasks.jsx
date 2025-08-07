@@ -3,7 +3,7 @@ import { Paperclip } from "lucide-react";
 
 // Constants
 const ITEMS_PER_PAGE = 6;
-const PRIORITY_TABS = ["All", "High", "Medium", "Low"];
+const PRIORITY_TABS = ["All", "High", "Mid", "Low"];
 
 const rawTasks = [
   {
@@ -89,32 +89,32 @@ const getDaysRemaining = (dueDate) => {
 const getPriorityFromDueDate = (dueDate) => {
   const daysLeft = getDaysRemaining(dueDate);
   if (daysLeft <= 2) return "High";
-  if (daysLeft <= 5) return "Medium";
+  if (daysLeft <= 5) return "Mid";
   return "Low";
 };
 
 const priorityColor = {
-  High: "text-red-500",
-  Medium: "text-yellow-500",
-  Low: "text-gray-500",
+  High: "bg-red-200 text-red-700 border border-red-300",
+  Mid: "bg-yellow-200 text-yellow-700 border border-yellow-300",
+  Low: "bg-gray-200 text-gray-700 border border-gray-300",
 };
 
 // Tab Color Logic
 const getTabColor = (tab, isActive) => {
-  const base = "px-5 py-1.5 rounded-full font-medium text-sm border";
+  const base = "px-12 py-2 rounded-full font-medium text-sm border";
   if (!isActive) {
     return `${base} bg-gray-200 text-gray-700 hover:bg-gray-300`;
   }
 
   switch (tab) {
     case "High":
-      return `${base} bg-red-600 text-white border-red-600`;
-    case "Medium":
-      return `${base} bg-yellow-500 text-white border-yellow-500`;
+      return `${base} bg-red-600 text-white`;
+    case "Mid":
+      return `${base} bg-yellow-500 text-white`;
     case "Low":
-      return `${base} bg-gray-600 text-white border-gray-600`;
+      return `${base} bg-gray-500 text-white"`;
     default:
-      return `${base} bg-blue-600 text-white border-blue-600`;
+      return `${base} bg-blue-500 text-white`;
   }
 };
 
