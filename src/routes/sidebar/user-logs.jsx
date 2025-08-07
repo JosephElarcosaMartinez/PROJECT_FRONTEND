@@ -17,7 +17,7 @@ const Userlogs = () => {
   const [search, setSearch] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 1;
+  const itemsPerPage = 5;
   const [visibleCount, setVisibleCount] = useState(5);
 
   useEffect(() => {
@@ -83,8 +83,7 @@ const Userlogs = () => {
   });
 
   const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = filteredLogs.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedData = filteredLogs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
     <div className="min-h-screen">
@@ -119,9 +118,9 @@ const Userlogs = () => {
       </div>
 
       {/* Logs Section */}
-      {filteredLogs.length > 0 ? (
+      {paginatedData.length > 0 ? (
         <div className="space-y-4">
-          {filteredLogs.slice(0, visibleCount).map((log, index) => {
+          {paginatedData.slice(0, visibleCount).map((log, index) => {
             const fullName = log.user_fullname || "Unknown User";
             const avatar = log.user_profile ? `http://localhost:3000${log.user_profile}` : defaultAvatar;
             const icon = getLogIcon(log);
@@ -160,27 +159,15 @@ const Userlogs = () => {
         <p className="text-center text-gray-300">No logs available.</p>
       )}
 
-      {visibleCount < filteredLogs.length && (
-        <div className="mt-6 text-center">
-          <button
-            className="text-gray-800 underline hover:text-blue-300 dark:text-white dark:hover:text-blue-400"
-            onClick={() => setVisibleCount((prev) => prev + 5)}
-          >
-            Load More
-          </button>
-        </div>
-      )}
-
       {/* Pagination - Not used with Load More but kept in case you want to switch */}
       <div className="flex justify-end items-center gap-3 mt-4">
         <button
           onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
           disabled={currentPage === 1}
-          className={`px-3 py-1 border rounded ${
-            currentPage === 1
-              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-          }`}
+          className={`px-3 py-1 border rounded ${currentPage === 1
+            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+            }`}
         >
           &lt;
         </button>
@@ -190,11 +177,10 @@ const Userlogs = () => {
         <button
           onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
           disabled={currentPage === totalPages}
-          className={`px-3 py-1 border rounded ${
-            currentPage === totalPages
-              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-          }`}
+          className={`px-3 py-1 border rounded ${currentPage === totalPages
+            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+            }`}
         >
           &gt;
         </button>
