@@ -33,7 +33,7 @@ const InitialData = [
     status: "Completed",
     filedDate: "2025-04-18",
     lawyer: "Emma Thompson",
-    balance: "P 2,500.00",
+    balance: "P 0.00",
   },
 ];
 
@@ -74,7 +74,7 @@ const Cases = () => {
   const [selectedCase, setSelectedCase] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 1;
 
   const [caseToEdit, setCaseToEdit] = useState(null);
   const [caseToDelete, setCaseToDelete] = useState(null);
@@ -269,16 +269,36 @@ const Cases = () => {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-end items-center gap-1 mt-4">
-        <button onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))} disabled={currentPage === 1}
-          className={`px-3 py-1 border rounded ${currentPage === 1 ? "bg-gray-200 text-gray-400" : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"}`}>&lt;</button>
-        {Array.from({ length: totalPages }, (_, i) => (
-          <button key={i + 1} onClick={() => setCurrentPage(i + 1)}
-            className={`px-3 py-1 border rounded ${currentPage === i + 1 ? "bg-blue-600 text-white" : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"}`}>{i + 1}</button>
-        ))}
-        <button onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))} disabled={currentPage === totalPages}
-          className={`px-3 py-1 border rounded ${currentPage === totalPages ? "bg-gray-200 text-gray-400" : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"}`}>&gt;</button>
+      <div className="flex justify-end items-center gap-3 mt-4">
+        <button
+          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+          disabled={currentPage === 1}
+          className={`px-3 py-1 border rounded ${
+            currentPage === 1
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+          }`}
+        >
+          &lt;
+        </button>
+
+        <span className="text-sm text-gray-700 dark:text-white">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <button
+          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className={`px-3 py-1 border rounded ${
+            currentPage === totalPages
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+          }`}
+        >
+          &gt;
+        </button>
       </div>
+
 
 {/* Add Case Modal */}
        {isModalOpen && (

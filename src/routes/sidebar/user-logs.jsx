@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from "react";
 import defaultAvatar from "../../assets/default-avatar.png";
-import { FileText, Archive, User, Scale, LogIn, LogOut, AlertTriangle, Activity } from "lucide-react";
+import {
+  FileText,
+  Archive,
+  User,
+  Scale,
+  LogIn,
+  LogOut,
+  AlertTriangle,
+  Activity,
+} from "lucide-react";
 
 const Userlogs = () => {
   const [tableData, setTableData] = useState([]);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 1;
   const [visibleCount, setVisibleCount] = useState(5);
 
   useEffect(() => {
@@ -61,7 +71,6 @@ const Userlogs = () => {
     return "Action";
   };
 
-  // Filtered directly in render
   const filteredLogs = tableData.filter((log) => {
     const matchSearch =
       log.user_fullname?.toLowerCase().includes(search.toLowerCase()) ||
@@ -72,6 +81,10 @@ const Userlogs = () => {
 
     return matchSearch && matchDate;
   });
+
+  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = filteredLogs.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="min-h-screen">
@@ -97,7 +110,6 @@ const Userlogs = () => {
           onChange={(e) => setSearch(e.target.value)}
           className="input flex-grow bg-transparent text-slate-900 outline-0 placeholder:text-slate-500 focus:border-blue-600 dark:text-slate-50"
         />
-
         <input
           type="date"
           value={selectedDate}
@@ -110,7 +122,7 @@ const Userlogs = () => {
       {filteredLogs.length > 0 ? (
         <div className="space-y-4">
           {filteredLogs.slice(0, visibleCount).map((log, index) => {
-            const fullName = `${log.user_fullname ? log.user_fullname : "Unknown User"}`;
+            const fullName = log.user_fullname || "Unknown User";
             const avatar = log.user_profile ? `http://localhost:3000${log.user_profile}` : defaultAvatar;
             const icon = getLogIcon(log);
             const tag = getLogTag(log.user_log_action);
@@ -128,14 +140,7 @@ const Userlogs = () => {
                 key={index}
                 className="flex items-start rounded-lg bg-white p-4 text-black shadow-sm hover:shadow-md dark:bg-slate-800 dark:text-white"
               >
-                {/* Avatar */}
-                <img
-                  src={avatar}
-                  alt={fullName}
-                  className="mr-4 h-12 w-12 rounded-full border"
-                />
-
-                {/* Details */}
+                <img src={avatar} alt={fullName} className="mr-4 h-12 w-12 rounded-full border" />
                 <div className="flex-1">
                   <div className="mb-1 flex items-center gap-3">
                     <span className="font-semibold">{fullName}</span>
@@ -146,8 +151,6 @@ const Userlogs = () => {
                     {log.user_log_type || "Unknown Type"}
                   </div>
                 </div>
-
-                {/* Timestamp */}
                 <div className="ml-auto whitespace-nowrap text-sm">{formattedTime}</div>
               </div>
             );
@@ -167,6 +170,35 @@ const Userlogs = () => {
           </button>
         </div>
       )}
+
+      {/* Pagination - Not used with Load More but kept in case you want to switch */}
+      <div className="flex justify-end items-center gap-3 mt-4">
+        <button
+          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+          disabled={currentPage === 1}
+          className={`px-3 py-1 border rounded ${
+            currentPage === 1
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+          }`}
+        >
+          &lt;
+        </button>
+        <span className="text-sm text-gray-700 dark:text-white">
+          Page {currentPage} of {totalPages}
+        </span>
+        <button
+          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className={`px-3 py-1 border rounded ${
+            currentPage === totalPages
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+          }`}
+        >
+          &gt;
+        </button>
+      </div>
     </div>
   );
 };
