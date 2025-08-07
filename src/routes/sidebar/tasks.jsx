@@ -83,8 +83,24 @@ const initialTasks = [
 
 const statusColor = {
   Completed: "text-green-600",
-  Pending: "text-yellow-600",
-  "In Progress": "text-blue-500",
+  Pending: "text-red-600",
+  "In Progress": "text-yellow-600",
+};
+
+//  Tab colors
+const getTabColor = (status, selectedStatus) => {
+  const isActive = selectedStatus === status;
+
+  switch (status) {
+    case "Pending":
+      return isActive ? "bg-red-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300";
+    case "In Progress":
+      return isActive ? "bg-yellow-500 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300";
+    case "Completed":
+      return isActive ? "bg-green-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300";
+    default:
+      return isActive ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700 hover:bg-gray-300";
+  }
 };
 
 export default function Tasks() {
