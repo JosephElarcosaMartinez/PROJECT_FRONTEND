@@ -280,7 +280,7 @@ const ClientContact = () => {
 
       {/* Back Link */}
       <div className="mt-6">
-        <a href="/clients" className="text-blue-600 underline">
+        <a href="/clients" className="text-blue-600 hover:underline">
           {" < Back "}
         </a>
       </div>
