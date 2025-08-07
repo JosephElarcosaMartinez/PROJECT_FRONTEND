@@ -1,6 +1,7 @@
-import { useState } from "react";
-import { Filter, Plus, Trash2, Pencil, X, UploadCloud, Paperclip, } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Filter, Plus, Trash2, Pencil, X, UploadCloud, Paperclip } from "lucide-react";
 
+// Will be removed once backend is integrated
 const initialTasks = [
   {
     id: 1,
@@ -81,6 +82,8 @@ const initialTasks = [
   },
 ];
 
+
+
 const statusColor = {
   Completed: "text-green-600",
   Pending: "text-red-600",
@@ -104,23 +107,111 @@ const getTabColor = (status, selectedStatus) => {
 };
 
 export default function Tasks() {
-  const [tasks, setTasks] = useState(initialTasks);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
   const totalPages = Math.ceil(tasks.length / itemsPerPage);
 
+  // Fetch tasks from backend
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const response = await fetch('/api/tasks');
+        if (!response.ok) {
+          throw new Error('Failed to fetch tasks');
+        }
+        const data = await response.json();
+        const formattedTasks = data.map(task => ({
+          id: task.td_id,
+          title: task.td_name,
+          description: task.td_description,
+          assignedTo: task.td_to, // You'll need to fetch user details separately
+          status: task.td_status,
+          dueDate: new Date(task.td_due_date).toLocaleDateString(),
+          completedDate: task.td_date_completed ? new Date(task.td_date_completed).toLocaleDateString() : null,
+          attachment: task.td_doc_path
+        }));
+        setTasks(formattedTasks);
+      } catch (err) {
+        setError('Failed to fetch tasks');
+        console.error('Error fetching tasks:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTasks();
+  }, []);
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentTasks = tasks.slice(indexOfFirstItem, indexOfLastItem);
 
-  const handleFileChange = (e, taskId) => {
+  const handleFileChange = async (e, taskId) => {
     const file = e.target.files[0];
     if (file) {
-      setTasks((prev) =>
-        prev.map((t) => (t.id === taskId ? { ...t, attachment: file } : t))
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch(`/api/tasks/${taskId}/upload`, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to upload file');
+        }
+
+        const data = await response.json();
+        // Update the local state with the new file path
+        setTasks((prev) =>
+          prev.map((t) => (t.id === taskId ? { ...t, attachment: data.filePath } : t))
+        );
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        // Handle error appropriately
+      }
+    }
+  };
+
+  // Function to update task status
+  const updateTaskStatus = async (taskId, newStatus) => {
+    try {
+      const response = await fetch(`/api/tasks/${taskId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          status: newStatus,
+          completedDate: newStatus === 'Completed' ? new Date().toISOString() : null
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update task status');
+      }
+      
+      // Update local state
+      setTasks(prev =>
+        prev.map(task =>
+          task.id === taskId
+            ? {
+                ...task,
+                status: newStatus,
+                completedDate: newStatus === 'Completed' ? new Date().toLocaleDateString() : null
+              }
+            : task
+        )
       );
+    } catch (error) {
+      console.error('Error updating task status:', error);
+      // Handle error appropriately
     }
   };
 
@@ -136,8 +227,17 @@ export default function Tasks() {
       </div>
 
       {/* Tasks Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {currentTasks.map((task) => (
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-white"></div>
+        </div>
+      ) : error ? (
+        <div className="text-red-500 text-center p-4">{error}</div>
+      ) : tasks.length === 0 ? (
+        <div className="text-center p-4">No tasks found</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {currentTasks.map((task) => (
           <div
             key={task.id}
             className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 rounded-lg shadow-lg relative"
@@ -190,7 +290,8 @@ export default function Tasks() {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       {/* Pagination */}
       <div className="flex justify-end items-center gap-3 mt-4">
