@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import AddContact from "../components/add-contact";
+import { useClickOutside } from "@/hooks/use-click-outside";
 
 const ClientContact = () => {
   const [tableData, setTableData] = useState([
@@ -52,7 +54,9 @@ const ClientContact = () => {
     },
   ]);
 
+  const [showAddContacts, setShowAddContacts] = useState(false);
   const [error, setError] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -63,6 +67,12 @@ const ClientContact = () => {
       String(value).toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
+
+  // useClickOutside for modal
+  const modalRef = useRef(null);
+  useClickOutside([modalRef], () => {
+    if (isModalOpen) setIsModalOpen(false);
+  });
 
   // Pagination
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -100,6 +110,15 @@ const ClientContact = () => {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 placeholder-gray-500 outline-none dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 md:flex-1"
         />
+        <button
+          onClick={() => {
+            setSearchTerm("");
+            setShowAddContacts(true);
+          }}
+          className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700"
+        >
+          Add Contacts
+        </button>
       </div>
 
       {/* Table */}
@@ -132,25 +151,55 @@ const ClientContact = () => {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-end items-center gap-1 mt-4">
-        {Array.from({ length: totalPages }, (_, i) => (
-          <button
-            key={i}
-            onClick={() => paginate(i + 1)}
-            className={`px-3 py-1 border rounded ${currentPage === i + 1
-                ? "bg-blue-600 text-white"
-                : "hover:bg-gray-200"
-              }`}
-          >
-            {i + 1}
-          </button>
-        ))}
+      <div className="flex justify-end items-center gap-3 mt-4">
+        <button
+          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+          disabled={currentPage === 1}
+          className={`px-3 py-1 border rounded ${
+            currentPage === 1
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+          }`}
+        >
+          &lt;
+        </button>
+
+        <span className="text-sm text-gray-700 dark:text-white">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <button
+          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className={`px-3 py-1 border rounded ${
+            currentPage === totalPages
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+          }`}
+        >
+          &gt;
+        </button>
       </div>
+
+      {/* AddContact Modal */}
+      {showAddContacts && (
+        <AddContact
+          onClose={() => setShowAddContacts(false)}
+          onAdd={(newContact) => {
+            setTableData((prev) => [
+              ...prev,
+              { id: Date.now(), ...newContact },
+            ]);
+            setCurrentPage(1); // Reset to first page
+            setShowAddContacts(false);
+          }}
+        />
+      )}
 
       {/* Go to Clients */}
       <div className="mt-6">
         <a href="/clients" className="text-blue-600 underline">
-          {" > Back "}
+          {" < Back "}
         </a>
       </div>
     </div>
