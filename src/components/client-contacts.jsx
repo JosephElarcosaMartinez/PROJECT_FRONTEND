@@ -97,7 +97,7 @@ const ClientContact = () => {
 
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="title">Clients {" > "} Contact</h1>
+          <h1 className="title">Clients {" > "} Contacts</h1>
           <p className="text-sm text-gray-500">
             Manage all client contacts information here...
           </p>
@@ -180,11 +180,10 @@ const ClientContact = () => {
         <button
           onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
           disabled={currentPage === 1}
-          className={`px-3 py-1 border rounded ${
-            currentPage === 1
-              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-          }`}
+          className={`px-3 py-1 border rounded ${currentPage === 1
+            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+            }`}
         >
           &lt;
         </button>
@@ -196,11 +195,10 @@ const ClientContact = () => {
         <button
           onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
           disabled={currentPage === totalPages}
-          className={`px-3 py-1 border rounded ${
-            currentPage === totalPages
-              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-              : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-          }`}
+          className={`px-3 py-1 border rounded ${currentPage === totalPages
+            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+            }`}
         >
           &gt;
         </button>
