@@ -23,7 +23,7 @@ import { ChangePass } from "./auth/changepass";
 import Verify from "./auth/verification";
 import Register from "./components/registration";
 import Clients from "./routes/sidebar/clients";
-import ClientContact from "./components/client-contact";
+import ClientContact from "./components/client-contacts";
 import { UnauthorizedAccess } from "./auth/unauthorized";
 
 export default function App() {
