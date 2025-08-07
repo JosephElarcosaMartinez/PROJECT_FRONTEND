@@ -35,7 +35,7 @@ const AddContact = ({ onAdd, onClose }) => {
         ...formData,
     };
 
-    alert("Contact added successfully!"); //  This alert will show upon success
+    alert("Contact added successfully!");
     onAdd(newContact);
     };
 
