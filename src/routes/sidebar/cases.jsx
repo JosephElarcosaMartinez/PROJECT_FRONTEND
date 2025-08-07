@@ -74,7 +74,7 @@ const Cases = () => {
   const [selectedCase, setSelectedCase] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 1;
+  const itemsPerPage = 5;
 
   const [caseToEdit, setCaseToEdit] = useState(null);
   const [caseToDelete, setCaseToDelete] = useState(null);
@@ -269,6 +269,7 @@ const Cases = () => {
       </div>
 
       {/* Pagination */}
+      {totalPages > 1 && (
       <div className="flex justify-end items-center gap-3 mt-4">
         <button
           onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -297,10 +298,12 @@ const Cases = () => {
         >
           &gt;
         </button>
-      </div>
+      </div> 
+            )}
 
 
-{/* Add Case Modal */}
+
+      {/* Add Case Modal */}
        {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div

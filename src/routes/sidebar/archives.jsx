@@ -123,38 +123,6 @@ const Archives = () => {
           </table>
         </div>
 
-        {/* Pagination */}
-        <div className="flex justify-end items-center gap-3 mt-4">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            disabled={currentPage === 1}
-            className={`px-3 py-1 border rounded ${
-              currentPage === 1
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-            }`}
-          >
-            &lt;
-          </button>
-
-          <span className="text-sm text-gray-700 dark:text-white">
-            Page {currentPage} of {totalPages}
-          </span>
-
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className={`px-3 py-1 border rounded ${
-              currentPage === totalPages
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-            }`}
-          >
-            &gt;
-          </button>
-        </div>
-      </div>
-
       {/* Filter Modal */}
       {isFilterOpen && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -194,6 +162,38 @@ const Archives = () => {
         </div>
       )}
     </div>
+     {/* Pagination */}
+        <div className="flex justify-end items-center gap-3 mt-4">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 border rounded ${
+              currentPage === 1
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+            }`}
+          >
+            &lt;
+          </button>
+
+          <span className="text-sm text-gray-700 dark:text-white">
+            Page {currentPage} of {totalPages}
+          </span>
+
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 border rounded ${
+              currentPage === totalPages
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+            }`}
+          >
+            &gt;
+          </button>
+        </div>
+      </div>
+
   );
 };
 

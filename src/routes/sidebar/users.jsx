@@ -171,6 +171,7 @@ const Users = () => {
       </div>
 
       {/* Pagination */}
+      {totalPages > 1 && (
       <div className="flex justify-end items-center gap-3 mt-4">
         <button
           onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -200,8 +201,8 @@ const Users = () => {
           &gt;
         </button>
       </div>
-
-
+      )}
+      
       {isModalOpen && <AddUserModal onClose={() => setIsModalOpen(false)} />}
 
       {/* Edit Modal */}
