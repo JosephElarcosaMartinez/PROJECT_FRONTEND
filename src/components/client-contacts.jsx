@@ -1,6 +1,8 @@
 import React, { useState, useRef } from "react";
 import AddContact from "../components/add-contact";
 import { useClickOutside } from "@/hooks/use-click-outside";
+import { Pencil, Trash } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 const ClientContact = () => {
   const [tableData, setTableData] = useState([
@@ -59,28 +61,29 @@ const ClientContact = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [editContact, setEditContact] = useState(null);
+
+  // For Delete Confirmation Modal
+  const [isDeleteContactModalOpen, setIsDeleteContactModalOpen] = useState(false);
+  const [contactToDelete, setContactToDelete] = useState(null);
+
   const itemsPerPage = 5;
 
-  // Filtering
   const filteredData = tableData.filter((item) =>
     Object.values(item).some((value) =>
       String(value).toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
-  // useClickOutside for modal
   const modalRef = useRef(null);
   useClickOutside([modalRef], () => {
     if (isModalOpen) setIsModalOpen(false);
   });
 
-  // Pagination
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="bg-blue rounded-xl">
@@ -122,7 +125,7 @@ const ClientContact = () => {
       </div>
 
       {/* Table */}
-      <div className="card shadow-lg">
+      <div className="card shadow-lg overflow-x-auto">
         <table className="min-w-full table-auto text-left text-sm">
           <thead className="card-title text-xs uppercase">
             <tr>
@@ -131,6 +134,7 @@ const ClientContact = () => {
               <th className="px-4 py-3">Phone</th>
               <th className="px-4 py-3">Role/Relation</th>
               <th className="px-4 py-3">Client</th>
+              <th className="px-4 py-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody className="text-gray-700 dark:text-white">
@@ -144,6 +148,27 @@ const ClientContact = () => {
                 <td className="px-4 py-3">{contact.clientContact_phonenum}</td>
                 <td className="px-4 py-3">{contact.clientContact_relation}</td>
                 <td className="px-4 py-3">{contact.clientContact_client}</td>
+                <td className="px-4 py-3 text-center">
+                  <div className="flex items-center justify-center gap-3">
+                    <button
+                      onClick={() => setEditContact(contact)}
+                      className="text-yellow-600 hover:text-yellow-700"
+                      title="Edit Contact"
+                    >
+                      <Pencil size={18} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setContactToDelete(contact);
+                        setIsDeleteContactModalOpen(true);
+                      }}
+                      className="text-red-600 hover:text-red-700"
+                      title="Delete Contact"
+                    >
+                      <Trash size={18} />
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -181,7 +206,7 @@ const ClientContact = () => {
         </button>
       </div>
 
-      {/* AddContact Modal */}
+      {/* Add Contact Modal */}
       {showAddContacts && (
         <AddContact
           onClose={() => setShowAddContacts(false)}
@@ -190,13 +215,72 @@ const ClientContact = () => {
               ...prev,
               { id: Date.now(), ...newContact },
             ]);
-            setCurrentPage(1); // Reset to first page
+            setCurrentPage(1);
             setShowAddContacts(false);
           }}
         />
       )}
 
-      {/* Go to Clients */}
+      {/* Edit Contact Modal */}
+      {editContact && (
+        <EditContactModal
+          contact={editContact}
+          onClose={() => setEditContact(null)}
+          onSave={(updatedContact) => {
+            setTableData((prevData) =>
+              prevData.map((item) =>
+                item.id === updatedContact.id ? updatedContact : item
+              )
+            );
+            setEditContact(null);
+          }}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteContactModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
+              Confirm Delete
+            </h3>
+            <p className="text-gray-700 dark:text-gray-300 mb-6">
+              Are you sure you want to delete contact{" "}
+              <span className="font-semibold">
+                {contactToDelete?.clientContact_fullname}
+              </span>
+              ?
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setIsDeleteContactModalOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-800 bg-gray-200 rounded-lg hover:bg-gray-300 dark:text-white dark:bg-gray-600 dark:hover:bg-gray-500"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setTableData((prevData) =>
+                    prevData.filter((item) => item.id !== contactToDelete.id)
+                  );
+                  setIsDeleteContactModalOpen(false);
+                  setContactToDelete(null);
+
+                  toast.success("Contact successfully deleted", {
+                    id: "delete-success",
+                  });
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700"
+              >
+                Delete
+              </button>
+
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Back Link */}
       <div className="mt-6">
         <a href="/clients" className="text-blue-600 underline">
           {" < Back "}
@@ -207,3 +291,79 @@ const ClientContact = () => {
 };
 
 export default ClientContact;
+
+// EditContactModal Component
+const EditContactModal = ({ contact, onClose, onSave }) => {
+  const [formData, setFormData] = useState({ ...contact });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-md dark:bg-slate-800">
+        <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-white">
+          Edit Contact
+        </h2>
+        <div className="space-y-3">
+          <input
+            name="clientContact_fullname"
+            value={formData.clientContact_fullname}
+            onChange={handleChange}
+            className="w-full rounded border px-3 py-2"
+            placeholder="Full Name"
+          />
+          <input
+            name="clientContact_email"
+            value={formData.clientContact_email}
+            onChange={handleChange}
+            className="w-full rounded border px-3 py-2"
+            placeholder="Email"
+          />
+          <input
+            name="clientContact_phonenum"
+            value={formData.clientContact_phonenum}
+            onChange={handleChange}
+            className="w-full rounded border px-3 py-2"
+            placeholder="Phone Number"
+          />
+          <input
+            name="clientContact_relation"
+            value={formData.clientContact_relation}
+            onChange={handleChange}
+            className="w-full rounded border px-3 py-2"
+            placeholder="Relation"
+          />
+          <input
+            name="clientContact_client"
+            value={formData.clientContact_client}
+            onChange={handleChange}
+            className="w-full rounded border px-3 py-2"
+            placeholder="Client"
+          />
+        </div>
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="rounded bg-gray-300 px-4 py-2 text-sm text-black hover:bg-gray-400"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => {
+              onSave(formData);
+              toast.success("Contact successfully updated", {
+                id: "update-success",
+              });
+            }}
+            className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+          >
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
