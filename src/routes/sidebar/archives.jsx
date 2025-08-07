@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { Filter, X } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
@@ -7,25 +7,22 @@ const initialCases = [
   { id: "C54321", name: "Davis Incorporation", client: "Davis Corp", dateFiled: "11/5/2022", archivedDate: "11/5/2022", category: "Corporate", lawyer: "Mark Reyes", fee: "₱20,000.00", balance: "₱10,000.00", status: "Closed", description: "Corporate filing case from 2022." },
   { id: "A12345", name: "Smith vs. Henderson", client: "John Smith", dateFiled: "1/15/2023", archivedDate: "N/A", category: "Civil", lawyer: "Anna Cruz", fee: "₱50,000.00", balance: "₱30,000.00", status: "For Review", description: "Civil case involving property dispute." },
   { id: "B67890", name: "Wilson Property Dispute", client: "Emily Wilson", dateFiled: "2/28/2023", archivedDate: "N/A", category: "Real Estate", lawyer: "James Tan", fee: "₱35,000.00", balance: "₱5,000.00", status: "Pending", description: "Dispute over residential land ownership." },
-  // extra cases for pagination testing
-  { id: "C00001", name: "Example Case 1", client: "Test Client", dateFiled: "3/1/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer A", fee: "₱10,000.00", balance: "₱0.00", status: "Closed", description: "" },
-  { id: "C00002", name: "Example Case 2", client: "Test Client", dateFiled: "3/5/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer B", fee: "₱15,000.00", balance: "₱5,000.00", status: "Closed", description: "" },
-  { id: "C00001", name: "Example Case 1", client: "Test Client", dateFiled: "3/1/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer A", fee: "₱10,000.00", balance: "₱0.00", status: "Closed", description: "" },
-  { id: "C00002", name: "Example Case 2", client: "Test Client", dateFiled: "3/5/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer B", fee: "₱15,000.00", balance: "₱5,000.00", status: "Closed", description: "" },
-  { id: "C00001", name: "Example Case 1", client: "Test Client", dateFiled: "3/1/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer A", fee: "₱10,000.00", balance: "₱0.00", status: "Closed", description: "" },
-  { id: "C00002", name: "Example Case 2", client: "Test Client", dateFiled: "3/5/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer B", fee: "₱15,000.00", balance: "₱5,000.00", status: "Closed", description: "" },
+  // unique test cases for pagination
+  { id: "C00003", name: "Example Case 3", client: "Test Client", dateFiled: "3/1/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer A", fee: "₱10,000.00", balance: "₱0.00", status: "Closed", description: "" },
+  { id: "C00004", name: "Example Case 4", client: "Test Client", dateFiled: "3/5/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer B", fee: "₱15,000.00", balance: "₱5,000.00", status: "Closed", description: "" },
+  { id: "C00005", name: "Example Case 5", client: "Test Client", dateFiled: "3/8/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer C", fee: "₱18,000.00", balance: "₱8,000.00", status: "Closed", description: "" },
+  { id: "C00006", name: "Example Case 6", client: "Test Client", dateFiled: "3/10/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer D", fee: "₱12,000.00", balance: "₱2,000.00", status: "Closed", description: "" },
+  { id: "C00007", name: "Example Case 7", client: "Test Client", dateFiled: "3/12/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer E", fee: "₱20,000.00", balance: "₱5,000.00", status: "Closed", description: "" },
 ];
 
 const Archives = () => {
   const [search, setSearch] = useState("");
   const [cases, setCases] = useState(initialCases);
 
-  // View Modal
   const [selectedCase, setSelectedCase] = useState(null);
   const viewModalRef = useRef();
   useClickOutside([viewModalRef], () => setSelectedCase(null));
 
-  // Filter Modal
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const filterModalRef = useRef();
   useClickOutside([filterModalRef], () => setIsFilterOpen(false));
@@ -33,7 +30,6 @@ const Archives = () => {
   const [clientFilter, setClientFilter] = useState("");
   const [archivedDateFilter, setArchivedDateFilter] = useState("");
 
-  // Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -52,11 +48,9 @@ const Archives = () => {
     return matchesSearch && matchesClient && matchesArchivedDate;
   });
 
-  // Pagination logic
   const totalPages = Math.ceil(filteredCases.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentCases = filteredCases.slice(indexOfFirstItem, indexOfLastItem);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const currentCases = filteredCases.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <div className="space-y-6 text-gray-800 dark:text-white min-h-screen">
@@ -129,42 +123,36 @@ const Archives = () => {
           </table>
         </div>
 
-        {/* Pagination controls */}
-        {totalPages > 1 && (
-          <div className="flex justify-end items-center gap-1 mt-4">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-              className={`px-3 py-1 border rounded ${currentPage === 1
+        {/* Pagination */}
+        <div className="flex justify-end items-center gap-3 mt-4">
+          <button
+            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 border rounded ${
+              currentPage === 1
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"}`}
-            >
-              &lt;
-            </button>
+                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+            }`}
+          >
+            &lt;
+          </button>
 
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i + 1}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`px-3 py-1 border rounded ${currentPage === i + 1
-                  ? "bg-blue-600 text-white"
-                  : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"}`}
-              >
-                {i + 1}
-              </button>
-            ))}
+          <span className="text-sm text-gray-700 dark:text-white">
+            Page {currentPage} of {totalPages}
+          </span>
 
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className={`px-3 py-1 border rounded ${currentPage === totalPages
+          <button
+            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 border rounded ${
+              currentPage === totalPages
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"}`}
-            >
-              &gt;
-            </button>
-          </div>
-        )}
+                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+            }`}
+          >
+            &gt;
+          </button>
+        </div>
       </div>
 
       {/* Filter Modal */}
