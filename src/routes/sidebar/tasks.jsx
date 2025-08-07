@@ -94,14 +94,14 @@ const getPriorityFromDueDate = (dueDate) => {
 };
 
 const priorityColor = {
-  High: "text-red-600",
+  High: "text-red-500",
   Medium: "text-yellow-500",
   Low: "text-gray-500",
 };
 
 // Tab Color Logic
 const getTabColor = (tab, isActive) => {
-  const base = "px-8 py-2 rounded-full font-semibold text-sm border";
+  const base = "px-5 py-1.5 rounded-full font-medium text-sm border";
   if (!isActive) {
     return `${base} bg-gray-200 text-gray-700 hover:bg-gray-300`;
   }
@@ -255,11 +255,10 @@ export default function Tasks() {
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
             disabled={currentPage === 1}
-            className={`px-3 py-1 border rounded ${
-              currentPage === 1
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-            }`}
+            className={`px-3 py-1 border rounded ${currentPage === 1
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+              }`}
           >
             &lt;
           </button>
@@ -271,11 +270,10 @@ export default function Tasks() {
           <button
             onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
             disabled={currentPage === totalPages}
-            className={`px-3 py-1 border rounded ${
-              currentPage === totalPages
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-            }`}
+            className={`px-3 py-1 border rounded ${currentPage === totalPages
+              ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+              : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+              }`}
           >
             &gt;
           </button>
