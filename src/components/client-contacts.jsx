@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import AddContact from "../components/add-contact";
 import { useClickOutside } from "@/hooks/use-click-outside";
-import { Pencil, Trash } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
 const ClientContact = () => {
@@ -129,7 +129,7 @@ const ClientContact = () => {
         <table className="min-w-full table-auto text-left text-sm">
           <thead className="card-title text-xs uppercase">
             <tr>
-              <th className="px-4 py-3">Fullname</th>
+              <th className="px-4 py-3">Company Name / Name</th>
               <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Phone</th>
               <th className="px-4 py-3">Role/Relation</th>
@@ -165,7 +165,7 @@ const ClientContact = () => {
                       className="text-red-600 hover:text-red-700"
                       title="Delete Contact"
                     >
-                      <Trash size={18} />
+                      <Trash2 size={18} />
                     </button>
                   </div>
                 </td>
