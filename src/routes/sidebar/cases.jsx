@@ -41,11 +41,11 @@ const InitialData = [
 const getStatusColor = (status) => {
   switch (status) {
     case "Pending":
-      return "bg-red-200 text-red-700 border border-red-300";    
+      return "bg-red-200 text-red-700 border border-red-300";
     case "Processing":
-      return "bg-yellow-200 text-yellow-700 border border-yellow-300"; 
+      return "bg-yellow-200 text-yellow-700 border border-yellow-300";
     case "Completed":
-      return "bg-green-200 text-green-700 border border-green-300";  
+      return "bg-green-200 text-green-700 border border-green-300";
     default:
       return "bg-gray-200 text-gray-700 border border-gray-300";
   }
@@ -74,7 +74,7 @@ const Cases = () => {
   const [selectedCase, setSelectedCase] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 1;
+  const itemsPerPage = 5;
 
   const [caseToEdit, setCaseToEdit] = useState(null);
   const [caseToDelete, setCaseToDelete] = useState(null);
@@ -273,11 +273,10 @@ const Cases = () => {
         <button
           onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
           disabled={currentPage === 1}
-          className={`px-3 py-1 border rounded ${
-            currentPage === 1
+          className={`px-3 py-1 border rounded ${currentPage === 1
               ? "bg-gray-200 text-gray-400 cursor-not-allowed"
               : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-          }`}
+            }`}
         >
           &lt;
         </button>
@@ -289,19 +288,18 @@ const Cases = () => {
         <button
           onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
           disabled={currentPage === totalPages}
-          className={`px-3 py-1 border rounded ${
-            currentPage === totalPages
+          className={`px-3 py-1 border rounded ${currentPage === totalPages
               ? "bg-gray-200 text-gray-400 cursor-not-allowed"
               : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-          }`}
+            }`}
         >
           &gt;
         </button>
       </div>
 
 
-{/* Add Case Modal */}
-       {isModalOpen && (
+      {/* Add Case Modal */}
+      {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div
             ref={addCaseModalRef}
