@@ -94,9 +94,9 @@ const getPriorityFromDueDate = (dueDate) => {
 };
 
 const priorityColor = {
-  High: "bg-red-200 text-red-700 border border-red-300",
-  Mid: "bg-yellow-200 text-yellow-700 border border-yellow-300",
-  Low: "bg-gray-200 text-gray-700 border border-gray-300",
+  High: "text-red-500",
+  Mid: "text-yellow-600",
+  Low: "text-gray-700",
 };
 
 // Tab Color Logic
