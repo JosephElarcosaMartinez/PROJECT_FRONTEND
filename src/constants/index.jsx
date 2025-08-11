@@ -1,6 +1,6 @@
 import { ChartColumn, Folders, Home, ListTodo, Users, Logs, Archive, ShieldUser, FileText } from "lucide-react";
 
-export const navbarLinks = [
+export const allNavbarLinks = [
     { label: "Home", icon: Home, path: "/" },
     { label: "Cases", icon: Folders, path: "/cases" },
     { label: "Documents", icon: FileText, path: "/documents" },
