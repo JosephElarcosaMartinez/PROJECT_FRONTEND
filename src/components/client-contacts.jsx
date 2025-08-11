@@ -3,8 +3,11 @@ import AddContact from "../components/add-contact";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { useAuth } from "@/context/auth-context";
 
 const ClientContact = () => {
+  const { user } = useAuth();
+
   const [tableData, setTableData] = useState([]);
   const [clients, setClients] = useState([]);
 
@@ -15,7 +18,6 @@ const ClientContact = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [editContact, setEditContact] = useState(null);
 
-  // For Delete Confirmation Modal
   const [removeContactModalOpen, setRemoveContactModalOpen] = useState(false);
   const [contactToBeRemoved, setContactToBeRemoved] = useState(null);
 
@@ -23,12 +25,20 @@ const ClientContact = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const client_contacts_endpoint =
+          user?.user_role === "Admin"
+            ? "http://localhost:3000/api/client-contacts"
+            : `http://localhost:3000/api/a-lawyer-client-contacts/${user.user_id}`;
+
+        const clients_endpoint =
+          user?.user_role === "Admin" ? "http://localhost:3000/api/clients" : `http://localhost:3000/api/clients/${user.user_id}`;
+
         // Fetch both contacts and clients in parallel
         const [contactsRes, clientsRes] = await Promise.all([
-          fetch("http://localhost:3000/api/client-contacts", {
+          fetch(client_contacts_endpoint, {
             credentials: "include",
           }),
-          fetch("http://localhost:3000/api/clients", {
+          fetch(clients_endpoint, {
             credentials: "include",
           }),
         ]);
@@ -69,6 +79,44 @@ const ClientContact = () => {
   const rowsPerPage = 5;
   const totalPages = Math.ceil(filteredData.length / rowsPerPage);
   const paginatedContacts = filteredData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+  const handleAddNewContact = async (newContact) => {
+    const toastId = toast.loading("Adding new contact...");
+
+    try {
+      const res = await fetch("http://localhost:3000/api/client-contacts", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newContact),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to add new contact.");
+      }
+
+      const createdContact = await res.json();
+
+      // Update UI instantly
+      setTableData((prev) => [createdContact, ...prev]);
+
+      toast.success("Contact successfully added!", {
+        id: toastId,
+        duration: 4000,
+      });
+
+      // Close modal
+      setShowAddContacts(false);
+    } catch (err) {
+      console.error("Error adding new contact:", err);
+      toast.error("Error adding new contact.", {
+        id: toastId,
+        duration: 3000,
+      });
+    }
+  };
 
   const handleContactRemoval = async (contact) => {
     const toastId = toast.loading(`Removing contact: ${contact.contact_fullname}...`);
@@ -135,7 +183,7 @@ const ClientContact = () => {
           }}
           className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700"
         >
-          Add Contacts
+          Add Contact
         </button>
       </div>
 
@@ -157,7 +205,7 @@ const ClientContact = () => {
               paginatedContacts.map((contact) => (
                 <tr
                   key={contact.contact_id}
-                  className="border-t hover:bg-blue-50 dark:hover:bg-slate-800"
+                  className="border-t border-gray-200 hover:bg-blue-50 dark:hover:bg-slate-800"
                 >
                   <td className="px-4 py-3">{contact.contact_fullname}</td>
                   <td className="px-4 py-3">{contact.contact_email}</td>
@@ -230,12 +278,9 @@ const ClientContact = () => {
       {/* Add Contact Modal */}
       {showAddContacts && (
         <AddContact
+          onAdd={(newContact) => handleAddNewContact(newContact)}
           onClose={() => setShowAddContacts(false)}
-          onAdd={(newContact) => {
-            setTableData((prev) => [...prev, { id: Date.now(), ...newContact }]);
-            setCurrentPage(1);
-            setShowAddContacts(false);
-          }}
+          clients={clients}
         />
       )}
 
@@ -244,14 +289,15 @@ const ClientContact = () => {
         <EditContactModal
           contact={editContact}
           onClose={() => setEditContact(null)}
+          clients={clients}
           onSave={(updatedContact) => {
-            setTableData((prevData) => prevData.map((item) => (item.id === updatedContact.id ? updatedContact : item)));
+            setTableData((prevData) => prevData.map((item) => (item.contact_id === updatedContact.contact_id ? updatedContact : item)));
             setEditContact(null);
           }}
         />
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Removal Confirmation Modal */}
       {removeContactModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg dark:bg-gray-800">
@@ -295,70 +341,122 @@ const ClientContact = () => {
 export default ClientContact;
 
 // EditContactModal Component
-const EditContactModal = ({ contact, onClose, onSave }) => {
-  const [formData, setFormData] = useState({ ...contact });
+const EditContactModal = ({ contact, onClose, onSave, clients = [] }) => {
+  const [formData, setFormData] = useState(contact || {});
+
+  // Sync when contact prop changes
+  useEffect(() => {
+    if (contact) {
+      setFormData(contact);
+    }
+  }, [contact]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleSave = async () => {
+    const toastId = toast.loading("Updating contact...");
+
+    try {
+      const res = await fetch(`http://localhost:3000/api/client-contacts/${formData.contact_id}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to update contact.");
+      }
+
+      const updatedContact = await res.json();
+      onSave(updatedContact); // update state in parent
+
+      toast.success("Contact successfully updated!", {
+        id: toastId,
+        duration: 3000,
+      });
+
+      onClose();
+    } catch (err) {
+      console.error(err);
+      toast.error("Error updating contact.", {
+        id: toastId,
+        duration: 3000,
+      });
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-md dark:bg-slate-800">
         <h2 className="mb-4 text-xl font-bold text-gray-800 dark:text-white">Edit Contact</h2>
         <div className="space-y-3">
           <input
-            name="clientContact_fullname"
-            value={formData.clientContact_fullname}
+            name="contact_fullname"
+            value={formData.contact_fullname || ""}
             onChange={handleChange}
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
             placeholder="Full Name"
           />
           <input
-            name="clientContact_email"
-            value={formData.clientContact_email}
+            name="contact_email"
+            value={formData.contact_email || ""}
             onChange={handleChange}
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
             placeholder="Email"
           />
           <input
-            name="clientContact_phonenum"
-            value={formData.clientContact_phonenum}
+            name="contact_phone"
+            value={formData.contact_phone || ""}
             onChange={handleChange}
-            className="w-full rounded border px-3 py-2"
+            className="w-full rounded border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
             placeholder="Phone Number"
           />
           <input
-            name="clientContact_relation"
-            value={formData.clientContact_relation}
+            name="contact_role"
+            value={formData.contact_role || ""}
             onChange={handleChange}
-            className="w-full rounded border px-3 py-2"
-            placeholder="Relation"
+            className="w-full rounded border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
+            placeholder="Role / Relation"
           />
-          <input
-            name="clientContact_client"
-            value={formData.clientContact_client}
+          <select
+            name="client_id"
+            value={formData.client_id}
             onChange={handleChange}
-            className="w-full rounded border px-3 py-2"
-            placeholder="Client"
-          />
+            required
+            className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
+          >
+            <option
+              value=""
+              disabled
+            >
+              Select Client
+            </option>
+            {clients.map((client) => (
+              <option
+                key={client.client_id}
+                value={client.client_id}
+              >
+                {client.client_fullname}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="mt-5 flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="rounded bg-gray-300 px-4 py-2 text-sm text-black hover:bg-gray-400"
+            className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
           >
             Cancel
           </button>
           <button
-            onClick={() => {
-              onSave(formData);
-              toast.success("Contact successfully updated", {
-                id: "update-success",
-              });
-            }}
-            className="rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+            onClick={handleSave}
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
           >
             Save Changes
           </button>
