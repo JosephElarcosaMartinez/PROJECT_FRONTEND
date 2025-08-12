@@ -25,6 +25,7 @@ import Register from "./components/registration";
 import Clients from "./routes/sidebar/clients";
 import ClientContact from "./components/client-contacts";
 import { UnauthorizedAccess } from "./auth/unauthorized";
+import Promotion from "./components/promotion";
 
 export default function App() {
     const router = createBrowserRouter([
@@ -71,6 +72,7 @@ export default function App() {
                         { path: "case-archive", element: <Archives /> },
                         { path: "notifications", element: <Notification /> },
                         { path: "notifications/notif-settings", element: <NotificationSettings /> },
+                        { path: "promotion", element: <Promotion /> },
                     ],
                 },
             ],
