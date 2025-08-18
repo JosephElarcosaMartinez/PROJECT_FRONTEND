@@ -10,6 +10,7 @@ export const allNavbarLinks = [
     { label: "Reports", icon: ChartColumn, path: "/reports" },
     { label: "Logs", icon: Logs, path: "/user-logs" },
     { label: "Case Archive", icon: Archive, path: "/case-archive" },
+    { Label: "Payments", icon: ShieldUser, path: "/payments" },
 ];
 
 // 🔧 Export a function to get filtered links based on role

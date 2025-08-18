@@ -19,13 +19,14 @@ import Userlogs from "./routes/sidebar/user-logs";
 import Reports from "./routes/sidebar/reports";
 import Notification from "./components/notification";
 import NotificationSettings from "./components/notif-settings";
-import { ChangePass } from "./auth/changepass";
 import Verify from "./auth/verification";
 import Register from "./components/registration";
 import Clients from "./routes/sidebar/clients";
 import ClientContact from "./components/client-contacts";
-import { UnauthorizedAccess } from "./auth/unauthorized";
+import ChangePass from "./auth/changepass";
 import Promotion from "./components/promotion";
+import { UnauthorizedAccess } from "./auth/unauthorized";
+import { Payments } from "./routes/sidebar/payments";
 
 export default function App() {
     const router = createBrowserRouter([
@@ -42,12 +43,8 @@ export default function App() {
             element: <Verify />,
         },
         {
-            path: "/change-password",
+            path: "/change-password/:token",
             element: <ChangePass />,
-        },
-        {
-            path: "register",
-            element: <Register />,
         },
         {
             path: "unauthorized",
@@ -67,12 +64,17 @@ export default function App() {
                         { path: "clients/contacts", element: <ClientContact /> },
                         { path: "tasks", element: <Tasks /> },
                         { path: "users", element: <Users /> },
+                        {
+                            path: "register",
+                            element: <Register />,
+                        },
                         { path: "reports", element: <Reports /> },
                         { path: "user-logs", element: <Userlogs /> },
                         { path: "case-archive", element: <Archives /> },
                         { path: "notifications", element: <Notification /> },
                         { path: "notifications/notif-settings", element: <NotificationSettings /> },
                         { path: "promotion", element: <Promotion /> },
+                        { path: "payments", element: <Payments /> },
                     ],
                 },
             ],
