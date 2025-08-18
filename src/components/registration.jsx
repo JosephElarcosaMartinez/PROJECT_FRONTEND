@@ -58,7 +58,7 @@ const Register = () => {
         formData.append("user_fname", user_fname);
         formData.append("user_mname", user_mname);
         formData.append("user_lname", user_lname);
-        formData.append("user_phonenum", user_phonenum);
+        formData.append("useyhr_phonenum", user_phonenum);
         formData.append("user_role", user_role);
         formData.append("branch_id", branch_id);
         formData.append("created_by", user?.user_id);
