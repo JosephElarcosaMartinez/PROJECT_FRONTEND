@@ -26,6 +26,7 @@ import Clients from "./routes/sidebar/clients";
 import ClientContact from "./components/client-contacts";
 import { UnauthorizedAccess } from "./auth/unauthorized";
 import Promotion from "./components/promotion";
+import { Payments } from "./routes/sidebar/payments";
 
 export default function App() {
     const router = createBrowserRouter([
@@ -73,6 +74,7 @@ export default function App() {
                         { path: "notifications", element: <Notification /> },
                         { path: "notifications/notif-settings", element: <NotificationSettings /> },
                         { path: "promotion", element: <Promotion /> },
+                        { path: "payments", element: <Payments /> },
                     ],
                 },
             ],
