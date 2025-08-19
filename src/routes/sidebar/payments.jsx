@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, Filter } from 'lucide-react';
@@ -424,4 +425,15 @@ export const Payments = () => {
       )}
     </div>
   );
+=======
+import React from "react";
+
+export const Payments = () => {
+    return (
+        <div>
+            <h2>Payments</h2>
+            Payments here
+        </div>
+    );
+>>>>>>> 51a394ad72bd9b4589de5445e87107ad333d0465
 };

@@ -19,13 +19,16 @@ import Userlogs from "./routes/sidebar/user-logs";
 import Reports from "./routes/sidebar/reports";
 import Notification from "./components/notification";
 import NotificationSettings from "./components/notif-settings";
-import { ChangePass } from "./auth/changepass";
 import Verify from "./auth/verification";
 import Register from "./components/registration";
 import Clients from "./routes/sidebar/clients";
 import ClientContact from "./components/client-contacts";
-import { UnauthorizedAccess } from "./auth/unauthorized";
+import ChangePass from "./auth/changepass";
 import Promotion from "./components/promotion";
+<<<<<<< HEAD
+=======
+import { UnauthorizedAccess } from "./auth/unauthorized";
+>>>>>>> 51a394ad72bd9b4589de5445e87107ad333d0465
 import { Payments } from "./routes/sidebar/payments";
 
 export default function App() {
@@ -43,12 +46,8 @@ export default function App() {
             element: <Verify />,
         },
         {
-            path: "/change-password",
+            path: "/change-password/:token",
             element: <ChangePass />,
-        },
-        {
-            path: "register",
-            element: <Register />,
         },
         {
             path: "unauthorized",
@@ -68,6 +67,10 @@ export default function App() {
                         { path: "clients/contacts", element: <ClientContact /> },
                         { path: "tasks", element: <Tasks /> },
                         { path: "users", element: <Users /> },
+                        {
+                            path: "register",
+                            element: <Register />,
+                        },
                         { path: "reports", element: <Reports /> },
                         { path: "user-logs", element: <Userlogs /> },
                         { path: "case-archive", element: <Archives /> },

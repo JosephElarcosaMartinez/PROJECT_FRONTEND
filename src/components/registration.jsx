@@ -3,6 +3,7 @@ import boslogo from "@/assets/BOS_LEGs.png";
 import { Mail, Lock, Eye, EyeOff, User, Phone, Briefcase, Image } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
+import toast from "react-hot-toast";
 
 const Register = () => {
     const navigate = useNavigate();
@@ -25,7 +26,7 @@ const Register = () => {
 
     useEffect(() => {
         if (!user || user.user_role !== "Admin") {
-            navigate("unauthorized");
+            navigate("/unauthorized");
         }
     }, [user, navigate]);
 
@@ -48,6 +49,7 @@ const Register = () => {
     }, []);
 
     const handleRegistration = async (e) => {
+        const toastId = toast.loading("Adding new user...");
         e.preventDefault();
 
         const formData = new FormData();
@@ -56,7 +58,7 @@ const Register = () => {
         formData.append("user_fname", user_fname);
         formData.append("user_mname", user_mname);
         formData.append("user_lname", user_lname);
-        formData.append("user_phonenum", user_phonenum);
+        formData.append("useyhr_phonenum", user_phonenum);
         formData.append("user_role", user_role);
         formData.append("branch_id", branch_id);
         formData.append("created_by", user?.user_id);
@@ -73,8 +75,13 @@ const Register = () => {
             });
 
             const data = await res.json();
+
             if (res.ok) {
                 setMessage("✅ User successfully registered.");
+                toast.success("User successfully added!", {
+                    id: toastId,
+                    duration: 4000,
+                });
 
                 setFName("");
                 setMName("");
@@ -202,6 +209,7 @@ const Register = () => {
                             className="w-full rounded-md border border-blue-300 px-4 py-2 pl-10 text-black focus:outline-none focus:ring-2 focus:ring-blue-400"
                             required
                         >
+                            <option value="Staff">Staff</option>
                             <option value="Paralegal">Paralegal</option>
                             <option value="Lawyer">Lawyer</option>
                             <option value="Admin">Admin</option>
