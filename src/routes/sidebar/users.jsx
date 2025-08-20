@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Pencil, UserRoundX, UserRoundPlus } from "lucide-react";
+import { Pencil, UserRoundX, UserRoundPlus, Search} from "lucide-react";
 import AddUserModal from "@/components/add-users";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
@@ -246,10 +246,10 @@ const Users = () => {
             <div className="mb-6 flex flex-col items-center gap-4 md:flex-row">
                 <input
                     type="text"
-                    placeholder="Search users..."
+                    placeholder="Search by user name, email, phone, role or status..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className="focus:ring-0.5 h-10 w-full flex-grow rounded-md border border-slate-300 bg-white px-4 text-sm text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600 md:flex-1"
+                    className="focus:ring-0.5 h-10 w-full flex-grow rounded-md border border-slate-300 bg-white px-4 text-base text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600 md:flex-1"
                 />
 
                 <button
