@@ -4,10 +4,12 @@ import { useClickOutside } from "@/hooks/use-click-outside";
 import { ProfileModal } from "../components/profile-modal";
 
 import { ChevronsLeft, Search, Sun, Moon, Bell } from "lucide-react";
+import default_avatar from "@/assets/default-avatar.png";
 
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
+import toast from "react-hot-toast";
 
 export const Header = ({ collapsed, setCollapsed }) => {
     const { theme, setTheme } = useTheme();
@@ -23,9 +25,15 @@ export const Header = ({ collapsed, setCollapsed }) => {
     });
 
     const handleLogout = async () => {
+        const toastId = toast.loading("Logging Out...");
+
         const confirmLogout = window.confirm("Are you sure you want to logout?");
         if (confirmLogout) {
             await logout();
+            toast.success("Logout successful!", {
+                id: toastId,
+                duration: 4000,
+            });
         }
     };
 
@@ -92,7 +100,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                     >
                         <span className="px-3 text-sm font-medium text-white">Hi, {user.user_role}</span>
                         <img
-                            src={`http://localhost:3000${user.user_profile}`}
+                            src={user?.user_profile ? `http://localhost:3000${user.user_profile}` : default_avatar}
                             alt="profile"
                             className="h-11 w-11 rounded-full object-cover outline outline-2 outline-gray-200 dark:outline-gray-500"
                         />
@@ -101,7 +109,11 @@ export const Header = ({ collapsed, setCollapsed }) => {
                     {open && (
                         <div className="absolute right-0 mt-2 w-48 rounded-md bg-white p-2 shadow-lg dark:bg-slate-800">
                             <div className="max-w-full truncate px-2 py-1 text-sm font-bold text-gray-500 dark:text-gray-300">
-                                {loading ? "Loading..." : user ? `${user.user_fname} ${user.user_mname ? user.user_mname[0] + "." : ""} ${user.user_lname}` : "No user"}
+                                {loading
+                                    ? "Loading..."
+                                    : user
+                                        ? `${user.user_fname} ${user.user_mname ? user.user_mname[0] + "." : ""} ${user.user_lname}`
+                                        : "No user"}
                             </div>
                             <button
                                 onClick={handleProfile}
