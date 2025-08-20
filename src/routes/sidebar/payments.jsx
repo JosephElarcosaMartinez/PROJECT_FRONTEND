@@ -437,4 +437,3 @@ export const Payments = () => {
         </div>
     );
 };
-r
