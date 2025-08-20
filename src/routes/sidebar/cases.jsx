@@ -120,7 +120,7 @@ const Cases = () => {
         (item) =>
             item.name.toLowerCase().includes(search.toLowerCase()) ||
             item.client.toLowerCase().includes(search.toLowerCase()) ||
-            item.category.toLowerCase().includes(search.toLowerCase()),
+            item.date_filed.toLowerCase().includes(search.toLowerCase()),
     );
 
     return (
