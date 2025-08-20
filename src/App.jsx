@@ -25,10 +25,7 @@ import Clients from "./routes/sidebar/clients";
 import ClientContact from "./components/client-contacts";
 import ChangePass from "./auth/changepass";
 import Promotion from "./components/promotion";
-<<<<<<< HEAD
-=======
 import { UnauthorizedAccess } from "./auth/unauthorized";
->>>>>>> 51a394ad72bd9b4589de5445e87107ad333d0465
 import { Payments } from "./routes/sidebar/payments";
 
 export default function App() {
