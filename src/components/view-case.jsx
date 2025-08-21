@@ -90,7 +90,7 @@ const ViewModal = ({ selectedCase, setSelectedCase }) => {
                         {/* Header */}
                         <div className="flex items-center justify-between mb-6">
                             <div>
-                                <h2 className="text-2xl font-semibold">Case {selectedCase.id}</h2>
+                                <h2 className="text-2xl font-semibold">Case {selectedCase.case_id}</h2>
                                 <div className="flex gap-4 mt-1 text-sm text-gray-600 dark:text-gray-300">
                                     <span>Cabinet #: 001</span>
                                     <span>Drawer #: 002</span>
@@ -106,11 +106,11 @@ const ViewModal = ({ selectedCase, setSelectedCase }) => {
                             <div className="lg:col-span-2 grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="text-sm font-semibold">Case Name</label>
-                                    <input type="text" readOnly value={selectedCase.name} className="w-full mt-1 rounded-lg border px-3 py-2 text-sm bg-white dark:bg-slate-800" />
+                                    <input type="text" readOnly value={selectedCase.ct_name} className="w-full mt-1 rounded-lg border px-3 py-2 text-sm bg-white dark:bg-slate-800" />
                                 </div>
                                 <div>
                                     <label className="text-sm font-semibold">Category</label>
-                                    <input type="text" readOnly value={selectedCase.category} className="w-full mt-1 rounded-lg border px-3 py-2 text-sm bg-white dark:bg-slate-800" />
+                                    <input type="text" readOnly value={selectedCase.case_category} className="w-full mt-1 rounded-lg border px-3 py-2 text-sm bg-white dark:bg-slate-800" />
                                 </div>
                                 <div>
                                     <label className="text-sm font-semibold">Client</label>

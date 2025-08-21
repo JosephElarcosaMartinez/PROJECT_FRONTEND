@@ -261,7 +261,7 @@ const Users = () => {
                     className="flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white shadow hover:bg-blue-700"
                 >
                     Add User
-                </button>
+                </button> 
             </div>
 
             {/* Users Table */}
