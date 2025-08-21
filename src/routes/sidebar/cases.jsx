@@ -4,22 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
 
-const getStatusColor = (status) => {
-    switch (status) {
-        case "All":
-            return "text-red-600 font-semibold";
-        case "Pending":
-            return "text-red-600 font-semibold";
-        case "Processing":
-            return "text-yellow-500 font-semibold";
-        case "Completed":
-            return "text-green-600 font-semibold";
-        default:
-            return "text-gray-500 font-semibold";
-    }
-};
-
-
 const Cases = () => {
     const [search, setSearch] = useState("");
     const [tableData, setTableData] = useState([]);
@@ -134,8 +118,8 @@ const Cases = () => {
         const lawyer = tableData.find((u) => u.user_id === lawyerId);
         return lawyer
             ? `${lawyer.user_fname || ""} ${lawyer.user_mname ? lawyer.user_mname[0] + "." : ""} ${lawyer.user_lname || ""}`
-                .replace(/\s+/g, " ")
-                .trim()
+                  .replace(/\s+/g, " ")
+                  .trim()
             : "Unassigned";
     };
 
@@ -147,15 +131,16 @@ const Cases = () => {
                 <h2 className="title">Cases</h2>
                 <p className="text-sm dark:text-slate-300">Manage all case details here.</p>
             </div>
+            
             {/* Tabs */}
             <div className="mb-4 flex gap-2">
                 {["All", "Pending", "Processing", "Completed"].map((tab) => {
                     // assign base colors
                     const baseColors = {
-                        All: "bg-blue-500 text-white",
-                        Pending: "bg-gray-500 text-white",
-                        Processing: "bg-yellow-400 text-white",
-                        Completed: "bg-green-500 text-white",
+                        All: "bg-blue-500 text-white font-semibold",
+                        Pending: "bg-gray-500 text-white font-semibold",
+                        Processing: "bg-yellow-500 text-white font-semibold",
+                        Completed: "bg-green-500 text-white font-semibold",
                     };
 
                     const active = statusFilter === tab || (tab === "All" && statusFilter === "");
@@ -167,7 +152,8 @@ const Cases = () => {
                         >
                             {tab}
                         </button>
-                    ); white
+                    );
+                    white;
                 })}
             </div>
 
@@ -238,9 +224,9 @@ const Cases = () => {
                                     <td className="px-4 py-3">
                                         {cases?.case_balance !== null && cases?.case_balance !== undefined
                                             ? new Intl.NumberFormat("en-PH", {
-                                                style: "currency",
-                                                currency: "PHP",
-                                            }).format(Number(cases.case_balance))
+                                                  style: "currency",
+                                                  currency: "PHP",
+                                              }).format(Number(cases.case_balance))
                                             : "₱0.00"}
                                     </td>
                                     <td className="px-4 py-3">
