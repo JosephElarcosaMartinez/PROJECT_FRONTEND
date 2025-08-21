@@ -6,6 +6,8 @@ import ViewModal from "../../components/view-case";
 
 const getStatusColor = (status) => {
     switch (status) {
+        case "All":
+            return "text-red-600 font-semibold";
         case "Pending":
             return "text-red-600 font-semibold";
         case "Processing":
@@ -19,6 +21,7 @@ const getStatusColor = (status) => {
 
 const Cases = () => {
     const [search, setSearch] = useState("");
+    const [statusFilter, setStatusFilter] = useState(""); // <-- new state for tabs
     const [tableData, setTableData] = useState([]);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -88,7 +91,7 @@ const Cases = () => {
         const formattedFee = newCase.fee.startsWith("P") ? newCase.fee : `P ${newCase.fee}`;
         const formattedId = parseInt(newCase.id);
 
-        setData((prev) => [
+        setTableData((prev) => [
             ...prev,
             {
                 ...newCase,
@@ -115,20 +118,49 @@ const Cases = () => {
         alert("New case has been added successfully!");
     };
 
-    const filteredCases = tableData.filter(
-        (cases) =>
+    // Filtering logic (search + tab)
+    const filteredCases = tableData.filter((cases) => {
+        const matchesSearch =
             cases.case_id.toString().includes(search) ||
             cases.ct_name.toLowerCase().includes(search.toLowerCase()) ||
             cases.client_fullname.toLowerCase().includes(search.toLowerCase()) ||
             cases.case_status.toLowerCase().includes(search.toLowerCase()) ||
-            formatDateTime(cases.case_date_created).toLowerCase().includes(search.toLowerCase()),
-    );
+            formatDateTime(cases.case_date_created).toLowerCase().includes(search.toLowerCase());
+
+        const matchesStatus = statusFilter ? cases.case_status === statusFilter : true;
+
+        return matchesSearch && matchesStatus;
+    });
 
     return (
         <div className="mx-auto">
             <div className="mb-6">
                 <h2 className="title">Cases</h2>
                 <p className="text-sm dark:text-slate-300">Manage all case details here.</p>
+            </div>
+
+            {/* Tabs */}
+            <div className="mb-4 flex gap-2">
+                {["All", "Pending", "Processing", "Completed"].map((tab) => {
+                    // assign base colors
+                    const baseColors = {
+                        All: "bg-blue-500 text-white",
+                        Pending: "bg-gray-500 text-white",
+                        Processing: "bg-yellow-400 text-black",
+                        Completed: "bg-green-500 text-white",
+                    };
+
+                    const active = statusFilter === tab || (tab === "All" && statusFilter === "");
+                    return (
+                        <button
+                            key={tab}
+                            onClick={() => setStatusFilter(tab === "All" ? "" : tab)}
+                            className={`rounded-full px-4 py-2 text-sm font-medium transition ${active ? baseColors[tab] : "bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200"}`}
+                        >
+                            {tab}
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Search and Buttons */}
