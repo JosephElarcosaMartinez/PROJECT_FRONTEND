@@ -1,30 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { Search } from "lucide-react";
 import defaultAvatar from "../../assets/default-avatar.png";
-import {
-  FileText,
-  Archive,
-  User,
-  Scale,
-  LogIn,
-  LogOut,
-  AlertTriangle,
-  Activity,
-} from "lucide-react";
+import { FileText, Archive, User, Scale, LogIn, LogOut, AlertTriangle, Activity, Search } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
 
 const Userlogs = () => {
-  const [tableData, setTableData] = useState([]);
+  const { user } = useAuth();
+
+  const [userLogs, setUserLogs] = useState([]);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+
   const [visibleCount, setVisibleCount] = useState(5);
 
+  // fetching user logs
   useEffect(() => {
     const fetchUserLogs = async () => {
       try {
-        const res = await fetch("http://localhost:3000/api/user-logs", {
+        const endpoint =
+          user?.user_role === "Admin" ? "http://localhost:3000/api/user-logs" : `http://localhost:3000/api/user-logs/${user.user_id}`;
+
+        const res = await fetch(endpoint, {
           method: "GET",
           credentials: "include",
         });
@@ -32,10 +28,10 @@ const Userlogs = () => {
         if (!res.ok) throw new Error("Failed to fetch user logs");
 
         const data = await res.json();
-        setTableData(data);
+        setUserLogs(data);
       } catch (error) {
-        console.error("Failed to fetch logs", error);
-        setError(error);
+        console.error("Failed to fetch user logs:", error);
+        setError(error.message || "An error occurred while fetching logs.");
       }
     };
 
@@ -72,7 +68,8 @@ const Userlogs = () => {
     return "Action";
   };
 
-  const filteredLogs = tableData.filter((log) => {
+  // Filtered directly in render
+  const filteredLogs = userLogs.filter((log) => {
     const matchSearch =
       log.user_fullname?.toLowerCase().includes(search.toLowerCase()) ||
       log.user_log_type?.toLowerCase().includes(search.toLowerCase()) ||
@@ -83,15 +80,12 @@ const Userlogs = () => {
     return matchSearch && matchDate;
   });
 
-  const totalPages = Math.ceil(filteredLogs.length / itemsPerPage);
-  const paginatedData = filteredLogs.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
-
   return (
     <div className="min-h-screen">
       {error && (
-        <div className="alert alert-error mx-10 mb-5 mt-5 shadow-lg">
+        <div className="mb-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-red-50 shadow">
           <div>
-            <span>{error.message}</span>
+            <span>{error}</span>
           </div>
         </div>
       )}
@@ -102,33 +96,36 @@ const Userlogs = () => {
       </div>
 
       {/* Filter Section */}
-      <div className="card mb-5 flex flex-col gap-3 overflow-x-auto p-4 shadow-md md:flex-row md:items-center md:gap-x-3">
-        <div className="focus:ring-0.5 flex flex-grow items-center gap-2 rounded-md border border-gray-300 bg-transparent px-3 py-2 focus-within:border-blue-600 focus-within:ring-blue-400 dark:border-slate-600 dark:focus-within:border-blue-600">
+      <div className="mb-8 flex flex-wrap items-center gap-4 rounded-lg bg-white p-4 shadow-md dark:bg-slate-900">
+        {/* Search input with icon */}
+        <div className="relative flex-grow">
           <Search
             size={18}
-            className="text-gray-600 dark:text-gray-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400"
           />
           <input
             type="text"
-            placeholder="Search ..."
+            placeholder="Search logs..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full bg-transparent text-gray-900 placeholder-gray-500 outline-none dark:text-white dark:placeholder-gray-400"
+            className="focus:ring-0.5 h-10 w-full rounded-md border border-slate-300 bg-transparent pl-10 pr-3 text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-blue-600 dark:border-slate-700 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600"
           />
         </div>
+
+        {/* Date input */}
         <input
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="input w-[150px] bg-transparent px-2 py-1 text-sm text-slate-900 outline-0 placeholder:text-slate-500 focus:border-blue-600 dark:text-slate-50"
+          className="focus:ring-0.5 h-10 w-[150px] rounded-md border border-slate-300 bg-transparent px-2 py-1 text-sm text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-blue-600 dark:border-slate-700 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600"
         />
       </div>
 
       {/* Logs Section */}
-      {paginatedData.length > 0 ? (
+      {filteredLogs.length > 0 ? (
         <div className="space-y-4">
-          {paginatedData.slice(0, visibleCount).map((log, index) => {
-            const fullName = log.user_fullname || "Unknown User";
+          {filteredLogs.slice(0, visibleCount).map((log, index) => {
+            const fullName = `${log.user_fullname ? log.user_fullname : "Unknown User"}`;
             const avatar = log.user_profile ? `http://localhost:3000${log.user_profile}` : defaultAvatar;
             const icon = getLogIcon(log);
             const tag = getLogTag(log.user_log_action);
@@ -146,7 +143,14 @@ const Userlogs = () => {
                 key={index}
                 className="flex items-start rounded-lg bg-white p-4 text-black shadow-sm hover:shadow-md dark:bg-slate-800 dark:text-white"
               >
-                <img src={avatar} alt={fullName} className="mr-4 h-12 w-12 rounded-full border" />
+                {/* Avatar */}
+                <img
+                  src={avatar}
+                  alt={fullName}
+                  className="mr-4 h-12 w-12 rounded-full border"
+                />
+
+                {/* Details */}
                 <div className="flex-1">
                   <div className="mb-1 flex items-center gap-3">
                     <span className="font-semibold">{fullName}</span>
@@ -157,6 +161,8 @@ const Userlogs = () => {
                     {log.user_log_type || "Unknown Type"}
                   </div>
                 </div>
+
+                {/* Timestamp */}
                 <div className="ml-auto whitespace-nowrap text-sm">{formattedTime}</div>
               </div>
             );
@@ -166,32 +172,16 @@ const Userlogs = () => {
         <p className="text-center text-gray-300">No logs available.</p>
       )}
 
-      {/* Pagination - Not used with Load More but kept in case you want to switch */}
-      <div className="flex justify-end items-center gap-3 mt-4">
-        <button
-          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-          disabled={currentPage === 1}
-          className={`px-3 py-1 border rounded ${currentPage === 1
-            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-            }`}
-        >
-          &lt;
-        </button>
-        <span className="text-sm text-gray-700 dark:text-white">
-          Page {currentPage} of {totalPages}
-        </span>
-        <button
-          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-          disabled={currentPage === totalPages}
-          className={`px-3 py-1 border rounded ${currentPage === totalPages
-            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-            }`}
-        >
-          &gt;
-        </button>
-      </div>
+      {visibleCount < filteredLogs.length && (
+        <div className="mt-6 text-center">
+          <button
+            className="text-gray-800 underline hover:text-blue-300 dark:text-white dark:hover:text-blue-400"
+            onClick={() => setVisibleCount((prev) => prev + 5)}
+          >
+            Load More
+          </button>
+        </div>
+      )}
     </div>
   );
 };
