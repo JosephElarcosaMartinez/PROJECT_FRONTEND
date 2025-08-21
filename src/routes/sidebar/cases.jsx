@@ -4,21 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
 
-const getStatusColor = (status) => {
-    switch (status) {
-        case "All":
-            return "text-red-600 font-semibold";
-        case "Pending":
-            return "text-red-600 font-semibold";
-        case "Processing":
-            return "text-yellow-500 font-semibold";
-        case "Completed":
-            return "text-green-600 font-semibold";
-        default:
-            return "text-gray-500 font-semibold";
-    }
-};
-
 const Cases = () => {
     const [search, setSearch] = useState("");
     const [statusFilter, setStatusFilter] = useState(""); // <-- new state for tabs
@@ -140,14 +125,14 @@ const Cases = () => {
             </div>
 
             {/* Tabs */}
-            <div className="mb-4 flex gap-2 ">
+            <div className="mb-4 flex gap-2">
                 {["All", "Pending", "Processing", "Completed"].map((tab) => {
                     // assign base colors
                     const baseColors = {
-                        All: "bg-blue-500 text-white",
-                        Pending: "bg-gray-500 text-white",
-                        Processing: "bg-yellow-400 text-white",
-                        Completed: "bg-green-500 text-white",
+                        All: "bg-blue-500 text-white font-semibold",
+                        Pending: "bg-gray-500 text-white font-semibold",
+                        Processing: "bg-yellow-500 text-white font-semibold",
+                        Completed: "bg-green-500 text-white font-semibold",
                     };
 
                     const active = statusFilter === tab || (tab === "All" && statusFilter === "");
