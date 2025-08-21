@@ -140,13 +140,13 @@ const Cases = () => {
             </div>
 
             {/* Tabs */}
-            <div className="mb-4 flex gap-2">
+            <div className="mb-4 flex gap-2 ">
                 {["All", "Pending", "Processing", "Completed"].map((tab) => {
                     // assign base colors
                     const baseColors = {
                         All: "bg-blue-500 text-white",
                         Pending: "bg-gray-500 text-white",
-                        Processing: "bg-yellow-400 text-black",
+                        Processing: "bg-yellow-400 text-white",
                         Completed: "bg-green-500 text-white",
                     };
 
