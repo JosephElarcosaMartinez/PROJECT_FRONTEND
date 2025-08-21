@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Filter, X } from "lucide-react";
+import { Filter, X, Search } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
 
@@ -60,17 +60,23 @@ const Archives = () => {
       </div>
 
       {/* Search + Filter */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-4 mb-6 flex flex-col md:flex-row items-center gap-4">
-        <input
-          type="text"
-          placeholder="Search archives..."
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setCurrentPage(1);
-          }}
-          className="w-full md:flex-1 px-4 py-2 border border-gray-300 dark:border-slate-600 rounded-md bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-white"
-        />
+      <div className="card mb-5 flex flex-col gap-3 overflow-x-auto p-4 shadow-md md:flex-row md:items-center md:gap-x-3">
+        <div className="focus:ring-0.5 flex flex-grow items-center gap-2 rounded-md border border-gray-300 bg-transparent px-3 py-2 focus-within:border-blue-600 focus-within:ring-blue-400 dark:border-slate-600 dark:focus-within:border-blue-600">
+          <Search
+            size={18}
+            className="text-gray-600 dark:text-gray-400"
+          />
+          <input
+            type="text"
+            placeholder="Search archives..."
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="w-full bg-transparent text-gray-900 placeholder-gray-500 outline-none dark:text-white dark:placeholder-gray-400"
+          />
+        </div>
         <button
           onClick={() => setIsFilterOpen(true)}
           className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
@@ -123,76 +129,74 @@ const Archives = () => {
           </table>
         </div>
 
-      {/* Filter Modal */}
-      {isFilterOpen && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div ref={filterModalRef} className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Filter Archives</h2>
-              <X className="cursor-pointer text-gray-600 dark:text-gray-300" onClick={() => setIsFilterOpen(false)} />
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Client</label>
-                <input type="text" value={clientFilter} onChange={(e) => setClientFilter(e.target.value)} className="w-full border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 rounded px-3 py-2 text-sm" placeholder="Enter client name" />
+        {/* Filter Modal */}
+        {isFilterOpen && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div ref={filterModalRef} className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg w-full max-w-md">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold">Filter Archives</h2>
+                <X className="cursor-pointer text-gray-600 dark:text-gray-300" onClick={() => setIsFilterOpen(false)} />
               </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Archived Date</label>
-                <input type="text" value={archivedDateFilter} onChange={(e) => setArchivedDateFilter(e.target.value)} className="w-full border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 rounded px-3 py-2 text-sm" placeholder="e.g. 11/5/2022 or N/A" />
-              </div>
-              <div className="flex justify-end gap-2 pt-4">
-                <button className="px-4 py-2 bg-gray-200 dark:bg-slate-600 rounded hover:bg-gray-300" onClick={() => { setClientFilter(""); setArchivedDateFilter(""); setIsFilterOpen(false); }}>
-                  Clear
-                </button>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" onClick={() => setIsFilterOpen(false)}>
-                  Apply
-                </button>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Client</label>
+                  <input type="text" value={clientFilter} onChange={(e) => setClientFilter(e.target.value)} className="w-full border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 rounded px-3 py-2 text-sm" placeholder="Enter client name" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Archived Date</label>
+                  <input type="text" value={archivedDateFilter} onChange={(e) => setArchivedDateFilter(e.target.value)} className="w-full border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 rounded px-3 py-2 text-sm" placeholder="e.g. 11/5/2022 or N/A" />
+                </div>
+                <div className="flex justify-end gap-2 pt-4">
+                  <button className="px-4 py-2 bg-gray-200 dark:bg-slate-600 rounded hover:bg-gray-300" onClick={() => { setClientFilter(""); setArchivedDateFilter(""); setIsFilterOpen(false); }}>
+                    Clear
+                  </button>
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" onClick={() => setIsFilterOpen(false)}>
+                    Apply
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* View Modal */}
-      {selectedCase && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div ref={viewModalRef}>
-            <ViewModal selectedCase={selectedCase} setSelectedCase={setSelectedCase} />
+        {/* View Modal */}
+        {selectedCase && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div ref={viewModalRef}>
+              <ViewModal selectedCase={selectedCase} setSelectedCase={setSelectedCase} />
+            </div>
           </div>
-        </div>
-      )}
-    </div>
-     {/* Pagination */}
-        <div className="flex justify-end items-center gap-3 mt-4">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            disabled={currentPage === 1}
-            className={`px-3 py-1 border rounded ${
-              currentPage === 1
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-            }`}
-          >
-            &lt;
-          </button>
-
-          <span className="text-sm text-gray-700 dark:text-white">
-            Page {currentPage} of {totalPages}
-          </span>
-
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className={`px-3 py-1 border rounded ${
-              currentPage === totalPages
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-            }`}
-          >
-            &gt;
-          </button>
-        </div>
+        )}
       </div>
+      {/* Pagination */}
+      <div className="flex justify-end items-center gap-3 mt-4">
+        <button
+          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+          disabled={currentPage === 1}
+          className={`px-3 py-1 border rounded ${currentPage === 1
+            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+            }`}
+        >
+          &lt;
+        </button>
+
+        <span className="text-sm text-gray-700 dark:text-white">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <button
+          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className={`px-3 py-1 border rounded ${currentPage === totalPages
+            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+            }`}
+        >
+          &gt;
+        </button>
+      </div>
+    </div>
 
   );
 };

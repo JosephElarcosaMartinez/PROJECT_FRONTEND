@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Pencil, UserRoundX, UserRoundPlus, Search} from "lucide-react";
+import { Pencil, UserRoundX, UserRoundPlus, Search } from "lucide-react";
 import AddUserModal from "@/components/add-users";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/auth-context";
@@ -233,9 +233,8 @@ const Users = () => {
                     <button
                         key={role}
                         onClick={() => setSelectedRole(role)}
-                        className={`rounded-full border px-4 py-1.5 text-sm ${
-                            selectedRole === role ? "bg-blue-600 text-white" : "border-gray-300 text-gray-800 dark:text-white"
-                        }`}
+                        className={`rounded-full border border-slate-400 px-4 py-1.5 text-sm ${selectedRole === role ? "bg-blue-600 text-white" : "border-gray-300 text-gray-800 dark:text-white"
+                            }`}
                     >
                         {role}
                     </button>
@@ -243,15 +242,20 @@ const Users = () => {
             </div>
 
             {/* Search & Add Button */}
-            <div className="mb-6 flex flex-col items-center gap-4 md:flex-row">
-                <input
-                    type="text"
-                    placeholder="Search by user name, email, phone, role or status..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="focus:ring-0.5 h-10 w-full flex-grow rounded-md border border-slate-300 bg-white px-4 text-base text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600 md:flex-1"
-                />
-
+            <div className="card mb-5 flex flex-col gap-3 overflow-x-auto p-4 shadow-md md:flex-row md:items-center md:gap-x-3">
+                <div className="focus:ring-0.5 flex flex-grow items-center gap-2 rounded-md border border-gray-300 bg-transparent px-3 py-2 focus-within:border-blue-600 focus-within:ring-blue-400 dark:border-slate-600 dark:focus-within:border-blue-600">
+                    <Search
+                        size={18}
+                        className="text-gray-600 dark:text-gray-400"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Search by user name, email, phone, role or status..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full bg-transparent text-gray-900 placeholder-gray-500 outline-none dark:text-white dark:placeholder-gray-400"
+                    />
+                </div>
                 <button
                     onClick={() => setIsModalOpen(true)}
                     className="flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white shadow hover:bg-blue-700"
@@ -285,15 +289,14 @@ const Users = () => {
                                         <img
                                             src={u.user_profile ? `${API_BASE}${u.user_profile}` : default_avatar}
                                             alt={`${u.user_fname || ""} ${u.user_lname || ""}`.trim()}
-                                            className={`h-10 w-10 rounded-full border-2 object-cover p-0.5 ${
-                                                u.user_status === "Active"
-                                                    ? "border-green-500"
-                                                    : u.user_status === "Pending"
-                                                      ? "border-yellow-500"
-                                                      : u.user_status === "Suspended"
+                                            className={`h-10 w-10 rounded-full border-2 object-cover p-0.5 ${u.user_status === "Active"
+                                                ? "border-green-500"
+                                                : u.user_status === "Pending"
+                                                    ? "border-yellow-500"
+                                                    : u.user_status === "Suspended"
                                                         ? "border-red-500"
                                                         : "border-gray-300"
-                                            }`}
+                                                }`}
                                         />
                                         <span className="font-medium">
                                             {`${u.user_fname || ""} ${u.user_mname || ""} ${u.user_lname || ""}`.replace(/\s+/g, " ").trim()}
@@ -305,15 +308,14 @@ const Users = () => {
                                     <td className="px-4 py-3">{formatDateTime(u.user_date_created)}</td>
                                     <td className="px-4 py-3">
                                         <span
-                                            className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${
-                                                u.user_status === "Active"
-                                                    ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                    : u.user_status === "Pending"
-                                                      ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
-                                                      : u.user_status === "Suspended"
+                                            className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${u.user_status === "Active"
+                                                ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                : u.user_status === "Pending"
+                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                    : u.user_status === "Suspended"
                                                         ? "bg-red-100 text-red-700 dark:bg-red-700/20 dark:text-red-300"
                                                         : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
-                                            }`}
+                                                }`}
                                         >
                                             {u.user_status}
                                         </span>

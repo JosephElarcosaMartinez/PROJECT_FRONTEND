@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Eye } from 'lucide-react';
+import { Eye, Search } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
 import toast from 'react-hot-toast';
 
@@ -137,15 +137,20 @@ export const Payments = () => {
             </div>
 
             {/* Search + Filters */}
-            <div className="card mb-6 flex flex-col items-center gap-4 rounded-lg bg-white p-4 shadow-md dark:bg-slate-800 md:flex-row">
-                <input
-                    type="text"
-                    placeholder="Search by client, case, or reference..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 placeholder-gray-500 outline-none focus:border-blue-600 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-600 md:flex-1"
-                />
-
+            <div className="card mb-5 flex flex-col gap-3 overflow-x-auto p-4 shadow-md md:flex-row md:items-center md:gap-x-3">
+                <div className="focus:ring-0.5 flex flex-grow items-center gap-2 rounded-md border border-gray-300 bg-transparent px-3 py-2 focus-within:border-blue-600 focus-within:ring-blue-400 dark:border-slate-600 dark:focus-within:border-blue-600">
+                    <Search
+                        size={18}
+                        className="text-gray-600 dark:text-gray-400"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Search by client, case, or reference..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-transparent text-gray-900 placeholder-gray-500 outline-none dark:text-white dark:placeholder-gray-400"
+                    />
+                </div>
                 <select
                     value={paymentTypeFilter}
                     onChange={(e) => setPaymentTypeFilter(e.target.value)}
