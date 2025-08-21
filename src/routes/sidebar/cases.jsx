@@ -146,7 +146,7 @@ const Cases = () => {
                     const baseColors = {
                         All: "bg-blue-500 text-white",
                         Pending: "bg-gray-500 text-white",
-                        Processing: "bg-yellow-400 text-black",
+                        Processing: "bg-yellow-400 text-white",
                         Completed: "bg-green-500 text-white",
                     };
 
@@ -159,7 +159,7 @@ const Cases = () => {
                         >
                             {tab}
                         </button>
-                    );
+                    ); white
                 })}
             </div>
 
@@ -230,9 +230,9 @@ const Cases = () => {
                                     <td className="px-4 py-3">
                                         {cases?.case_balance !== null && cases?.case_balance !== undefined
                                             ? new Intl.NumberFormat("en-PH", {
-                                                  style: "currency",
-                                                  currency: "PHP",
-                                              }).format(Number(cases.case_balance))
+                                                style: "currency",
+                                                currency: "PHP",
+                                            }).format(Number(cases.case_balance))
                                             : "₱0.00"}
                                     </td>
                                     <td className="px-4 py-3">
