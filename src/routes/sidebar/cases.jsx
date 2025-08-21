@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from "react";
-import { Pencil, Trash2, Eye, Search } from "lucide-react";
+import { Pencil, SquareX, CircleX, Eye, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
 
 const Cases = () => {
     const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState(""); // <-- new state for tabs
     const [tableData, setTableData] = useState([]);
+    const [error, setError] = useState(null);
+    const [statusFilter, setStatusFilter] = useState("");
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCase, setSelectedCase] = useState(null);
@@ -26,7 +27,7 @@ const Cases = () => {
                 setTableData(data);
             } catch (error) {
                 console.error("Error fetching cases:", error);
-                alert("Failed to load cases. Please try again later.");
+                setError(error.message + ". You might want to check your server connection.");
             }
         };
         fetchCases();
@@ -76,7 +77,7 @@ const Cases = () => {
         const formattedFee = newCase.fee.startsWith("P") ? newCase.fee : `P ${newCase.fee}`;
         const formattedId = parseInt(newCase.id);
 
-        setTableData((prev) => [
+        setData((prev) => [
             ...prev,
             {
                 ...newCase,
@@ -103,27 +104,34 @@ const Cases = () => {
         alert("New case has been added successfully!");
     };
 
-    // Filtering logic (search + tab)
-    const filteredCases = tableData.filter((cases) => {
-        const matchesSearch =
+    const filteredCases = tableData.filter(
+        (cases) =>
             cases.case_id.toString().includes(search) ||
             cases.ct_name.toLowerCase().includes(search.toLowerCase()) ||
             cases.client_fullname.toLowerCase().includes(search.toLowerCase()) ||
             cases.case_status.toLowerCase().includes(search.toLowerCase()) ||
-            formatDateTime(cases.case_date_created).toLowerCase().includes(search.toLowerCase());
+            formatDateTime(cases.case_date_created).toLowerCase().includes(search.toLowerCase()),
+    );
 
-        const matchesStatus = statusFilter ? cases.case_status === statusFilter : true;
-
-        return matchesSearch && matchesStatus;
-    });
+    // get the full name of the (assigned) lawyer
+    const getLawyerFullName = (lawyerId) => {
+        const lawyer = tableData.find((u) => u.user_id === lawyerId);
+        return lawyer
+            ? `${lawyer.user_fname || ""} ${lawyer.user_mname ? lawyer.user_mname[0] + "." : ""} ${lawyer.user_lname || ""}`
+                  .replace(/\s+/g, " ")
+                  .trim()
+            : "Unassigned";
+    };
 
     return (
         <div className="mx-auto">
+            {error && <div className="mb-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-red-50 shadow">{error}</div>}
+
             <div className="mb-6">
                 <h2 className="title">Cases</h2>
                 <p className="text-sm dark:text-slate-300">Manage all case details here.</p>
             </div>
-
+            
             {/* Tabs */}
             <div className="mb-4 flex gap-2">
                 {["All", "Pending", "Processing", "Completed"].map((tab) => {
@@ -145,6 +153,7 @@ const Cases = () => {
                             {tab}
                         </button>
                     );
+                    white;
                 })}
             </div>
 
@@ -157,7 +166,7 @@ const Cases = () => {
                     />
                     <input
                         type="text"
-                        placeholder="Search by case name, client, date filed, status or lawyer..."
+                        placeholder="Search cases by name, client, date filed, status or lawyer..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full bg-transparent text-gray-900 placeholder-gray-500 outline-none dark:text-white dark:placeholder-gray-400"
@@ -211,7 +220,7 @@ const Cases = () => {
                                             {cases.case_status}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3">{cases?.user_fname ?? "To be assigned"}</td>
+                                    <td className="px-4 py-3">{getLawyerFullName(cases.user_id)}</td>
                                     <td className="px-4 py-3">
                                         {cases?.case_balance !== null && cases?.case_balance !== undefined
                                             ? new Intl.NumberFormat("en-PH", {
@@ -230,15 +239,15 @@ const Cases = () => {
                                             </button>
                                             <button
                                                 className="p-1.5 text-yellow-500 hover:text-yellow-700"
-                                                onClick={() => alert(`Editing ${cases.name}`)}
+                                                onClick={() => alert(`Editing ${cases.ct_name} of ${cases.client_fullname}`)}
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </button>
                                             <button
                                                 className="p-1.5 text-red-600 hover:text-red-800"
-                                                onClick={() => alert(`Deleting ${cases.name}`)}
+                                                onClick={() => alert(`Deleting the case of ${cases.client_fullname}`)}
                                             >
-                                                <Trash2 className="h-4 w-4" />
+                                                <SquareX className="h-4 w-4" />
                                             </button>
                                         </div>
                                     </td>
@@ -319,6 +328,7 @@ const Cases = () => {
             {/* View Case Modal */}
             <ViewModal
                 selectedCase={selectedCase}
+                tableData={tableData}
                 setSelectedCase={setSelectedCase}
             />
         </div>
