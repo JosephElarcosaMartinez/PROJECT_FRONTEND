@@ -206,7 +206,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                 ) : (
                     <>
                         {/* Payment Record View */}
-                        <div className="mb-5 flex items-center gap-3">
+                        <div className="mb-6 flex items-center gap-3">
                             <button
                                 onClick={() => setShowPayment(false)}
                                 className="text-gray-500 hover:text-gray-800 dark:hover:text-white"

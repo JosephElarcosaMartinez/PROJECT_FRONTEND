@@ -4,6 +4,21 @@ import { useNavigate } from "react-router-dom";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
 
+// add this inside Cases component, above return
+const getStatusColor = (status) => {
+    switch (status) {
+        case "Pending":
+            return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+        case "Processing":
+            return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
+        case "Completed":
+            return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+        default:
+            return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
+    }
+};
+
+
 const Cases = () => {
     const [search, setSearch] = useState("");
     const [tableData, setTableData] = useState([]);
@@ -118,8 +133,8 @@ const Cases = () => {
         const lawyer = tableData.find((u) => u.user_id === lawyerId);
         return lawyer
             ? `${lawyer.user_fname || ""} ${lawyer.user_mname ? lawyer.user_mname[0] + "." : ""} ${lawyer.user_lname || ""}`
-                  .replace(/\s+/g, " ")
-                  .trim()
+                .replace(/\s+/g, " ")
+                .trim()
             : "Unassigned";
     };
 
@@ -131,7 +146,7 @@ const Cases = () => {
                 <h2 className="title">Cases</h2>
                 <p className="text-sm dark:text-slate-300">Manage all case details here.</p>
             </div>
-            
+
             {/* Tabs */}
             <div className="mb-4 flex gap-2">
                 {["All", "Pending", "Processing", "Completed"].map((tab) => {
@@ -224,9 +239,9 @@ const Cases = () => {
                                     <td className="px-4 py-3">
                                         {cases?.case_balance !== null && cases?.case_balance !== undefined
                                             ? new Intl.NumberFormat("en-PH", {
-                                                  style: "currency",
-                                                  currency: "PHP",
-                                              }).format(Number(cases.case_balance))
+                                                style: "currency",
+                                                currency: "PHP",
+                                            }).format(Number(cases.case_balance))
                                             : "₱0.00"}
                                     </td>
                                     <td className="px-4 py-3">

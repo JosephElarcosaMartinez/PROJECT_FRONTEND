@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Eye } from "lucide-react";
+import { Eye, Search } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import toast from "react-hot-toast";
 
@@ -128,15 +128,21 @@ export const Payments = () => {
                 </div>
             </div>
 
-            {/* Search + Filters */}
+            {/* Search bar */}
             <div className="card mb-6 flex flex-col items-center gap-4 rounded-lg bg-white p-4 shadow-md dark:bg-slate-800 md:flex-row">
-                <input
-                    type="text"
-                    placeholder="Search by client, case, or reference..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 placeholder-gray-500 outline-none focus:border-blue-600 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-600 md:flex-1"
-                />
+                <div className="relative w-full md:flex-1">
+                    <Search
+                        size={18}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Search by client, case, or reference..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full rounded-md border border-gray-300 bg-gray-100 pl-10 pr-4 py-2 text-gray-900 placeholder-gray-500 outline-none focus:border-blue-600 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-600"
+                    />
+                </div>
 
                 <select
                     value={paymentTypeFilter}
@@ -148,6 +154,8 @@ export const Payments = () => {
                     <option value="Cash">Cash</option>
                 </select>
             </div>
+
+
 
             {/* Payments Table */}
             <div className="card w-full overflow-x-auto">
