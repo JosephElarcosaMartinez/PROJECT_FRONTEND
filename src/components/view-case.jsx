@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { X, MapPin, ArrowLeft } from "lucide-react";
+import { X, MapPin, ArrowLeft, Eye } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 
 const getStatusColor = (status) => {
@@ -19,7 +19,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
     const modalRef = useRef(null);
     const fileInputRef = useRef(null);
 
-    const [showPayment, setShowPayment] = useState(false); // <-- added toggle
+    const [showPayment, setShowPayment] = useState(false);
 
     useClickOutside([modalRef], () => setSelectedCase(null));
 
@@ -53,6 +53,9 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
             hour12: true,
         });
     };
+
+    const formatCurrency = (amount) =>
+        new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount);
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -161,7 +164,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                             </div>
                         </div>
 
-                        {/* Documents Section (unchanged) */}
+                        {/* Documents Section */}
                         <div className="mt-6 overflow-x-auto rounded-lg border">
                             <div className="flex items-center justify-between p-4">
                                 <h3 className="text-sm font-semibold">Documents</h3>
@@ -183,49 +186,110 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                     </tr>
                                 </thead>
                                 <tbody className="text-gray-700 dark:text-white">
-                                    {[
-                                        { id: "D123", name: "Affidavit", status: "For Approval", file: "affidavit.pdf", uploader: "Joshua Go" },
-                                        { id: "D124", name: "Pleadings", status: "Approved", file: "pleadings.pdf", uploader: "Noel Batcotoy" },
-                                    ].map((doc) => (
-                                        <tr key={doc.id} className="border-t border-gray-200 dark:border-gray-700">
-                                            <td className="px-4 py-2">{doc.id}</td>
-                                            <td className="px-4 py-2">{doc.name}</td>
-                                            <td className="px-4 py-2">{doc.status}</td>
-                                            <td className="cursor-pointer px-4 py-2 text-blue-600 underline">{doc.file}</td>
-                                            <td className="px-4 py-2">{doc.uploader}</td>
-                                            <td className="space-x-2 px-4 py-2">
-                                                <button className="text-blue-600 hover:underline">Edit</button>
-                                                <button className="text-red-600 hover:underline">Remove</button>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {[{ id: "D123", name: "Affidavit", status: "For Approval", file: "affidavit.pdf", uploader: "Joshua Go" },
+                                    { id: "D124", name: "Pleadings", status: "Approved", file: "pleadings.pdf", uploader: "Noel Batcotoy" }]
+                                        .map((doc) => (
+                                            <tr key={doc.id} className="border-t border-gray-200 dark:border-gray-700">
+                                                <td className="px-4 py-2">{doc.id}</td>
+                                                <td className="px-4 py-2">{doc.name}</td>
+                                                <td className="px-4 py-2">{doc.status}</td>
+                                                <td className="cursor-pointer px-4 py-2 text-blue-600 underline">{doc.file}</td>
+                                                <td className="px-4 py-2">{doc.uploader}</td>
+                                                <td className="space-x-2 px-4 py-2">
+                                                    <button className="text-blue-600 hover:underline">Edit</button>
+                                                    <button className="text-red-600 hover:underline">Remove</button>
+                                                </td>
+                                            </tr>
+                                        ))}
                                 </tbody>
                             </table>
                         </div>
                     </>
                 ) : (
                     <>
-                        {/* Payment Record View */}
-                        <div className="mb-6 flex items-center gap-3">
+                        {/* Payment Record Header */}
+                        <div className="mb-6 flex items-center gap-3 border-b pb-3">
                             <button
                                 onClick={() => setShowPayment(false)}
-                                className="text-gray-500 hover:text-gray-800 dark:hover:text-white"
+                                className="flex items-center gap-1 rounded-lg px-3 py-1 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-slate-700 dark:hover:text-white"
                             >
-                                <ArrowLeft className="h-6 w-6" />
+                                <ArrowLeft className="h-4 w-4" />
+                                Back
                             </button>
-                            <h2 className="text-2xl font-semibold">Payment Record</h2>
+                            <h2 className="text-xl font-bold text-gray-800 dark:text-white">Payment Record</h2>
                         </div>
 
-                        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                            <div className="rounded-lg border bg-green-50 p-4 shadow dark:bg-green-900">
-                                <p className="text-sm text-gray-500 dark:text-green-100">Total Paid</p>
-                                <p className="text-lg font-semibold text-green-700 dark:text-green-300">₱10,000.00</p>
+                        {/* Payment Summary Cards */}
+                        <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            <div className="rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-green-100 p-5 shadow-sm dark:border-green-800 dark:from-green-900 dark:to-green-800">
+                                <p className="text-sm font-medium text-green-700 dark:text-green-300">Total Paid</p>
+                                <p className="mt-2 text-2xl font-extrabold text-green-800 dark:text-green-200">10,000.00</p>
                             </div>
-                            <div className="rounded-lg border bg-red-50 p-4 shadow dark:bg-red-900">
-                                <p className="text-sm text-gray-500 dark:text-red-100">Remaining Balance</p>
-                                <p className="text-lg font-semibold text-red-700 dark:text-red-300">{selectedCase.case_balance}</p>
+                            <div className="rounded-xl border border-red-200 bg-gradient-to-r from-red-50 to-red-100 p-5 shadow-sm dark:border-red-800 dark:from-red-900 dark:to-red-800">
+                                <p className="text-sm font-medium text-red-700 dark:text-red-300">Remaining Balance</p>
+                                <p className="mt-2 text-2xl font-extrabold text-red-800 dark:text-red-200">
+                                    {selectedCase.case_balance}
+                                </p>
+                            </div>
+                            <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100 p-5 shadow-sm dark:border-blue-800 dark:from-blue-900 dark:to-blue-800">
+                                <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Fee</p>
+                                <p className="mt-2 text-2xl font-extrabold text-blue-800 dark:text-blue-200">
+                                    {selectedCase.case_fee}
+                                </p>
                             </div>
                         </div>
+
+                        {/* Payments Table */}
+                        <div className="card w-full overflow-x-auto rounded-xl border border-gray-200 shadow-sm dark:border-slate-700">
+                            <div className="overflow-y-auto">
+                                <table className="min-w-full table-auto text-left text-sm">
+                                    <thead className="sticky top-0 bg-gray-100 text-xs uppercase text-gray-600 dark:bg-slate-800 dark:text-gray-300">
+                                        <tr>
+                                            <th className="px-4 py-3">Payment ID</th>
+                                            <th className="px-4 py-3">Client</th>
+                                            <th className="px-4 py-3">Case</th>
+                                            <th className="px-4 py-3">Amount</th>
+                                            <th className="px-4 py-3">Date</th>
+                                            <th className="px-4 py-3">Payment Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
+                                        {(selectedCase.payments || []).length > 0 ? (
+                                            selectedCase.payments.map((p) => (
+                                                <tr
+                                                    key={p.payment_id}
+                                                    className="hover:bg-blue-50 dark:hover:bg-slate-800 transition"
+                                                >
+                                                    <td className="px-4 py-3 font-medium">{p.payment_id}</td>
+                                                    <td className="px-4 py-3 font-medium">{p.client_fullname}</td>
+                                                    <td
+                                                        className="max-w-xs truncate px-4 py-3"
+                                                        title={p.ct_name}
+                                                    >
+                                                        {p.ct_name}
+                                                    </td>
+                                                    <td className="px-4 py-3 font-bold text-green-600 dark:text-green-400">
+                                                        {formatCurrency(p.payment_amount)}
+                                                    </td>
+                                                    <td className="px-4 py-3">{formatDateTime(p.payment_date)}</td>
+                                                    <td className="px-4 py-3">{p.payment_type}</td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td
+                                                    colSpan="6"
+                                                    className="px-4 py-6 text-center text-slate-500 dark:text-slate-400"
+                                                >
+                                                    No payments found.
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                     </>
                 )}
             </div>
