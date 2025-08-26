@@ -41,7 +41,15 @@ const Documents = () => {
     };
 
     // Filtered list
-    const filteredDocs = documents.filter((doc) => doc.name.toLowerCase().includes(search.toLowerCase()));
+    const filteredDocs = documents.filter((doc) => {
+        const term = search.toLowerCase();
+        return (
+            doc.name.toLowerCase().includes(term) ||
+            doc.case.toLowerCase().includes(term) ||
+            doc.type.toLowerCase().includes(term) ||
+            doc.uploadedBy.toLowerCase().includes(term)
+        );
+    });
 
     // Pagination logic
     const totalPages = Math.ceil(filteredDocs.length / itemsPerPage) || 1;

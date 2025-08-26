@@ -1,81 +1,39 @@
-import { useState } from "react";
-import { Eye, Search } from "lucide-react";
+import { useState, useEffect, use } from "react";
+import { Eye } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import toast from "react-hot-toast";
 
 export const Payments = () => {
     const { user } = useAuth();
     const [error, setError] = useState("");
+    const [paymentsData, setPaymentsData] = useState([]);
 
-    // Sample payment data
-    const [paymentsData, setPaymentsData] = useState([
-        {
-            payment_id: 1,
-            client: "John Doe Corporation",
-            case: "Contract Dispute #2024-001",
-            paid_amount: 15000.0,
-            date: "2024-08-15",
-            payment_type: "Cash",
-            status: "Completed",
-            payment_method: "Wire Transfer",
-            reference_number: "PAY-2024-001",
-        },
-        {
-            payment_id: 2,
-            client: "Sarah Johnson",
-            case: "Personal Injury Case #2024-002",
-            paid_amount: 8500.5,
-            date: "2024-08-12",
-            payment_type: "Credit Card",
-            status: "Completed",
-            payment_method: "Visa",
-            reference_number: "PAY-2024-002",
-        },
-        {
-            payment_id: 3,
-            client: "TechStart Industries",
-            case: "Intellectual Property #2024-003",
-            paid_amount: 25000.0,
-            date: "2024-08-10",
-            payment_type: "Check",
-            status: "Pending",
-            payment_method: "Business Check",
-            reference_number: "PAY-2024-003",
-        },
-        {
-            payment_id: 4,
-            client: "Maria Garcia",
-            case: "Family Law Case #2024-004",
-            paid_amount: 3200.0,
-            date: "2024-08-08",
-            payment_type: "Cash",
-            status: "Completed",
-            payment_method: "Cash Payment",
-            reference_number: "PAY-2024-004",
-        },
-        {
-            payment_id: 5,
-            client: "Global Manufacturing Co.",
-            case: "Corporate Litigation #2024-005",
-            paid_amount: 45000.0,
-            date: "2024-08-05",
-            payment_type: "Cash Payment",
-            status: "Completed",
-            payment_method: "ACH Transfer",
-            reference_number: "PAY-2024-005",
-        },
-        {
-            payment_id: 6,
-            client: "Robert Chen",
-            case: "Real Estate Transaction #2024-006",
-            paid_amount: 7800.75,
-            date: "2024-08-03",
-            payment_type: "Check",
-            status: "Pending",
-            payment_method: "MasterCard",
-            reference_number: "PAY-2024-006",
-        },
-    ]);
+    // fetching here the payments
+    useEffect(() => {
+        const fetchPayments = async () => {
+            try {
+                const response = await fetch("http://localhost:3000/api/payments", {
+                    method: "GET",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch payments");
+                }
+
+                const data = await response.json();
+                setPaymentsData(data);
+            } catch (err) {
+                console.error(err);
+                setError("Failed to fetch payments. Please try again later.");
+            }
+        };
+
+        fetchPayments();
+    }, []);
 
     const [searchTerm, setSearchTerm] = useState("");
     const [paymentTypeFilter, setPaymentTypeFilter] = useState("All");
@@ -88,8 +46,8 @@ export const Payments = () => {
     // Filter + Search
     const filteredPayments = paymentsData.filter((p) => {
         const matchesSearch =
-            p.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            p.case.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.payment_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.ct_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             p.reference_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
             p.payment_type.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -117,6 +75,19 @@ export const Payments = () => {
         return styles[status] || "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
     };
 
+    const formatDateTime = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toLocaleString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+        });
+    };
+
     return (
         <div className="bg-blue rounded-xl">
             {error && <div className="mb-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-red-50 shadow">{error}</div>}
@@ -128,21 +99,15 @@ export const Payments = () => {
                 </div>
             </div>
 
-            {/* Search bar */}
+            {/* Search + Filters */}
             <div className="card mb-6 flex flex-col items-center gap-4 rounded-lg bg-white p-4 shadow-md dark:bg-slate-800 md:flex-row">
-                <div className="relative w-full md:flex-1">
-                    <Search
-                        size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400"
-                    />
-                    <input
-                        type="text"
-                        placeholder="Search by client, case, or reference..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full rounded-md border border-gray-300 bg-gray-100 pl-10 pr-4 py-2 text-gray-900 placeholder-gray-500 outline-none focus:border-blue-600 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-600"
-                    />
-                </div>
+                <input
+                    type="text"
+                    placeholder="Search by client, case, or reference..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 placeholder-gray-500 outline-none focus:border-blue-600 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-600 md:flex-1"
+                />
 
                 <select
                     value={paymentTypeFilter}
@@ -155,14 +120,13 @@ export const Payments = () => {
                 </select>
             </div>
 
-
-
             {/* Payments Table */}
             <div className="card w-full overflow-x-auto">
-                <div className="h-[600px] overflow-y-auto">
+                <div className="overflow-y-auto">
                     <table className="min-w-full table-auto text-left text-sm">
                         <thead className="card-title z-100 sticky top-0 bg-white text-xs uppercase dark:bg-slate-900">
                             <tr>
+                                <th className="px-4 py-3">Payment ID</th>
                                 <th className="px-4 py-3">Client</th>
                                 <th className="px-4 py-3">Case</th>
                                 <th className="px-4 py-3">Amount</th>
@@ -178,15 +142,16 @@ export const Payments = () => {
                                         key={p.payment_id}
                                         className="border-t border-gray-200 transition hover:bg-blue-50 dark:border-gray-700 dark:hover:bg-slate-800"
                                     >
-                                        <td className="px-4 py-3 font-medium">{p.client}</td>
+                                        <td className="px-4 py-3 font-medium">{p.payment_id}</td>
+                                        <td className="px-4 py-3 font-medium">{p.client_fullname}</td>
                                         <td
                                             className="max-w-xs truncate px-4 py-3"
-                                            title={p.case}
+                                            title={p.ct_name}
                                         >
-                                            {p.case}
+                                            {p.ct_name}
                                         </td>
-                                        <td className="px-4 py-3 font-bold text-green-600 dark:text-green-400">{formatCurrency(p.paid_amount)}</td>
-                                        <td className="px-4 py-3">{new Date(p.date).toLocaleDateString()}</td>
+                                        <td className="px-4 py-3 font-bold text-green-600 dark:text-green-400">{formatCurrency(p.payment_amount)}</td>
+                                        <td className="px-4 py-3">{formatDateTime(p.payment_date)}</td>
                                         <td className="px-4 py-3">{p.payment_type}</td>
                                         <td className="px-4 py-3">
                                             <button
@@ -281,7 +246,7 @@ export const Payments = () => {
                             </div>
                             <div>
                                 <p className="font-semibold text-gray-600 dark:text-blue-700">Payment Method</p>
-                                <p className="dark:text-slate-200">{viewPayment.payment_method}</p>
+                                <p className="dark:text-slate-200">{viewPayment.payment_type}</p>
                             </div>
                         </div>
                         <div className="mt-6 flex justify-end">
