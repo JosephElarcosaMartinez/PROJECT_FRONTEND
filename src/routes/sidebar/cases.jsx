@@ -1,62 +1,65 @@
 import { useState, useRef, useEffect } from "react";
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { Pencil, SquareX, CircleX, Eye, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
 
-const InitialData = [
-    {
-        id: 1,
-        name: "Davis Incorporation",
-        client: "Davis Corp",
-        date_filed: "Aug 11, 2025",
-        status: "Pending",
-        lawyer: "Sarah Wilson",
-        balance: "P 40,000.00",
-        fee: "P 50,000.00",
-    },
-    {
-        id: 2,
-        name: "Smith vs. Henderson",
-        client: "John Smith",
-        date_filed: "Jul 22, 2025",
-        status: "Processing",
-        lawyer: "John Cooper",
-        balance: "P 0.00",
-        fee: "P 10,000.00",
-    },
-    {
-        id: 3,
-        name: "Davis Incorporation",
-        client: "Davis Corp",
-        date_filed: "Feb 25, 2025",
-        status: "Completed",
-        lawyer: "Emma Thompson",
-        balance: "P 2,500.00",
-        fee: "P 12,500.00",
-    },
-];
-
+// add this inside Cases component, above return
 const getStatusColor = (status) => {
     switch (status) {
         case "Pending":
-            return "text-red-600 font-semibold";
+            return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
         case "Processing":
-            return "text-yellow-500 font-semibold";
+            return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
         case "Completed":
-            return "text-green-600 font-semibold";
+            return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
         default:
-            return "text-gray-500 font-semibold";
+            return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
     }
 };
 
+
 const Cases = () => {
     const [search, setSearch] = useState("");
-    const [data, setData] = useState(InitialData);
+    const [tableData, setTableData] = useState([]);
+    const [error, setError] = useState(null);
+    const [statusFilter, setStatusFilter] = useState("");
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCase, setSelectedCase] = useState(null);
     const addCaseModalRef = useRef();
     const navigate = useNavigate();
+
+    // Fetch cases data from API
+    useEffect(() => {
+        const fetchCases = async () => {
+            try {
+                const response = await fetch("http://localhost:3000/api/cases");
+                if (!response.ok) {
+                    throw new Error("Failed to fetch cases");
+                }
+                const data = await response.json();
+                setTableData(data);
+            } catch (error) {
+                console.error("Error fetching cases:", error);
+                setError(error.message + ". You might want to check your server connection.");
+            }
+        };
+        fetchCases();
+    }, []);
+
+    const formatDateTime = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toLocaleString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+        });
+    };
 
     const [newCase, setNewCase] = useState({
         id: "",
@@ -116,29 +119,74 @@ const Cases = () => {
         alert("New case has been added successfully!");
     };
 
-    const filteredCases = data.filter(
-        (item) =>
-            item.name.toLowerCase().includes(search.toLowerCase()) ||
-            item.client.toLowerCase().includes(search.toLowerCase()) ||
-            item.date_filed.toLowerCase().includes(search.toLowerCase()),
+    const filteredCases = tableData.filter(
+        (cases) =>
+            cases.case_id.toString().includes(search) ||
+            cases.ct_name.toLowerCase().includes(search.toLowerCase()) ||
+            cases.client_fullname.toLowerCase().includes(search.toLowerCase()) ||
+            cases.case_status.toLowerCase().includes(search.toLowerCase()) ||
+            formatDateTime(cases.case_date_created).toLowerCase().includes(search.toLowerCase()),
     );
+
+    // get the full name of the (assigned) lawyer
+    const getLawyerFullName = (lawyerId) => {
+        const lawyer = tableData.find((u) => u.user_id === lawyerId);
+        return lawyer
+            ? `${lawyer.user_fname || ""} ${lawyer.user_mname ? lawyer.user_mname[0] + "." : ""} ${lawyer.user_lname || ""}`
+                .replace(/\s+/g, " ")
+                .trim()
+            : "Unassigned";
+    };
 
     return (
         <div className="mx-auto">
+            {error && <div className="mb-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-red-50 shadow">{error}</div>}
+
             <div className="mb-6">
                 <h2 className="title">Cases</h2>
                 <p className="text-sm dark:text-slate-300">Manage all case details here.</p>
             </div>
 
+            {/* Tabs */}
+            <div className="mb-4 flex gap-2">
+                {["All", "Pending", "Processing", "Completed"].map((tab) => {
+                    // assign base colors
+                    const baseColors = {
+                        All: "bg-blue-500 text-white font-semibold",
+                        Pending: "bg-gray-500 text-white font-semibold",
+                        Processing: "bg-yellow-500 text-white font-semibold",
+                        Completed: "bg-green-500 text-white font-semibold",
+                    };
+
+                    const active = statusFilter === tab || (tab === "All" && statusFilter === "");
+                    return (
+                        <button
+                            key={tab}
+                            onClick={() => setStatusFilter(tab === "All" ? "" : tab)}
+                            className={`rounded-full px-4 py-2 text-sm font-medium transition ${active ? baseColors[tab] : "bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200"}`}
+                        >
+                            {tab}
+                        </button>
+                    );
+                    white;
+                })}
+            </div>
+
             {/* Search and Buttons */}
             <div className="card mb-5 flex flex-col gap-3 overflow-x-auto p-4 shadow-md md:flex-row md:items-center md:gap-x-3">
-                <input
-                    type="text"
-                    placeholder="Search by case name, client, or category..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="focus:ring-0.5 h-10 w-full flex-grow rounded-md border border-slate-300 bg-white px-3 text-base text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600"
-                />
+                <div className="focus:ring-0.5 flex flex-grow items-center gap-2 rounded-md border border-gray-300 bg-transparent px-3 py-2 focus-within:border-blue-600 focus-within:ring-blue-400 dark:border-slate-600 dark:focus-within:border-blue-600">
+                    <Search
+                        size={18}
+                        className="text-gray-600 dark:text-gray-400"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Search cases by name, client, date filed, status or lawyer..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full bg-transparent text-gray-900 placeholder-gray-500 outline-none dark:text-white dark:placeholder-gray-400"
+                    />
+                </div>
 
                 <div className="flex flex-shrink-0 gap-2 whitespace-nowrap">
                     <button
@@ -173,41 +221,48 @@ const Cases = () => {
                     </thead>
                     <tbody className="text-slate-950 dark:text-white">
                         {filteredCases.length > 0 ? (
-                            filteredCases.map((item) => (
+                            filteredCases.map((cases) => (
                                 <tr
-                                    key={item.id}
+                                    key={cases.id}
                                     className="border-t border-gray-200 transition hover:bg-blue-100 dark:border-gray-700 dark:hover:bg-blue-950"
                                 >
-                                    <td className="px-4 py-3">C{item.id}</td>
-                                    <td className="px-4 py-3">{item.name}</td>
-                                    <td className="px-4 py-3">{item.client}</td>
-                                    <td className="px-4 py-3">{item.date_filed}</td>
+                                    <td className="px-4 py-3">{cases.case_id}</td>
+                                    <td className="px-4 py-3">{cases.ct_name}</td>
+                                    <td className="px-4 py-3">{cases.client_fullname}</td>
+                                    <td className="px-4 py-3">{formatDateTime(cases.case_date_created)}</td>
                                     <td className="px-4 py-3">
-                                        <span className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(item.status)}`}>
-                                            {item.status}
+                                        <span className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(cases.case_status)}`}>
+                                            {cases.case_status}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3">{item.lawyer}</td>
-                                    <td className="px-4 py-3">{item.balance}</td>
+                                    <td className="px-4 py-3">{getLawyerFullName(cases.user_id)}</td>
+                                    <td className="px-4 py-3">
+                                        {cases?.case_balance !== null && cases?.case_balance !== undefined
+                                            ? new Intl.NumberFormat("en-PH", {
+                                                style: "currency",
+                                                currency: "PHP",
+                                            }).format(Number(cases.case_balance))
+                                            : "₱0.00"}
+                                    </td>
                                     <td className="px-4 py-3">
                                         <div className="flex flex-wrap items-center gap-1">
                                             <button
                                                 className="p-1.5 text-blue-600 hover:text-blue-800"
-                                                onClick={() => setSelectedCase(item)}
+                                                onClick={() => setSelectedCase(cases)}
                                             >
                                                 <Eye className="h-4 w-4" />
                                             </button>
                                             <button
                                                 className="p-1.5 text-yellow-500 hover:text-yellow-700"
-                                                onClick={() => alert(`Editing ${item.name}`)}
+                                                onClick={() => alert(`Editing ${cases.ct_name} of ${cases.client_fullname}`)}
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </button>
                                             <button
                                                 className="p-1.5 text-red-600 hover:text-red-800"
-                                                onClick={() => alert(`Deleting ${item.name}`)}
+                                                onClick={() => alert(`Deleting the case of ${cases.client_fullname}`)}
                                             >
-                                                <Trash2 className="h-4 w-4" />
+                                                <SquareX className="h-4 w-4" />
                                             </button>
                                         </div>
                                     </td>
@@ -288,6 +343,7 @@ const Cases = () => {
             {/* View Case Modal */}
             <ViewModal
                 selectedCase={selectedCase}
+                tableData={tableData}
                 setSelectedCase={setSelectedCase}
             />
         </div>
