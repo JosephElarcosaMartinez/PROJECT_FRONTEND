@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Pencil, Trash2, Eye, EyeOff, RefreshCcw } from "lucide-react";
+import { Pencil, Trash2, Eye, EyeOff, RefreshCcw, Search } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import AddClient from "../../components/add-client";
 import { useAuth } from "@/context/auth-context";
@@ -41,7 +41,7 @@ const Client = () => {
             setClientContacts(contacts);
         } catch (err) {
             console.error("Fetching error:", err);
-            setError(err);
+            setError(err + ". You might want to check you server connection.");
         }
     }, [user, showAllClients]);
 
@@ -191,13 +191,7 @@ const Client = () => {
 
     return (
         <div className="bg-blue rounded-xl">
-            {error && (
-                <div className="alert alert-error mx-10 mb-5 mt-5 shadow-lg">
-                    <div>
-                        <span>{error.message}</span>
-                    </div>
-                </div>
-            )}
+            {error && <div className="mb-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-red-50 shadow">{error}</div>}
 
             <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
@@ -206,14 +200,20 @@ const Client = () => {
                 </div>
             </div>
 
-            <div className="card mb-6 flex flex-col items-center gap-4 rounded-lg bg-white p-4 shadow-md dark:bg-slate-800 md:flex-row">
-                <input
-                    type="text"
-                    placeholder="Search clients..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full rounded-md border border-gray-300 bg-gray-100 px-4 py-2 text-gray-900 placeholder-gray-500 outline-none focus:border-blue-600 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-600 md:flex-1"
-                />
+            <div className="card mb-6 flex flex-col items-center gap-4 rounded-lg bg-white p-4 shadow-md md:flex-row">
+                <div className="focus:ring-0.5 flex flex-grow items-center gap-2 rounded-md border border-gray-300 bg-transparent px-3 py-2 focus-within:border-blue-600 focus-within:ring-blue-400 dark:border-slate-600 dark:focus-within:border-blue-600">
+                    <Search
+                        size={18}
+                        className="text-gray-600 dark:text-gray-400"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Search clients by name, company, email, phone or created by..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full bg-transparent text-gray-900 placeholder-gray-500 outline-none dark:text-white dark:placeholder-gray-400"
+                    />
+                </div>
 
                 {user?.user_role === "Admin" && (
                     <button
@@ -254,13 +254,12 @@ const Client = () => {
                                 >
                                     <td className="whitespace-nowrap px-4 py-3">
                                         <span
-                                            className={`mr-2 inline-block h-2 w-4 rounded-full ${
-                                                client.client_status === "Active"
+                                            className={`mr-2 inline-block h-2 w-4 rounded-full ${client.client_status === "Active"
                                                     ? "bg-green-500"
                                                     : client.client_status === "Inactive"
-                                                      ? "bg-gray-400"
-                                                      : "bg-red-500"
-                                            }`}
+                                                        ? "bg-gray-400"
+                                                        : "bg-red-500"
+                                                }`}
                                         ></span>
                                         {client.client_fullname}
                                     </td>
@@ -381,13 +380,12 @@ const Client = () => {
                                     <p className="font-semibold dark:text-blue-700">Status</p>
                                     <p className="text-gray-600 dark:text-slate-200">
                                         <span
-                                            className={`rounded-full px-3 py-0.5 text-xs text-white ${
-                                                viewClient.client_status === "Active"
+                                            className={`rounded-full px-3 py-0.5 text-xs text-white ${viewClient.client_status === "Active"
                                                     ? "bg-green-500"
                                                     : viewClient.client_status === "Inactive"
-                                                      ? "bg-gray-400"
-                                                      : "bg-red-500"
-                                            }`}
+                                                        ? "bg-gray-400"
+                                                        : "bg-red-500"
+                                                }`}
                                         >
                                             {viewClient.client_status}
                                         </span>
