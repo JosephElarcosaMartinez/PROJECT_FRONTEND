@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
-import { Paperclip } from "lucide-react";
+import { Paperclip, Download, Loader2 } from "lucide-react";
 import { useAuth } from "../../context/auth-context";
 
 // Constants
 const ITEMS_PER_PAGE = 6;
 const PRIORITY_TABS = ["All", "High", "Mid", "Low"];
 
+// Raw tasks now come from backend; placeholder kept for shape reference only.
+const rawTasks = [];
 
 // Helpers
 const getDaysRemaining = (dueDate) => {
@@ -28,6 +30,9 @@ const priorityColor = {
   Mid: "text-yellow-600",
   Low: "text-gray-700",
 };
+
+// Priority ordering for sorting (smaller number = higher precedence)
+const PRIORITY_ORDER = { High: 1, Mid: 2, Low: 3 };
 
 // Tab Color Logic
 const getTabColor = (tab, isActive) => {
@@ -52,72 +57,59 @@ export default function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [priorityFilter, setPriorityFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [uploadingTaskId, setUploadingTaskId] = useState(null);
   const [error, setError] = useState(null);
 
-  // Initialize tasks with computed fields
-  const { user } = useAuth();
+  const API_BASE = 'http://localhost:3000';
 
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const response = await fetch("http://localhost:3000/api/tasks", {
-          method: "GET",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (response.status === 401) {
-          setError("You are not authorized to view tasks. Please log in.");
-          return;
-        }
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const processed = data.map((task) => ({
-          ...task,
-          priority: getPriorityFromDueDate(task.td_due_date, task.td_status),
-        }));
-        setTasks(processed);
-      } catch (e) {
-        setError("Failed to fetch tasks: " + e.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (user) {
-      fetchTasks();
-    } else {
-      setError("Please log in to view tasks");
+  // Fetch tasks from backend
+  const fetchTasks = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/tasks`, { credentials: 'include' });
+      if (!res.ok) throw new Error(`Failed to fetch tasks (${res.status})`);
+      const data = await res.json();
+      // Map backend rows to UI fields
+      const mapped = data.map(row => {
+        const due = row.td_due_date || row.td_due_date?.substring?.(0,10) || '';
+        return {
+          id: row.td_id,
+          title: row.td_name || 'Untitled Task',
+          case: row.td_case_id || row.td_case || '-',
+            description: row.td_description || '',
+            assignedTo: row.td_to || '-',
+            dueDate: due,
+            completedDate: row.td_date_completed || null,
+            status: row.td_status || 'Pending',
+            attachmentPath: row.td_doc_path || null,
+            priority: row.td_due_date ? getPriorityFromDueDate(row.td_due_date) : 'Low'
+        };
+      });
+      setTasks(mapped);
+    } catch (e) {
+      setError(e.message);
+    } finally {
       setLoading(false);
     }
-  }, [user]);
+  };
+
+  useEffect(() => { fetchTasks(); }, []);
 
   const filteredTasks = useMemo(() => {
-    // First filter by priority if needed
-    const filtered = priorityFilter === "All"
+    const base = priorityFilter === "All"
       ? tasks
       : tasks.filter((task) => task.priority === priorityFilter);
-    
-    // Then sort tasks by priority and status
-    return filtered.sort((a, b) => {
-      // Put completed tasks last
-      if (a.td_status === "Completed" && b.td_status !== "Completed") return 1;
-      if (a.td_status !== "Completed" && b.td_status === "Completed") return -1;
-      
-      // For pending tasks, sort by priority
-      if (a.td_status !== "Completed" && b.td_status !== "Completed") {
-        const priorityOrder = { High: 1, Mid: 2, Low: 3 };
-        return (priorityOrder[a.priority] || 4) - (priorityOrder[b.priority] || 4);
-      }
-      
-      return 0;
+    // Sort by priority: High -> Mid -> Low; then optional dueDate ascending
+    return [...base].sort((a, b) => {
+      const pa = PRIORITY_ORDER[a.priority] || 99;
+      const pb = PRIORITY_ORDER[b.priority] || 99;
+      if (pa !== pb) return pa - pb;
+      // Secondary: earlier due date first (if valid dates)
+      const da = Date.parse(a.dueDate) || Infinity;
+      const db = Date.parse(b.dueDate) || Infinity;
+      return da - db;
     });
   }, [priorityFilter, tasks]);
 
@@ -130,82 +122,59 @@ export default function Tasks() {
   const handleFileChange = async (e, taskId) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    // Create FormData to send the file
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('taskId', taskId);
-    formData.append('status', 'Completed');
-    formData.append('completionDate', new Date().toISOString());
-
+    setUploadingTaskId(taskId);
+    setError(null);
     try {
-      const response = await fetch('http://localhost:3000/api/tasks/upload', {
+      const form = new FormData();
+      form.append('file', file);
+      form.append('taskId', taskId);
+      const res = await fetch(`${API_BASE}/api/tasks/upload`, {
         method: 'POST',
-        credentials: 'include',
-        body: formData
+        body: form,
+        credentials: 'include'
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to upload file');
-      }
-
-      const data = await response.json();
-
-      // Update the tasks state with the new attachment info and completion status
-      setTasks((prev) =>
-        prev.map((task) =>
-          task.td_id === taskId
-            ? {
-              ...task,
-              td_status: 'Completed',
-              td_date_completed: data.td_date_completed,
-              attachment: {
-                name: file.name,
-                path: data.filePath
-              }
-            }
-            : task
-        )
-      );
-
-      alert('File uploaded successfully!');
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      alert('Failed to upload file. Please try again.');
+      if (!res.ok) throw new Error('Upload failed');
+      await fetchTasks();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploadingTaskId(null);
     }
   };
 
-  if (loading) {
-    return <div className="text-center py-8">Loading tasks...</div>;
-  }
-
-  if (error) {
-    return <div className="text-center py-8 text-red-500">Error: {error}</div>;
-  }
+  const handleDownload = async (taskId, filename='document.pdf') => {
+    try {
+      const res = await fetch(`${API_BASE}/api/tasks/${taskId}/attachment`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Download failed');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setError(e.message);
+    }
+  };
 
   return (
     <div className="space-y-6 min-h-screen text-black dark:text-white">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
-        <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
-            Tasks
-          </h2>
-          <p className="text-sm text-gray-500">
-            Manage and track all case-related tasks
-          </p>
-        </div>
-
-        {/* Add Task Button */}
-        <div className="mt-4 md:mt-0 flex gap-2">
-          <button
-            className="flex items-center gap-2 border border-blue-600 bg-blue-600 px-3 py-1 rounded-md text-white hover:bg-blue-700"
-          // onClick={}
-          >
-            Add Task
-          </button>
-        </div>
+      <div>
+        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+          Tasks
+        </h2>
+        <p className="text-sm text-gray-500">
+          Manage and track all case-related tasks
+        </p>
       </div>
+
+      {error && (
+        <div className="p-3 rounded bg-red-100 text-red-700 text-sm">{error}</div>
+      )}
 
       {/* Priority Tabs */}
       <div className="flex gap-3 flex-wrap mb-4">
@@ -227,74 +196,82 @@ export default function Tasks() {
       </div>
 
       {/* Task Cards */}
+      {loading ? (
+        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+          <Loader2 className="animate-spin" size={18} /> Loading tasks...
+        </div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {currentTasks.map((task) => {
           const isOverdue =
-            task.td_status !== "Completed" &&
-            new Date(task.td_due_date) < new Date();
+            task.status !== "Completed" &&
+            new Date(task.dueDate) < new Date();
 
           return (
             <div
-              key={task.td_id}
-              className="relative rounded-lg border border-gray-200 bg-white p-4 shadow hover:shadow-lg dark:border-slate-700 dark:bg-slate-800 dark:hover:shadow-xl transition-shadow duration-200"
+              key={task.id}
+              className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 rounded-lg shadow-lg relative"
             >
-              {task.td_status !== "Completed" && task.priority && (
-                  <span className={`absolute right-1 top-3 rounded-full px-3 py-1 text-xs font-medium ${priorityColor[task.priority]}`}>
-                    {task.priority}
-                  </span>
-              )}
+              <div className="absolute top-3 right-4 text-sm font-medium">
+                <span className={priorityColor[task.priority]}>
+                  {task.priority}
+                </span>
+              </div>
 
-              <h3 className="font-semibold text-blue-700 dark:text-blue-400 mb-1 mt-2">
-                {task.td_name}
+              <h3 className="font-semibold text-blue-700 dark:text-blue-400 mb-1 truncate">
+                {task.title}
               </h3>
               <p className="text-sm">
-                <strong>Case:</strong> {task.td_case}
+                <strong>Case:</strong> {task.case}
               </p>
-              <p className="text-sm mb-2">{task.td_description}</p>
+              <p className="text-sm mb-2">{task.description}</p>
               <p className="text-sm mb-1">
-                <strong>Assigned to:</strong> {task.td_to}
+                <strong>Assigned to:</strong> {task.assignedTo}
               </p>
               <p className="text-sm mb-1">
-                <strong className="text-red-600">Due:</strong> {task.td_due_date ? task.td_due_date.substring(0, 10) : ''}
+                <strong className="text-red-600">Due:</strong> {task.dueDate}
                 {isOverdue && (
                   <span className="text-red-500 ml-1">(Overdue)</span>
                 )}
               </p>
-              {task.td_status === "Completed" ? (
+              {task.status === "Completed" && (
                 <p className="text-sm mb-2 text-green-600">
-                  <strong>Completed:</strong> {task.td_date_completed ? task.td_date_completed.substring(0, 10) : ''}
-                </p>
-              ) : (
-                <p className="text-sm mb-2 text-red-600">
-                  <strong>Pending</strong>
+                  <strong>Completed:</strong> {task.completedDate}
                 </p>
               )}
 
               {/* File Upload */}
-              <div className="mt-4 flex justify-end">
-                <label className="inline-flex items-center gap-2 cursor-pointer text-blue-600 hover:underline text-sm">
-                  <Paperclip size={16} />
-                  {task.attachment ? "Change File" : "Attach File"}
+              <div className="mt-4 flex items-center justify-between gap-2">
+                <label className="inline-flex items-center gap-2 cursor-pointer text-blue-600 hover:underline text-xs">
+                  <Paperclip size={14} />
+                  {uploadingTaskId === task.id ? 'Uploading...' : (task.attachmentPath ? 'Replace File' : 'Attach File')}
                   <input
                     type="file"
                     className="hidden"
-                    onChange={(e) => handleFileChange(e, task.td_id)}
+                    disabled={uploadingTaskId === task.id}
+                    onChange={(e) => handleFileChange(e, task.id)}
                   />
                 </label>
+                {task.attachmentPath && (
+                  <button
+                    onClick={() => handleDownload(task.id, task.title + '.pdf')}
+                    className="text-green-600 hover:text-green-800 text-xs inline-flex items-center gap-1"
+                  >
+                    <Download size={14} /> Download
+                  </button>
+                )}
               </div>
-
-              {task.attachment && (
-                <p className="text-xs text-gray-600 mt-1 truncate w-48 text-right">
-                  {task.attachment.name}
-                </p>
+              {task.attachmentPath && (
+                <p className="text-[10px] text-gray-500 mt-1 truncate w-full text-right">Encrypted file stored</p>
               )}
             </div>
           );
         })}
       </div>
+      )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
+  {!loading && totalPages > 1 && (
         <div className="flex justify-end items-center gap-3 mt-4">
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}

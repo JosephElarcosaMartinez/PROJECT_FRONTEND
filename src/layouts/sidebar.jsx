@@ -1,18 +1,22 @@
 import { forwardRef } from "react";
 import { NavLink } from "react-router-dom";
 import PropTypes from "prop-types";
+import { useAuth } from "@/context/auth-context";
 
-import { navbarLinks } from "../constants";
+import { getNavbarLinks } from "../constants";
 import light_logo from "@/assets/light_logo.png";
 import light_logo2 from "@/assets/BOS_LEGS.png";
 import { cn } from "@/utils/cn";
 
 export const Sidebar = forwardRef(({ collapsed }, ref) => {
+    const { user } = useAuth();
+    const navbarLinks = getNavbarLinks(user?.user_role);
+
     return (
         <aside
             ref={ref}
             className={cn(
-                "fixed z-[50] flex h-full w-[240px] flex-col overflow-x-hidden rounded-lg bg-[#1c3482] p-2 text-white shadow-md transition-all dark:bg-slate-900",
+                "fixed z-999 flex h-full w-[240px] flex-col overflow-x-hidden rounded-lg bg-[#1c3482] p-2 text-white shadow-md transition-all dark:bg-slate-900",
                 collapsed ? "p-0 md:w-[70px] md:items-center" : "md:w-[240px]",
                 collapsed ? "max-md:left-full" : "max-md:left-0",
             )}
