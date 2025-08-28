@@ -158,6 +158,18 @@ export default function Tasks() {
     }
   };
 
+  // Format any date-like value to a concise date string (YYYY-MM-DD fallback)
+  const formatDate = (value) => {
+    if (!value) return '-';
+    const d = new Date(value);
+    if (isNaN(d.getTime())) {
+      // Fallback: attempt simple slice (covers already-truncated ISO strings)
+      return value.toString().slice(0, 10);
+    }
+    // Use locale for better readability while keeping only date parts
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' });
+  };
+
   return (
     <div className="space-y-6 min-h-screen text-black dark:text-white">
       {/* Header */}
@@ -227,14 +239,14 @@ export default function Tasks() {
                 <strong>Assigned to:</strong> {task.assignedTo}
               </p>
               <p className="text-sm mb-1">
-                <strong className="text-red-600">Due:</strong> {task.dueDate}
+                <strong className="text-red-600">Due:</strong> {formatDate(task.dueDate)}
                 {isOverdue && (
                   <span className="text-red-500 ml-1">(Overdue)</span>
                 )}
               </p>
               {task.status === "Completed" && (
                 <p className="text-sm mb-2 text-green-600">
-                  <strong>Completed:</strong> {task.completedDate}
+                  <strong>Completed:</strong> {formatDate(task.completedDate)}
                 </p>
               )}
 
