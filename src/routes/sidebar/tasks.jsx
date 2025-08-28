@@ -1,82 +1,12 @@
 import { useState, useEffect, useMemo } from "react";
-import { Paperclip } from "lucide-react";
+import { Paperclip, Download, Loader2 } from "lucide-react";
 
 // Constants
 const ITEMS_PER_PAGE = 6;
 const PRIORITY_TABS = ["All", "High", "Mid", "Low"];
 
-const rawTasks = [
-  {
-    id: 1,
-    title: "Draft incorporation documents",
-    case: "Davis Incorporation",
-    description: "Prepare articles of incorporation and bylaws",
-    assignedTo: "John Cooper",
-    dueDate: "Dec 1, 2025",
-    completedDate: "Nov 25, 2022",
-    attachment: null,
-  },
-  {
-    id: 2,
-    title: "Prepare deposition questions",
-    case: "Smith vs. Henderson",
-    description: "Draft questions for opposing party deposition",
-    assignedTo: "Emma Thompson",
-    dueDate: "Aug 8, 2025",
-    completedDate: null,
-    attachment: null,
-  },
-  {
-    id: 3,
-    title: "Site inspection",
-    case: "Wilson Property Dispute",
-    description: "Visit property to document current boundary markers",
-    assignedTo: "Sarah Wilson",
-    dueDate: "Aug 12, 2025",
-    completedDate: null,
-    attachment: null,
-  },
-  {
-    id: 4,
-    title: "Contract Review",
-    case: "Anderson vs. Global Corp",
-    description: "Review the contractual obligations",
-    assignedTo: "Michael Brown",
-    dueDate: "Aug 14, 2025",
-    completedDate: null,
-    attachment: null,
-  },
-  {
-    id: 5,
-    title: "Witness Interview",
-    case: "Lopez vs. Metro Bank",
-    description: "Interview main witnesses for testimony",
-    assignedTo: "Sarah Wilson",
-    dueDate: "Aug 20, 2025",
-    completedDate: null,
-    attachment: null,
-  },
-  {
-    id: 6,
-    title: "File Court Motion",
-    case: "Davis Incorporation",
-    description: "File motion for summary judgment",
-    assignedTo: "Emma Thompson",
-    dueDate: "Aug 5, 2025",
-    completedDate: "Aug 4, 2025",
-    attachment: null,
-  },
-  {
-    id: 7,
-    title: "Research Case Law",
-    case: "Smith vs. Henderson",
-    description: "Research precedents relevant to case",
-    assignedTo: "John Cooper",
-    dueDate: "Aug 15, 2025",
-    completedDate: null,
-    attachment: null,
-  },
-];
+// Raw tasks now come from backend; placeholder kept for shape reference only.
+const rawTasks = [];
 
 // Helpers
 const getDaysRemaining = (dueDate) => {
@@ -98,6 +28,9 @@ const priorityColor = {
   Mid: "text-yellow-600",
   Low: "text-gray-700",
 };
+
+// Priority ordering for sorting (smaller number = higher precedence)
+const PRIORITY_ORDER = { High: 1, Mid: 2, Low: 3 };
 
 // Tab Color Logic
 const getTabColor = (tab, isActive) => {
@@ -122,20 +55,60 @@ export default function Tasks() {
   const [tasks, setTasks] = useState([]);
   const [priorityFilter, setPriorityFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [uploadingTaskId, setUploadingTaskId] = useState(null);
+  const [error, setError] = useState(null);
 
-  // Initialize tasks with computed fields
-  useEffect(() => {
-    const processed = rawTasks.map((task) => ({
-      ...task,
-      priority: getPriorityFromDueDate(task.dueDate),
-    }));
-    setTasks(processed);
-  }, []);
+  const API_BASE = 'http://localhost:3000';
+
+  // Fetch tasks from backend
+  const fetchTasks = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${API_BASE}/api/tasks`, { credentials: 'include' });
+      if (!res.ok) throw new Error(`Failed to fetch tasks (${res.status})`);
+      const data = await res.json();
+      // Map backend rows to UI fields
+      const mapped = data.map(row => {
+        const due = row.td_due_date || row.td_due_date?.substring?.(0,10) || '';
+        return {
+          id: row.td_id,
+          title: row.td_name || 'Untitled Task',
+          case: row.td_case_id || row.td_case || '-',
+            description: row.td_description || '',
+            assignedTo: row.td_to || '-',
+            dueDate: due,
+            completedDate: row.td_date_completed || null,
+            status: row.td_status || 'Pending',
+            attachmentPath: row.td_doc_path || null,
+            priority: row.td_due_date ? getPriorityFromDueDate(row.td_due_date) : 'Low'
+        };
+      });
+      setTasks(mapped);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchTasks(); }, []);
 
   const filteredTasks = useMemo(() => {
-    return priorityFilter === "All"
+    const base = priorityFilter === "All"
       ? tasks
       : tasks.filter((task) => task.priority === priorityFilter);
+    // Sort by priority: High -> Mid -> Low; then optional dueDate ascending
+    return [...base].sort((a, b) => {
+      const pa = PRIORITY_ORDER[a.priority] || 99;
+      const pb = PRIORITY_ORDER[b.priority] || 99;
+      if (pa !== pb) return pa - pb;
+      // Secondary: earlier due date first (if valid dates)
+      const da = Date.parse(a.dueDate) || Infinity;
+      const db = Date.parse(b.dueDate) || Infinity;
+      return da - db;
+    });
   }, [priorityFilter, tasks]);
 
   const totalPages = Math.ceil(filteredTasks.length / ITEMS_PER_PAGE);
@@ -144,15 +117,45 @@ export default function Tasks() {
     currentPage * ITEMS_PER_PAGE
   );
 
-  const handleFileChange = (e, taskId) => {
+  const handleFileChange = async (e, taskId) => {
     const file = e.target.files[0];
     if (!file) return;
+    setUploadingTaskId(taskId);
+    setError(null);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      form.append('taskId', taskId);
+      const res = await fetch(`${API_BASE}/api/tasks/upload`, {
+        method: 'POST',
+        body: form,
+        credentials: 'include'
+      });
+      if (!res.ok) throw new Error('Upload failed');
+      await fetchTasks();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploadingTaskId(null);
+    }
+  };
 
-    setTasks((prev) =>
-      prev.map((task) =>
-        task.id === taskId ? { ...task, attachment: file } : task
-      )
-    );
+  const handleDownload = async (taskId, filename='document.pdf') => {
+    try {
+      const res = await fetch(`${API_BASE}/api/tasks/${taskId}/attachment`, { credentials: 'include' });
+      if (!res.ok) throw new Error('Download failed');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setError(e.message);
+    }
   };
 
   return (
@@ -166,6 +169,10 @@ export default function Tasks() {
           Manage and track all case-related tasks
         </p>
       </div>
+
+      {error && (
+        <div className="p-3 rounded bg-red-100 text-red-700 text-sm">{error}</div>
+      )}
 
       {/* Priority Tabs */}
       <div className="flex gap-3 flex-wrap mb-4">
@@ -187,6 +194,11 @@ export default function Tasks() {
       </div>
 
       {/* Task Cards */}
+      {loading ? (
+        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+          <Loader2 className="animate-spin" size={18} /> Loading tasks...
+        </div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {currentTasks.map((task) => {
           const isOverdue =
@@ -204,7 +216,7 @@ export default function Tasks() {
                 </span>
               </div>
 
-              <h3 className="font-semibold text-blue-700 dark:text-blue-400 mb-1">
+              <h3 className="font-semibold text-blue-700 dark:text-blue-400 mb-1 truncate">
                 {task.title}
               </h3>
               <p className="text-sm">
@@ -227,30 +239,37 @@ export default function Tasks() {
               )}
 
               {/* File Upload */}
-              <div className="mt-4 flex justify-end">
-                <label className="inline-flex items-center gap-2 cursor-pointer text-blue-600 hover:underline text-sm">
-                  <Paperclip size={16} />
-                  {task.attachment ? "Change File" : "Attach File"}
+              <div className="mt-4 flex items-center justify-between gap-2">
+                <label className="inline-flex items-center gap-2 cursor-pointer text-blue-600 hover:underline text-xs">
+                  <Paperclip size={14} />
+                  {uploadingTaskId === task.id ? 'Uploading...' : (task.attachmentPath ? 'Replace File' : 'Attach File')}
                   <input
                     type="file"
                     className="hidden"
+                    disabled={uploadingTaskId === task.id}
                     onChange={(e) => handleFileChange(e, task.id)}
                   />
                 </label>
+                {task.attachmentPath && (
+                  <button
+                    onClick={() => handleDownload(task.id, task.title + '.pdf')}
+                    className="text-green-600 hover:text-green-800 text-xs inline-flex items-center gap-1"
+                  >
+                    <Download size={14} /> Download
+                  </button>
+                )}
               </div>
-
-              {task.attachment && (
-                <p className="text-xs text-gray-600 mt-1 truncate w-48 text-right">
-                  {task.attachment.name}
-                </p>
+              {task.attachmentPath && (
+                <p className="text-[10px] text-gray-500 mt-1 truncate w-full text-right">Encrypted file stored</p>
               )}
             </div>
           );
         })}
       </div>
+      )}
 
       {/* Pagination */}
-      {totalPages > 1 && (
+  {!loading && totalPages > 1 && (
         <div className="flex justify-end items-center gap-3 mt-4">
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
