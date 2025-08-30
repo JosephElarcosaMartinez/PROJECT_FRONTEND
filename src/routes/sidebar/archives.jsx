@@ -55,7 +55,7 @@ const Archives = () => {
   return (
     <div className="space-y-6 text-gray-800 dark:text-white min-h-screen">
       <div>
-        <h2 className="text-2xl font-bold">Archives</h2>
+        <h2 className="title">Archives</h2>
         <p className="text-sm text-gray-500">Browse and search completed and archived cases</p>
       </div>
 

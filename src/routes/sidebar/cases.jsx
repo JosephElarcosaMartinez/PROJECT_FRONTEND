@@ -297,7 +297,6 @@ const Cases = () => {
                                 ["Category", "category"],
                                 ["Client", "client"],
                                 ["Branch", "branch"],
-                                ["Filed Date", "filedDate", "date"],
                                 ["Fee", "fee"],
                             ].map(([label, name, type = "text"]) => (
                                 <div key={name}>
@@ -312,7 +311,7 @@ const Cases = () => {
                                 </div>
                             ))}
                             <div className="md:col-span-2">
-                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Description / Remarks</label>
                                 <textarea
                                     name="description"
                                     value={newCase.description}

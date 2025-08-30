@@ -225,7 +225,7 @@ const Users = () => {
             {/* Header */}
             <div className="mb-6">
                 <h2 className="title">Users</h2>
-                <p className="text-sm dark:text-slate-300">Manage system users and their roles</p>
+                <p className="text-sm text-gray-500">Manage system users and their roles</p>
             </div>
 
             {/* Role Filters */}
@@ -308,7 +308,7 @@ const Users = () => {
                                     </td>
                                     <td className="px-4 py-3">{u.user_email}</td>
                                     <td className="px-4 py-3">{u.user_phonenum}</td>
-                                    <td className="px-4 py-3">{u.user_role}</td>
+                                    <td className="px-4 py-3">{u.user_role === "Admin" ? "Super Lawyer" : u.user_role}</td>
                                     <td className="px-4 py-3">{formatDateTime(u.user_date_created)}</td>
                                     <td className="px-4 py-3">
                                         <span

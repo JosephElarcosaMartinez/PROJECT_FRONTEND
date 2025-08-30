@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from "react";
 import defaultAvatar from "../../assets/default-avatar.png";
-import { FileText, Archive, User, Scale, LogIn, LogOut, AlertTriangle, Activity, Search } from "lucide-react";
+import {
+  FileText,
+  Archive,
+  User,
+  Scale,
+  LogIn,
+  LogOut,
+  AlertTriangle,
+  Activity,
+  Search,
+} from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 
 const Userlogs = () => {
@@ -10,7 +20,6 @@ const Userlogs = () => {
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
-
   const [visibleCount, setVisibleCount] = useState(5);
 
   // fetching user logs
@@ -18,7 +27,9 @@ const Userlogs = () => {
     const fetchUserLogs = async () => {
       try {
         const endpoint =
-          user?.user_role === "Admin" ? "http://localhost:3000/api/user-logs" : `http://localhost:3000/api/user-logs/${user.user_id}`;
+          user?.user_role === "Admin"
+            ? "http://localhost:3000/api/user-logs"
+            : `http://localhost:3000/api/user-logs/${user.user_id}`;
 
         const res = await fetch(endpoint, {
           method: "GET",
@@ -42,21 +53,24 @@ const Userlogs = () => {
     const type = log.user_log_type?.toLowerCase();
     const action = log.user_log_action?.toLowerCase();
 
-    if (type === "user log") return <User className="h-5 w-5" />;
-    if (type === "document log") return <FileText className="h-5 w-5" />;
-    if (type === "case log") return <Scale className="h-5 w-5" />;
-    if (type === "archive log") return <Archive className="h-5 w-5" />;
+    if (type === "user log") return <User className="h-5 w-5 text-blue-500" />;
+    if (type === "document log") return <FileText className="h-5 w-5 text-purple-500" />;
+    if (type === "case log") return <Scale className="h-5 w-5 text-green-500" />;
+    if (type === "archive log") return <Archive className="h-5 w-5 text-orange-500" />;
 
-    if (/login/.test(action)) return <LogIn className="h-5 w-5" />;
-    if (/logout/.test(action)) return <LogOut className="h-5 w-5" />;
-    if (/fail|error/.test(action)) return <AlertTriangle className="h-5 w-5 text-red-500" />;
+    if (/login/.test(action)) return <LogIn className="h-5 w-5 text-blue-600" />;
+    if (/logout/.test(action)) return <LogOut className="h-5 w-5 text-gray-500" />;
+    if (/fail|error/.test(action))
+      return <AlertTriangle className="h-5 w-5 text-red-500" />;
 
-    return <Activity className="h-5 w-5" />;
+    return <Activity className="h-5 w-5 text-slate-500" />;
   };
 
   const getTagColor = (action) => {
-    if (/login/i.test(action)) return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
-    if (/logout/i.test(action)) return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+    if (/login/i.test(action))
+      return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
+    if (/logout/i.test(action))
+      return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
     if (/fail|error/i.test(action)) return "bg-red-100 text-red-700";
     return "bg-green-100 text-green-700";
   };
@@ -75,7 +89,8 @@ const Userlogs = () => {
       log.user_log_type?.toLowerCase().includes(search.toLowerCase()) ||
       log.user_log_action?.toLowerCase().includes(search.toLowerCase());
 
-    const matchDate = !selectedDate || log.user_log_time?.startsWith(selectedDate);
+    const matchDate =
+      !selectedDate || log.user_log_time?.startsWith(selectedDate);
 
     return matchSearch && matchDate;
   });
@@ -84,94 +99,109 @@ const Userlogs = () => {
     <div className="min-h-screen">
       {error && (
         <div className="mb-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-red-50 shadow">
-          <div>
-            <span>{error}</span>
-          </div>
+          <span>{error}</span>
         </div>
       )}
 
-      <div className="mb-6 flex flex-col gap-y-1">
-        <h2 className="title">Logs</h2>
-        <p className="text-sm dark:text-slate-300">Track and monitor user activities across the platform.</p>
+      {/* Header */}
+      <div className="mb-6">
+        <h2 className="title">
+          User Logs
+        </h2>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Monitor all platform activities with search and filters.
+        </p>
       </div>
 
-      {/* Filter Section */}
-      <div className="mb-8 flex flex-wrap items-center gap-4 rounded-lg bg-white p-4 shadow-md dark:bg-slate-900">
-        {/* Search input with icon */}
+      {/* Filters */}
+      <div className="mb-8 flex flex-wrap items-center gap-4 rounded-xl bg-white p-4 shadow-md dark:bg-slate-900">
         <div className="relative flex-grow">
           <Search
             size={18}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
           />
           <input
             type="text"
-            placeholder="Search logs..."
+            placeholder="Search by name, type, or action..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="focus:ring-0.5 h-10 w-full rounded-md border border-slate-300 bg-transparent pl-10 pr-3 text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-blue-600 dark:border-slate-700 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600"
+            className="h-10 w-full rounded-md border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm text-slate-800 placeholder:text-slate-400 focus:border-blue-600 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
           />
         </div>
 
-        {/* Date input */}
         <input
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="focus:ring-0.5 h-10 w-[150px] rounded-md border border-slate-300 bg-transparent px-2 py-1 text-sm text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none focus:ring-blue-600 dark:border-slate-700 dark:text-slate-50 dark:placeholder:text-slate-400 dark:focus:border-blue-600 dark:focus:ring-blue-600"
+          className="h-10 rounded-md border border-slate-200 bg-slate-50 px-2 text-sm text-slate-800 focus:border-blue-600 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
         />
       </div>
 
-      {/* Logs Section */}
+      {/* Logs List */}
       {filteredLogs.length > 0 ? (
         <div className="space-y-4">
           {filteredLogs.slice(0, visibleCount).map((log, index) => {
-            const fullName = `${log.user_fullname ? log.user_fullname : "Unknown User"}`;
-            const avatar = log.user_profile ? `http://localhost:3000${log.user_profile}` : defaultAvatar;
+            const fullName = `${log.user_fullname || "Unknown User"}`;
+            const avatar = log.user_profile
+              ? `http://localhost:3000${log.user_profile}`
+              : defaultAvatar;
             const icon = getLogIcon(log);
             const tag = getLogTag(log.user_log_action);
             const tagColor = getTagColor(log.user_log_action);
-            const formattedTime = new Date(log.user_log_time).toLocaleString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-              hour: "2-digit",
-              minute: "2-digit",
-            });
+            const formattedTime = new Date(log.user_log_time).toLocaleString(
+              "en-US",
+              {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              }
+            );
 
             return (
               <div
                 key={index}
-                className="flex items-start rounded-lg bg-white p-4 text-black shadow-sm hover:shadow-md dark:bg-slate-800 dark:text-white"
+                className="flex items-start gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:shadow-md dark:border-slate-700 dark:bg-slate-800"
               >
                 {/* Avatar */}
                 <img
                   src={avatar}
                   alt={fullName}
-                  className="mr-4 h-12 w-12 rounded-full border"
+                  className="h-12 w-12 rounded-full border object-cover"
                 />
 
                 {/* Details */}
                 <div className="flex-1">
-                  <div className="mb-1 flex items-center gap-3">
-                    <span className="font-semibold">{fullName}</span>
-                    <span className={`rounded px-2 py-1 text-xs font-medium ${tagColor}`}>{tag}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="font-semibold text-slate-800 dark:text-slate-100">
+                      {fullName}
+                    </span>
+                    <span
+                      className={`rounded-md px-2 py-0.5 text-xs font-medium ${tagColor}`}
+                    >
+                      {tag}
+                    </span>
                   </div>
-                  <div className="text-dark-700 mb-1 flex items-center gap-2 text-sm">
+                  <div className="mt-1 flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
                     {icon}
-                    {log.user_log_type || "Unknown Type"}
+                    <span>{log.user_log_type || "Unknown Type"}</span>
                   </div>
                 </div>
 
                 {/* Timestamp */}
-                <div className="ml-auto whitespace-nowrap text-sm">{formattedTime}</div>
+                <div className="text-right text-xs text-slate-500 dark:text-slate-400">
+                  {formattedTime}
+                </div>
               </div>
             );
           })}
         </div>
       ) : (
-        <p className="text-center text-gray-300">No logs available.</p>
+        <p className="text-center text-slate-400">No logs found.</p>
       )}
 
+      {/* Load More */}
       {visibleCount < filteredLogs.length && (
         <div className="mt-6 text-center">
           <button

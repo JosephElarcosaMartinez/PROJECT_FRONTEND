@@ -1,27 +1,46 @@
-import { useRef, useState } from "react";
-import { X, MapPin, ArrowLeft, Eye } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
+import { X, Check, MapPin, ArrowLeft } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
+import CaseActionModal from "./case-action-modal";
 
-const getStatusColor = (status) => {
-    switch (status) {
-        case "Pending":
-            return "text-red-600 font-semibold";
-        case "Processing":
-            return "text-yellow-500 font-semibold";
-        case "Completed":
-            return "text-green-600 font-semibold";
-        default:
-            return "text-gray-500 font-semibold";
-    }
-};
-
-const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
+const ViewModal = ({ selectedCase, setSelectedCase, tableData, handleAddTask, handleCloseCase, handleDismissCase }) => {
     const modalRef = useRef(null);
     const fileInputRef = useRef(null);
 
-    const [showPayment, setShowPayment] = useState(false);
+    const [showPayments, setShowPayments] = useState(false);
+    const [payments, setPayments] = useState([]);
+    const [showCloseModal, setShowCloseModal] = useState(false);
+    const [showDismissModal, setShowDismissModal] = useState(false);
 
-    useClickOutside([modalRef], () => setSelectedCase(null));
+
+    // Fetching payments
+    useEffect(() => {
+        const fetchPayments = async () => {
+            try {
+                const res = await fetch(`http://localhost:3000/api/payments/case/${selectedCase.case_id}`);
+                const data = await res.json();
+                if (res.ok) {
+                    setPayments(data);
+                } else {
+                    console.error("Failed to fetch payments:", data.error);
+                }
+            } catch (error) {
+                console.error("Error fetching payments:", error);
+            }
+        };
+
+        if (showPayments && selectedCase) {
+            fetchPayments();
+        }
+    }, [showPayments, selectedCase]);
+
+    useClickOutside([modalRef], () => {
+        // Only close parent ViewModal if no nested modals are open
+        if (!showCloseModal && !showDismissModal) {
+            setSelectedCase(null);
+            setShowPayments(false);
+        }
+    });
 
     const handleFileUpload = (event) => {
         const file = event.target.files[0];
@@ -55,7 +74,10 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
     };
 
     const formatCurrency = (amount) =>
-        new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount);
+        new Intl.NumberFormat("en-PH", {
+            style: "currency",
+            currency: "PHP",
+        }).format(amount);
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -67,13 +89,11 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                     className="absolute right-4 top-4 text-gray-500 hover:text-gray-800 dark:hover:text-white"
                     onClick={() => setSelectedCase(null)}
                 >
-                    <X className="h-6 w-6" />
+                    <X className="btn-ghost h-8 w-8" />
                 </button>
 
-                {/* Switch between Case Info and Payment Record */}
-                {!showPayment ? (
+                {!showPayments ? (
                     <>
-                        {/* Header */}
                         <div className="mb-6 flex items-center justify-between">
                             <div>
                                 <h2 className="text-2xl font-semibold">Case {selectedCase.case_id}</h2>
@@ -82,13 +102,16 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                     <span>Drawer #: {selectedCase.case_drawer}</span>
                                 </div>
                             </div>
-                            <div className="mr-7 flex items-center gap-1 text-sm text-slate-400 dark:text-white">
-                                <MapPin size={20} strokeWidth={2} className="text-red-800" />
+                            <div className="mr-7 flex items-center gap-1 text-sm text-slate-500">
+                                <MapPin
+                                    size={20}
+                                    strokeWidth={2}
+                                    className="text-red-400 dark:text-red-700"
+                                />
                                 <span>{selectedCase.branch_name}</span>
                             </div>
                         </div>
 
-                        {/* Case Info */}
                         <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
                             <div className="grid grid-cols-2 gap-4 lg:col-span-2">
                                 <div>
@@ -137,40 +160,99 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                     />
                                 </div>
                             </div>
-
                             <div className="space-y-4">
                                 <div className="rounded-lg border bg-gray-50 p-4 dark:bg-slate-800">
                                     <h4 className="mb-2 text-sm font-semibold">Payment</h4>
                                     <div className="space-y-1 text-sm">
-                                        <div className="flex justify-between"><span>Total Fee</span><span className="font-semibold">{selectedCase.case_fee}</span></div>
-                                        <div className="flex justify-between"><span>Total Paid</span><span>- 10,000.00</span></div>
+                                        <div className="flex justify-between">
+                                            <span>Total Fee</span>
+                                            <span className="font-semibold">
+                                                {selectedCase?.case_fee !== null && selectedCase?.case_fee !== undefined
+                                                    ? new Intl.NumberFormat("en-PH", {
+                                                        style: "currency",
+                                                        currency: "PHP",
+                                                    }).format(Number(selectedCase.case_fee))
+                                                    : "₱0.00"}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between">
+                                            <span>Total Paid</span>
+                                            <span>
+                                                -{" "}
+                                                {new Intl.NumberFormat("en-PH", {
+                                                    style: "currency",
+                                                    currency: "PHP",
+                                                }).format(Number(selectedCase.case_fee - selectedCase.case_balance))}
+                                            </span>
+                                        </div>
                                         <hr className="my-1 border-gray-300 dark:border-gray-600" />
-                                        <div className="flex justify-between font-semibold"><span>Remaining</span><span>{selectedCase.case_balance}</span></div>
+                                        <div className="flex justify-between font-semibold">
+                                            <span>Remaining</span>
+                                            <span>
+                                                {selectedCase?.case_balance !== null && selectedCase?.case_balance !== undefined
+                                                    ? new Intl.NumberFormat("en-PH", {
+                                                        style: "currency",
+                                                        currency: "PHP",
+                                                    }).format(Number(selectedCase.case_balance))
+                                                    : "₱0.00"}
+                                            </span>
+                                        </div>
                                     </div>
                                     <button
-                                        onClick={() => setShowPayment(true)}
+                                        onClick={() => setShowPayments(!showPayments)}
                                         className="mt-3 w-full rounded-lg bg-green-600 py-2 text-sm text-white hover:bg-green-700"
                                     >
                                         View Payment Record
                                     </button>
                                 </div>
                                 <div className="space-y-1 text-sm text-gray-600 dark:text-gray-300">
-                                    <p><strong>Date Filed:</strong> <span className="ml-2 text-gray-500">{formatDateTime(selectedCase.case_date_created)}</span></p>
+                                    <p>
+                                        <strong>Date Filed:</strong>
+                                        <span className="ml-2 text-slate-500">{formatDateTime(selectedCase.case_date_created)}</span>
+                                    </p>
+
                                     {selectedCase.case_last_updated && (
-                                        <p><strong>Last Updated:</strong> <span className="ml-2 text-gray-500">{formatDateTime(selectedCase.case_last_updated)}</span></p>
+                                        <p>
+                                            <strong>Last Updated:</strong>
+                                            <span className="ml-2 text-slate-500">{formatDateTime(selectedCase.case_last_updated)}</span>
+                                        </p>
                                     )}
-                                    <p><strong>Status:</strong> <span className={getStatusColor(selectedCase.case_status)}>{selectedCase.case_status}</span></p>
+
+                                    <p>
+                                        <strong>Status:</strong>{" "}
+                                        <span
+                                            className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${selectedCase.case_status === "Pending"
+                                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                : selectedCase.case_status === "Processing"
+                                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
+                                                    : selectedCase.case_status === "Completed"
+                                                        ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                                }`}
+                                        >
+                                            {selectedCase.case_status}
+                                        </span>
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Documents Section */}
                         <div className="mt-6 overflow-x-auto rounded-lg border">
                             <div className="flex items-center justify-between p-4">
                                 <h3 className="text-sm font-semibold">Documents</h3>
                                 <div className="flex gap-2">
-                                    <input type="file" ref={fileInputRef} onChange={handleFileUpload} className="hidden" />
-                                    <button onClick={() => fileInputRef.current.click()} className="rounded bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-700">Upload</button>
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        onChange={handleFileUpload}
+                                        className="hidden"
+                                    />
+                                    <button
+                                        onClick={() => fileInputRef.current.click()}
+                                        className="rounded bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-700"
+                                    >
+                                        Upload
+                                    </button>
                                     <button className="rounded bg-blue-500 px-4 py-1.5 text-sm text-white">Clear</button>
                                 </div>
                             </div>
@@ -186,35 +268,83 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                     </tr>
                                 </thead>
                                 <tbody className="text-gray-700 dark:text-white">
-                                    {[{ id: "D123", name: "Affidavit", status: "For Approval", file: "affidavit.pdf", uploader: "Joshua Go" },
-                                    { id: "D124", name: "Pleadings", status: "Approved", file: "pleadings.pdf", uploader: "Noel Batcotoy" }]
-                                        .map((doc) => (
-                                            <tr key={doc.id} className="border-t border-gray-200 dark:border-gray-700">
-                                                <td className="px-4 py-2">{doc.id}</td>
-                                                <td className="px-4 py-2">{doc.name}</td>
-                                                <td className="px-4 py-2">{doc.status}</td>
-                                                <td className="cursor-pointer px-4 py-2 text-blue-600 underline">{doc.file}</td>
-                                                <td className="px-4 py-2">{doc.uploader}</td>
-                                                <td className="space-x-2 px-4 py-2">
-                                                    <button className="text-blue-600 hover:underline">Edit</button>
-                                                    <button className="text-red-600 hover:underline">Remove</button>
-                                                </td>
-                                            </tr>
-                                        ))}
+                                    {[
+                                        { id: "D123", name: "Affidavit", status: "For Approval", file: "affidavit.pdf", uploader: "Joshua Go" },
+                                        { id: "D124", name: "Pleadings", status: "Approved", file: "pleadings.pdf", uploader: "Noel Batcotoy" },
+                                    ].map((doc) => (
+                                        <tr
+                                            key={doc.id}
+                                            className="border-t border-gray-200 dark:border-gray-700"
+                                        >
+                                            <td className="px-4 py-2">{doc.id}</td>
+                                            <td className="px-4 py-2">{doc.name}</td>
+                                            <td className="px-4 py-2">{doc.status}</td>
+                                            <td className="cursor-pointer px-4 py-2 text-blue-600 underline">{doc.file}</td>
+                                            <td className="px-4 py-2">{doc.uploader}</td>
+                                            <td className=" px-2 py-1">
+                                                <button className="flex items-center gap-1 px-2 py-1 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition-colors duration-200">
+                                                    <X size={16} />
+                                                    Rejected
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
                                 </tbody>
                             </table>
+                            {/* Action Buttons */}
+                            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:gap-4">
+                                <button
+                                    onClick={() => handleAddTask(selectedCase)}
+                                    className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                                >
+                                    Add New Task
+                                </button>
+                                <button
+                                    onClick={() => setShowCloseModal(true)}
+                                    className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                                >
+                                    Close Case
+                                </button>
+                                <button
+                                    onClick={() => setShowDismissModal(true)}
+                                    className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                                >
+                                    Dismiss Case
+                                </button>
+                            </div>
+
+                            {/* Nested Close/Dismiss Modals */}
+                            {showCloseModal && (
+                                <CaseActionModal
+                                    caseData={selectedCase}
+                                    type="close"
+                                    onClose={() => setShowCloseModal(false)}
+                                    onConfirm={handleCloseCase}
+                                />
+                            )}
+
+                            {showDismissModal && (
+                                <CaseActionModal
+                                    caseData={selectedCase}
+                                    type="dismiss"
+                                    onClose={() => setShowDismissModal(false)}
+                                    onConfirm={handleDismissCase}
+                                />
+                            )}
+
                         </div>
                     </>
+
                 ) : (
                     <>
+
                         {/* Payment Record Header */}
                         <div className="mb-6 flex items-center gap-3 border-b pb-3">
                             <button
-                                onClick={() => setShowPayment(false)}
-                                className="flex items-center gap-1 rounded-lg px-3 py-1 text-sm font-medium text-gray-600 transition hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-slate-700 dark:hover:text-white"
+                                onClick={() => setShowPayments(false)}
+                                className="btn-ghost"
                             >
                                 <ArrowLeft className="h-4 w-4" />
-                                Back
                             </button>
                             <h2 className="text-xl font-bold text-gray-800 dark:text-white">Payment Record</h2>
                         </div>
@@ -223,18 +353,26 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                             <div className="rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-green-100 p-5 shadow-sm dark:border-green-800 dark:from-green-900 dark:to-green-800">
                                 <p className="text-sm font-medium text-green-700 dark:text-green-300">Total Paid</p>
-                                <p className="mt-2 text-2xl font-extrabold text-green-800 dark:text-green-200">10,000.00</p>
+                                <p className="mt-2 text-2xl font-extrabold text-green-800 dark:text-green-200">
+                                    {selectedCase?.case_balance !== null && selectedCase?.case_balance !== undefined
+                                        ? formatCurrency(selectedCase.case_fee - selectedCase.case_balance)
+                                        : "₱0.00"}
+                                </p>
                             </div>
                             <div className="rounded-xl border border-red-200 bg-gradient-to-r from-red-50 to-red-100 p-5 shadow-sm dark:border-red-800 dark:from-red-900 dark:to-red-800">
                                 <p className="text-sm font-medium text-red-700 dark:text-red-300">Remaining Balance</p>
                                 <p className="mt-2 text-2xl font-extrabold text-red-800 dark:text-red-200">
-                                    {selectedCase.case_balance}
+                                    {selectedCase?.case_balance !== null && selectedCase?.case_balance !== undefined
+                                        ? formatCurrency(selectedCase.case_balance)
+                                        : "₱0.00"}
                                 </p>
                             </div>
                             <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100 p-5 shadow-sm dark:border-blue-800 dark:from-blue-900 dark:to-blue-800">
                                 <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Fee</p>
                                 <p className="mt-2 text-2xl font-extrabold text-blue-800 dark:text-blue-200">
-                                    {selectedCase.case_fee}
+                                    {selectedCase?.case_fee !== null && selectedCase?.case_fee !== undefined
+                                        ? formatCurrency(selectedCase.case_fee)
+                                        : "₱0.00"}
                                 </p>
                             </div>
                         </div>
@@ -254,11 +392,11 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-200 dark:divide-slate-700">
-                                        {(selectedCase.payments || []).length > 0 ? (
-                                            selectedCase.payments.map((p) => (
+                                        {(payments || []).length > 0 ? (
+                                            payments.map((p) => (
                                                 <tr
                                                     key={p.payment_id}
-                                                    className="hover:bg-blue-50 dark:hover:bg-slate-800 transition"
+                                                    className="transition hover:bg-blue-50 dark:hover:bg-slate-800"
                                                 >
                                                     <td className="px-4 py-3 font-medium">{p.payment_id}</td>
                                                     <td className="px-4 py-3 font-medium">{p.client_fullname}</td>
@@ -287,9 +425,25 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         )}
                                     </tbody>
                                 </table>
+                                {/* Modals */}
+                                {showCloseModal && (
+                                    <CaseActionModal
+                                        caseData={selectedCase}
+                                        type="close"
+                                        onClose={() => setShowCloseModal(false)}
+                                        onConfirm={handleCloseCase}
+                                    />
+                                )}
+                                {showDismissModal && (
+                                    <CaseActionModal
+                                        caseData={selectedCase}
+                                        type="dismiss"
+                                        onClose={() => setShowDismissModal(false)}
+                                        onConfirm={handleDismissCase}
+                                    />
+                                )}
                             </div>
                         </div>
-
                     </>
                 )}
             </div>

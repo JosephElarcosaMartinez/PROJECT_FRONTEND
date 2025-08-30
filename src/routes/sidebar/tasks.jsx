@@ -159,9 +159,8 @@ export default function Tasks() {
     <div className="space-y-6 min-h-screen text-black dark:text-white">
       {/* Header */}
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
-          Tasks
-        </h2>
+        <h2 className="title">Tasks</h2>
+
         <p className="text-sm text-gray-500">
           Manage and track all case-related tasks
         </p>
@@ -187,48 +186,75 @@ export default function Tasks() {
       </div>
 
       {/* Task Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {currentTasks.map((task) => {
           const isOverdue =
-            task.status !== "Completed" &&
-            new Date(task.dueDate) < new Date();
+            task.status !== "Completed" && new Date(task.dueDate) < new Date();
 
           return (
             <div
               key={task.id}
-              className="bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 p-4 rounded-lg shadow-lg relative"
+              className="relative bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-md p-5 flex flex-col justify-between hover:shadow-xl transition-shadow duration-200"
             >
-              <div className="absolute top-3 right-4 text-sm font-medium">
-                <span className={priorityColor[task.priority]}>
+              {/* Priority Badge */}
+              <div className="absolute top-3 right-3">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${task.priority === "High"
+                    ? "bg-red-100 text-red-600"
+                    : task.priority === "Mid"
+                      ? "bg-yellow-100 text-yellow-600"
+                      : "bg-gray-200 text-gray-700"
+                    }`}
+                >
                   {task.priority}
                 </span>
               </div>
 
-              <h3 className="font-semibold text-blue-700 dark:text-blue-400 mb-1">
-                {task.title}
-              </h3>
-              <p className="text-sm">
-                <strong>Case:</strong> {task.case}
-              </p>
-              <p className="text-sm mb-2">{task.description}</p>
-              <p className="text-sm mb-1">
-                <strong>Assigned to:</strong> {task.assignedTo}
-              </p>
-              <p className="text-sm mb-1">
-                <strong className="text-red-600">Due:</strong> {task.dueDate}
-                {isOverdue && (
-                  <span className="text-red-500 ml-1">(Overdue)</span>
-                )}
-              </p>
-              {task.status === "Completed" && (
-                <p className="text-sm mb-2 text-green-600">
-                  <strong>Completed:</strong> {task.completedDate}
+              {/* Task Title & Case */}
+              <div className="mb-3">
+                <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-400 leading-snug">
+                  {task.title}
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Case: <span className="font-medium">{task.case}</span>
                 </p>
-              )}
+              </div>
+
+              {/* Description */}
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
+                {task.description}
+              </p>
+
+              {/* Assignee & Dates */}
+              <div className="space-y-1 text-sm">
+                <p>
+                  <span className="font-medium text-gray-700 dark:text-gray-200">
+                    Assigned to:
+                  </span>{" "}
+                  {task.assignedTo}
+                </p>
+                <p>
+                  <span className="font-medium text-red-600">Due:</span> {task.dueDate}
+                  {isOverdue && (
+                    <span className="text-red-500 font-medium ml-1">(Overdue)</span>
+                  )}
+                </p>
+                {task.status === "Completed" && (
+                  <p className="text-green-600">
+                    <span className="font-medium">Completed:</span>{" "}
+                    {task.completedDate}
+                  </p>
+                )}
+              </div>
 
               {/* File Upload */}
-              <div className="mt-4 flex justify-end">
-                <label className="inline-flex items-center gap-2 cursor-pointer text-blue-600 hover:underline text-sm">
+              <div className="mt-4 pt-3 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between">
+                {task.attachment && (
+                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate w-40">
+                    📎 {task.attachment.name}
+                  </p>
+                )}
+                <label className="inline-flex items-center gap-2 cursor-pointer text-blue-600 hover:text-blue-800 text-sm font-medium">
                   <Paperclip size={16} />
                   {task.attachment ? "Change File" : "Attach File"}
                   <input
@@ -238,16 +264,11 @@ export default function Tasks() {
                   />
                 </label>
               </div>
-
-              {task.attachment && (
-                <p className="text-xs text-gray-600 mt-1 truncate w-48 text-right">
-                  {task.attachment.name}
-                </p>
-              )}
             </div>
           );
         })}
       </div>
+
 
       {/* Pagination */}
       {totalPages > 1 && (
