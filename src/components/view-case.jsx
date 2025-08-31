@@ -233,6 +233,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, handleAddTask, ha
                                         </span>
                                     </p>
                                 </div>
+                                <span className="rounded-full bg-green-600 px-3 text-sm font-medium">{selectedCase.case_verdict}</span>
                             </div>
                         </div>
 
@@ -244,9 +245,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, handleAddTask, ha
 
                                 <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
                                     {/* Add Task Button */}
-                                    <button
-                                        onClick={() => handleAddTask(selectedCase)}
-                                        className="rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-teal-700"
+                                    <button className="rounded-md border border-teal-600 px-4 py-1.5 text-sm text-teal-600 hover:bg-teal-700 hover:text-white"
                                     >
                                         Add Task Document
                                     </button>
