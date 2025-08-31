@@ -45,8 +45,8 @@ const DashboardPage = () => {
                 {/* first row */}
                 <div
                     className={`grid grid-cols-1 gap-4 ${user.user_role === "Admin"
-                            ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                            : "lg:grid-cols-3 xl:grid-cols-3"
+                        ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                        : "lg:grid-cols-3 xl:grid-cols-3"
                         }`}
                 >
                     {/* Users (Admin only) */}
@@ -54,7 +54,7 @@ const DashboardPage = () => {
                         <div className="card">
                             <div className="card-header">
                                 <p className="card-title">Users</p>
-                                <div className="bg-indigo-500/20 w-fit rounded-lg p-2 text-indigo-500 transition-colors dark:bg-indigo-600/20 dark:text-indigo-400">
+                                <div className="p-2 text-blue-500 ">
                                     <ShieldUser size={26} />
                                 </div>
                             </div>
@@ -68,7 +68,7 @@ const DashboardPage = () => {
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Archived Cases</p>
-                            <div className="bg-red-500/20 w-fit rounded-lg p-2 text-red-500 transition-colors dark:bg-red-600/20 dark:text-red-400">
+                            <div className="p-2 text-blue-500 ">
                                 <Archive size={26} />
                             </div>
                         </div>
@@ -81,7 +81,7 @@ const DashboardPage = () => {
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Processing Cases</p>
-                            <div className="bg-amber-500/20 w-fit rounded-lg p-2 text-amber-500 transition-colors dark:bg-amber-600/20 dark:text-amber-400">
+                            <div className="p-2 text-blue-500 ">
                                 <FolderOpen size={26} />
                             </div>
                         </div>
@@ -94,7 +94,7 @@ const DashboardPage = () => {
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Processing Documents</p>
-                            <div className="bg-violet-500/20 w-fit rounded-lg p-2 text-violet-500 transition-colors dark:bg-violet-600/20 dark:text-violet-400">
+                            <div className="p-2 text-blue-500 ">
                                 <FileMinus size={26} />
                             </div>
                         </div>
@@ -107,15 +107,15 @@ const DashboardPage = () => {
                 {/* second row */}
                 <div
                     className={`grid grid-cols-1 gap-4 ${user.user_role === "Admin"
-                            ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3"
-                            : "lg:grid-cols-3 xl:grid-cols-3"
+                        ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3"
+                        : "lg:grid-cols-3 xl:grid-cols-3"
                         }`}
                 >
                     {/* Clients */}
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Clients</p>
-                            <div className="bg-emerald-500/20 w-fit rounded-lg p-2 text-emerald-500 transition-colors dark:bg-emerald-600/20 dark:text-emerald-400">
+                            <div className="p-2 text-blue-500">
                                 <Users size={26} />
                             </div>
                         </div>
@@ -128,7 +128,7 @@ const DashboardPage = () => {
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Pending Approvals</p>
-                            <div className="bg-orange-500/20 w-fit rounded-lg p-2 text-orange-500 transition-colors dark:bg-orange-600/20 dark:text-orange-400">
+                            <div className="p-2 text-blue-500 ">
                                 <UserRoundMinus size={26} />
                             </div>
                         </div>
@@ -141,7 +141,7 @@ const DashboardPage = () => {
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Pending Tasks</p>
-                            <div className="bg-cyan-500/20 w-fit rounded-lg p-2 text-cyan-500 transition-colors dark:bg-cyan-600/20 dark:text-cyan-400">
+                            <div className="p-2 text-blue-500 ">
                                 <ListTodo size={26} />
                             </div>
                         </div>

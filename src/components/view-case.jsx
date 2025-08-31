@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { X, Check, MapPin, ArrowLeft } from "lucide-react";
+import { X, MapPin, ArrowLeft, XCircle, CheckCircle } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import CaseActionModal from "./case-action-modal";
 
@@ -11,7 +11,6 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, handleAddTask, ha
     const [payments, setPayments] = useState([]);
     const [showCloseModal, setShowCloseModal] = useState(false);
     const [showDismissModal, setShowDismissModal] = useState(false);
-
 
     // Fetching payments
     useEffect(() => {
@@ -146,7 +145,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, handleAddTask, ha
                                     <input
                                         type="text"
                                         readOnly
-                                        value={`Atty. ${getLawyerFullName(selectedCase.user_id)}`}
+                                        value={selectedCase.user_id ? `Atty. ${getLawyerFullName(selectedCase.user_id)}` : "Unassigned"}
                                         className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm dark:bg-slate-800"
                                     />
                                 </div>
@@ -238,9 +237,21 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, handleAddTask, ha
                         </div>
 
                         <div className="mt-6 overflow-x-auto rounded-lg border">
-                            <div className="flex items-center justify-between p-4">
-                                <h3 className="text-sm font-semibold">Documents</h3>
-                                <div className="flex gap-2">
+                            <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+                                <h3 className="text-base font-semibold text-gray-800 dark:text-white">
+                                    Documents
+                                </h3>
+
+                                <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+                                    {/* Add Task Button */}
+                                    <button
+                                        onClick={() => handleAddTask(selectedCase)}
+                                        className="rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-teal-700"
+                                    >
+                                        Add Task Document
+                                    </button>
+
+                                    {/* Upload File */}
                                     <input
                                         type="file"
                                         ref={fileInputRef}
@@ -249,13 +260,20 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, handleAddTask, ha
                                     />
                                     <button
                                         onClick={() => fileInputRef.current.click()}
-                                        className="rounded bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-700"
+                                        className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-small text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
                                     >
-                                        Upload
+                                        Add Document
                                     </button>
-                                    <button className="rounded bg-blue-500 px-4 py-1.5 text-sm text-white">Clear</button>
+
+                                    {/* Clear Button */}
+                                    <button
+                                        className="inline-flex items-center gap-2 rounded-md bg-red-500 px-4 py-2 text-sm font-small text-white shadow-sm transition hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300"
+                                    >
+                                        Clear
+                                    </button>
                                 </div>
                             </div>
+
                             <table className="w-full text-sm">
                                 <thead className="bg-gray-200 text-left dark:bg-slate-700">
                                     <tr>
@@ -282,36 +300,37 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, handleAddTask, ha
                                             <td className="cursor-pointer px-4 py-2 text-blue-600 underline">{doc.file}</td>
                                             <td className="px-4 py-2">{doc.uploader}</td>
                                             <td className=" px-2 py-1">
-                                                <button className="flex items-center gap-1 px-2 py-1 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition-colors duration-200">
-                                                    <X size={16} />
-                                                    Rejected
-                                                </button>
+                                                <div className="text-red-600 flex gap-2">
+                                                    Reject
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
-                            {/* Action Buttons */}
-                            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:gap-4">
-                                <button
-                                    onClick={() => handleAddTask(selectedCase)}
-                                    className="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                                >
-                                    Add New Task
-                                </button>
-                                <button
-                                    onClick={() => setShowCloseModal(true)}
-                                    className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
-                                >
-                                    Close Case
-                                </button>
-                                <button
-                                    onClick={() => setShowDismissModal(true)}
-                                    className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-                                >
-                                    Dismiss Case
-                                </button>
-                            </div>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="mt-6 flex flex-col items-stretch gap-2 sm:flex-row sm:justify-end sm:gap-3">
+
+                            {/* Close Case */}
+                            <button
+                                onClick={() => setShowCloseModal(true)}
+                                className="inline-flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-small text-white shadow-sm transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300"
+                            >
+                                <CheckCircle size={20} />
+                                Close Case
+                            </button>
+
+                            {/* Dismiss Case */}
+                            <button
+                                onClick={() => setShowDismissModal(true)}
+                                className="inline-flex items-center gap-2 rounded-md bg-red-500 px-4 py-2 text-sm font-small text-white shadow-sm transition hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300"
+                            >
+                                <XCircle size={20} />
+                                Dismiss Case
+                            </button>
+
 
                             {/* Nested Close/Dismiss Modals */}
                             {showCloseModal && (

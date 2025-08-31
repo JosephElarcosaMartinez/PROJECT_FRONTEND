@@ -3,23 +3,11 @@ import { Pencil, SquareX, CircleX, Eye, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
-
-// add this inside Cases component, above return
-const getStatusColor = (status) => {
-    switch (status) {
-        case "Pending":
-            return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
-        case "Processing":
-            return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200";
-        case "Completed":
-            return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
-        default:
-            return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
-    }
-};
-
+import { useAuth } from "@/context/auth-context";
 
 const Cases = () => {
+    const { user } = useAuth();
+
     const [search, setSearch] = useState("");
     const [tableData, setTableData] = useState([]);
     const [error, setError] = useState(null);
@@ -34,7 +22,9 @@ const Cases = () => {
     useEffect(() => {
         const fetchCases = async () => {
             try {
-                const response = await fetch("http://localhost:3000/api/cases");
+                const cases_endpoint = user?.user_role === "Admin" ? "/cases" : `/cases/user/${user?.user_id}`;
+
+                const response = await fetch(`http://localhost:3000/api${cases_endpoint}`);
                 if (!response.ok) {
                     throw new Error("Failed to fetch cases");
                 }
@@ -55,9 +45,6 @@ const Cases = () => {
             month: "long",
             day: "numeric",
             year: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
         });
     };
 
@@ -119,14 +106,26 @@ const Cases = () => {
         alert("New case has been added successfully!");
     };
 
-    const filteredCases = tableData.filter(
-        (cases) =>
+    // Set default statusFilter to 'Pending' if there are pending cases, else '' (All)
+    useEffect(() => {
+        if (tableData.some((c) => c.case_status === "Pending")) {
+            setStatusFilter("Pending");
+        } else {
+            setStatusFilter("");
+        }
+    }, [tableData])
+
+    const filteredCases = tableData.filter((cases) => {
+        const matchesStatus = statusFilter ? cases.case_status === statusFilter : true;
+        const searchLower = search.toLowerCase();
+        const matchesSearch =
             cases.case_id.toString().includes(search) ||
-            cases.ct_name.toLowerCase().includes(search.toLowerCase()) ||
-            cases.client_fullname.toLowerCase().includes(search.toLowerCase()) ||
-            cases.case_status.toLowerCase().includes(search.toLowerCase()) ||
-            formatDateTime(cases.case_date_created).toLowerCase().includes(search.toLowerCase()),
-    );
+            (cases.ct_name && cases.ct_name.toLowerCase().includes(searchLower)) ||
+            (cases.client_fullname && cases.client_fullname.toLowerCase().includes(searchLower)) ||
+            (cases.case_status && cases.case_status.toLowerCase().includes(searchLower)) ||
+            (formatDateTime(cases.case_date_created) && formatDateTime(cases.case_date_created).toLowerCase().includes(searchLower));
+        return matchesStatus && matchesSearch;
+    });
 
     // get the full name of the (assigned) lawyer
     const getLawyerFullName = (lawyerId) => {
@@ -149,13 +148,14 @@ const Cases = () => {
 
             {/* Tabs */}
             <div className="mb-4 flex gap-2">
-                {["All", "Pending", "Processing", "Completed"].map((tab) => {
+                {["All", "Pending", "Processing", "Completed", "Dismissed"].map((tab) => {
                     // assign base colors
                     const baseColors = {
                         All: "bg-blue-500 text-white font-semibold",
-                        Pending: "bg-gray-500 text-white font-semibold",
-                        Processing: "bg-yellow-500 text-white font-semibold",
+                        Pending: "bg-yellow-500 text-white font-semibold",
+                        Processing: "bg-blue-500 text-white font-semibold",
                         Completed: "bg-green-500 text-white font-semibold",
+                        Dismissed: "bg-red-500 text-white font-semibold",
                     };
 
                     const active = statusFilter === tab || (tab === "All" && statusFilter === "");
@@ -223,7 +223,7 @@ const Cases = () => {
                         {filteredCases.length > 0 ? (
                             filteredCases.map((cases) => (
                                 <tr
-                                    key={cases.id}
+                                    key={cases.case_id}
                                     className="border-t border-gray-200 transition hover:bg-blue-100 dark:border-gray-700 dark:hover:bg-blue-950"
                                 >
                                     <td className="px-4 py-3">{cases.case_id}</td>
@@ -231,11 +231,26 @@ const Cases = () => {
                                     <td className="px-4 py-3">{cases.client_fullname}</td>
                                     <td className="px-4 py-3">{formatDateTime(cases.case_date_created)}</td>
                                     <td className="px-4 py-3">
-                                        <span className={`rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(cases.case_status)}`}>
+                                        <span
+                                            className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${cases.case_status === "Pending"
+                                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                : cases.case_status === "Processing"
+                                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
+                                                    : cases.case_status === "Completed"
+                                                        ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                                }`}
+                                        >
                                             {cases.case_status}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3">{getLawyerFullName(cases.user_id)}</td>
+
+                                    {cases.user_id ? (
+                                        <td className="px-4 py-3">{getLawyerFullName(cases.user_id)}</td>
+                                    ) : (
+                                        <td className="px-4 py-3 italic text-gray-500">Unassigned</td>
+                                    )}
+
                                     <td className="px-4 py-3">
                                         {cases?.case_balance !== null && cases?.case_balance !== undefined
                                             ? new Intl.NumberFormat("en-PH", {
@@ -260,7 +275,7 @@ const Cases = () => {
                                             </button>
                                             <button
                                                 className="p-1.5 text-red-600 hover:text-red-800"
-                                                onClick={() => alert(`Deleting the case of ${cases.client_fullname}`)}
+                                                onClick={() => alert(`Dismissing the case of ${cases.client_fullname}`)}
                                             >
                                                 <SquareX className="h-4 w-4" />
                                             </button>
@@ -297,6 +312,7 @@ const Cases = () => {
                                 ["Category", "category"],
                                 ["Client", "client"],
                                 ["Branch", "branch"],
+                                ["Filed Date", "filedDate", "date"],
                                 ["Fee", "fee"],
                             ].map(([label, name, type = "text"]) => (
                                 <div key={name}>
@@ -311,7 +327,7 @@ const Cases = () => {
                                 </div>
                             ))}
                             <div className="md:col-span-2">
-                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Description / Remarks</label>
+                                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                                 <textarea
                                     name="description"
                                     value={newCase.description}

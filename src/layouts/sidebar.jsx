@@ -16,7 +16,7 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
         <aside
             ref={ref}
             className={cn(
-                "fixed z-100 flex h-full w-[240px] flex-col overflow-x-hidden rounded-lg bg-[#1c3482] p-2 text-white shadow-md transition-all dark:bg-slate-900",
+                "fixed z-100 flex h-full w-[240px] flex-col overflow-x-hidden rounded-lg bg-[#1c3482] p-3 text-white shadow-md transition-all dark:bg-slate-900",
                 collapsed ? "p-0 md:w-[70px] md:items-center" : "md:w-[240px]",
                 collapsed ? "max-md:left-full" : "max-md:left-0",
             )}
