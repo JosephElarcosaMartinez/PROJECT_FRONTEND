@@ -1,16 +1,16 @@
 import { useRef, useState, useEffect } from "react";
-import { X, MapPin, ArrowLeft, XCircle, CheckCircle } from "lucide-react";
+import { X, MapPin, ArrowLeft, Trash2, XCircle, CheckCircle } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
-import CaseActionModal from "./case-action-modal";
+import { useAuth } from "@/context/auth-context";
 
-const ViewModal = ({ selectedCase, setSelectedCase, tableData, handleAddTask, handleCloseCase, handleDismissCase }) => {
+const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
+    const { user } = useAuth();
+
     const modalRef = useRef(null);
     const fileInputRef = useRef(null);
 
     const [showPayments, setShowPayments] = useState(false);
     const [payments, setPayments] = useState([]);
-    const [showCloseModal, setShowCloseModal] = useState(false);
-    const [showDismissModal, setShowDismissModal] = useState(false);
 
     // Fetching payments
     useEffect(() => {
@@ -34,11 +34,8 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, handleAddTask, ha
     }, [showPayments, selectedCase]);
 
     useClickOutside([modalRef], () => {
-        // Only close parent ViewModal if no nested modals are open
-        if (!showCloseModal && !showDismissModal) {
-            setSelectedCase(null);
-            setShowPayments(false);
-        }
+        setSelectedCase(null);
+        setShowPayments(false);
     });
 
     const handleFileUpload = (event) => {
@@ -95,7 +92,15 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, handleAddTask, ha
                     <>
                         <div className="mb-6 flex items-center justify-between">
                             <div>
-                                <h2 className="text-2xl font-semibold">Case {selectedCase.case_id}</h2>
+                                <h2 className="text-2xl font-semibold">
+                                    Case {selectedCase.case_id}
+                                    {/* {" "}
+                                    {selectedCase.case_verdict && selectedCase.case_status === "Completed" && (
+                                        <span className="rounded-full bg-green-600 px-2 text-sm font-medium text-white">
+                                            {selectedCase.case_verdict}
+                                        </span>
+                                    )} */}
+                                </h2>
                                 <div className="mt-1 flex gap-4 text-sm text-gray-600 dark:text-gray-300">
                                     <span>Cabinet #: {selectedCase.case_cabinet}</span>
                                     <span>Drawer #: {selectedCase.case_drawer}</span>
@@ -231,48 +236,43 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, handleAddTask, ha
                                         >
                                             {selectedCase.case_status}
                                         </span>
+                                        {/* Case Verdict */}
+                                        {selectedCase.case_verdict && selectedCase.case_status === "Completed" && (
+                                            <>
+                                                <span> -</span>
+                                                <span className="ml-2 font-semibold underline">{selectedCase.case_verdict}</span>
+                                            </>
+                                        )}
                                     </p>
                                 </div>
-                                <span className="rounded-full bg-green-600 px-3 text-sm font-medium">{selectedCase.case_verdict}</span>
                             </div>
                         </div>
 
                         <div className="mt-6 overflow-x-auto rounded-lg border">
-                            <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-                                <h3 className="text-base font-semibold text-gray-800 dark:text-white">
-                                    Documents
-                                </h3>
+                            <div className="flex items-center justify-between p-4">
+                                <h3 className="text-sm font-semibold">Documents</h3>
 
-                                <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
-                                    {/* Add Task Button */}
-                                    <button className="rounded-md border border-teal-600 px-4 py-1.5 text-sm text-teal-600 hover:bg-teal-700 hover:text-white"
-                                    >
-                                        Add Task Document
-                                    </button>
-
-                                    {/* Upload File */}
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        onChange={handleFileUpload}
-                                        className="hidden"
-                                    />
-                                    <button
-                                        onClick={() => fileInputRef.current.click()}
-                                        className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-small text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                                    >
-                                        Add Document
-                                    </button>
-
-                                    {/* Clear Button */}
-                                    <button
-                                        className="inline-flex items-center gap-2 rounded-md bg-red-500 px-4 py-2 text-sm font-small text-white shadow-sm transition hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300"
-                                    >
-                                        Clear
-                                    </button>
-                                </div>
+                                {selectedCase.case_status === "Processing" && (
+                                    <div className="flex gap-2">
+                                        <button className="rounded border border-teal-600 px-4 py-1.5 text-sm text-teal-600 hover:bg-teal-700 hover:text-white">
+                                            Add Task Document
+                                        </button>
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            onChange={handleFileUpload}
+                                            className="hidden"
+                                        />
+                                        <button
+                                            onClick={() => fileInputRef.current.click()}
+                                            className="rounded bg-blue-600 px-4 py-1.5 text-sm text-white hover:bg-blue-700"
+                                        >
+                                            Add Document
+                                        </button>
+                                        <button className="rounded bg-red-600 px-4 py-1.5 text-sm text-white hover:bg-red-700">Clear</button>
+                                    </div>
+                                )}
                             </div>
-
                             <table className="w-full text-sm">
                                 <thead className="bg-gray-200 text-left dark:bg-slate-700">
                                     <tr>
@@ -284,10 +284,18 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, handleAddTask, ha
                                         <th className="px-4 py-2">Action</th>
                                     </tr>
                                 </thead>
+
                                 <tbody className="text-gray-700 dark:text-white">
                                     {[
                                         { id: "D123", name: "Affidavit", status: "For Approval", file: "affidavit.pdf", uploader: "Joshua Go" },
-                                        { id: "D124", name: "Pleadings", status: "Approved", file: "pleadings.pdf", uploader: "Noel Batcotoy" },
+                                        { id: "D124", name: "Pleadings", status: "Approved", file: "pleadings.pdf", uploader: "Noel Glow" },
+                                        {
+                                            id: "D125",
+                                            name: "Special Proceedings",
+                                            status: "Approved",
+                                            file: "proceedings.pdf",
+                                            uploader: "Joseph Grow",
+                                        },
                                     ].map((doc) => (
                                         <tr
                                             key={doc.id}
@@ -298,10 +306,12 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, handleAddTask, ha
                                             <td className="px-4 py-2">{doc.status}</td>
                                             <td className="cursor-pointer px-4 py-2 text-blue-600 underline">{doc.file}</td>
                                             <td className="px-4 py-2">{doc.uploader}</td>
-                                            <td className=" px-2 py-1">
-                                                <div className="text-red-600 flex gap-2">
-                                                    Reject
-                                                </div>
+                                            <td className="space-x-2 px-4 py-2">
+                                                <button className="text-blue-600 hover:underline">Edit</button>
+                                                <button className="text-red-600 hover:underline">Reject</button>
+                                                <button className="text-red-600 hover:underline">
+                                                    <Trash2 size={16} />
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
@@ -309,53 +319,28 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, handleAddTask, ha
                             </table>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="mt-6 flex flex-col items-stretch gap-2 sm:flex-row sm:justify-end sm:gap-3">
-
-                            {/* Close Case */}
-                            <button
-                                onClick={() => setShowCloseModal(true)}
-                                className="inline-flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-small text-white shadow-sm transition hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300"
-                            >
-                                <CheckCircle size={20} />
-                                Close Case
-                            </button>
-
-                            {/* Dismiss Case */}
-                            <button
-                                onClick={() => setShowDismissModal(true)}
-                                className="inline-flex items-center gap-2 rounded-md bg-red-500 px-4 py-2 text-sm font-small text-white shadow-sm transition hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300"
-                            >
-                                <XCircle size={20} />
-                                Dismiss Case
-                            </button>
-
-
-                            {/* Nested Close/Dismiss Modals */}
-                            {showCloseModal && (
-                                <CaseActionModal
-                                    caseData={selectedCase}
-                                    type="close"
-                                    onClose={() => setShowCloseModal(false)}
-                                    onConfirm={handleCloseCase}
-                                />
-                            )}
-
-                            {showDismissModal && (
-                                <CaseActionModal
-                                    caseData={selectedCase}
-                                    type="dismiss"
-                                    onClose={() => setShowDismissModal(false)}
-                                    onConfirm={handleDismissCase}
-                                />
-                            )}
-
-                        </div>
+                        {/* close case and dismiss case button when the case is not yet completed */}
+                        {selectedCase.case_status === "Processing" && (
+                            <div className="mt-6 flex items-center justify-end gap-4">
+                                <button
+                                    title="Closing or Finishing the Case"
+                                    className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700"
+                                >
+                                    <CheckCircle size={20} />
+                                    Close Case
+                                </button>
+                                <button
+                                    title="Dismissing Case"
+                                    className="inline-flex gap-2 rounded-lg bg-gray-600 px-3 py-2 text-sm text-white hover:bg-gray-700"
+                                >
+                                    <XCircle size={20} />
+                                    Dismiss Case
+                                </button>
+                            </div>
+                        )}
                     </>
-
                 ) : (
                     <>
-
                         {/* Payment Record Header */}
                         <div className="mb-6 flex items-center gap-3 border-b pb-3">
                             <button
@@ -443,23 +428,6 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, handleAddTask, ha
                                         )}
                                     </tbody>
                                 </table>
-                                {/* Modals */}
-                                {showCloseModal && (
-                                    <CaseActionModal
-                                        caseData={selectedCase}
-                                        type="close"
-                                        onClose={() => setShowCloseModal(false)}
-                                        onConfirm={handleCloseCase}
-                                    />
-                                )}
-                                {showDismissModal && (
-                                    <CaseActionModal
-                                        caseData={selectedCase}
-                                        type="dismiss"
-                                        onClose={() => setShowDismissModal(false)}
-                                        onConfirm={handleDismissCase}
-                                    />
-                                )}
                             </div>
                         </div>
                     </>
