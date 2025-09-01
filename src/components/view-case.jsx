@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { X, MapPin, ArrowLeft, Trash2, XCircle, CheckCircle } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { useAuth } from "@/context/auth-context";
+import CaseActionModal from "./case-action-modal";
 
 const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
     const { user } = useAuth();
@@ -11,6 +12,45 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
 
     const [showPayments, setShowPayments] = useState(false);
     const [payments, setPayments] = useState([]);
+    const [showCloseModal, setShowCloseModal] = useState(false);
+    const [showDismissModal, setShowDismissModal] = useState(false);
+
+    // Handlers for closing and dismissing case
+    const handleCloseCase = async () => {
+        try {
+            const res = await fetch(`/api/cases/${selectedCase.case_id}/close`, {
+                method: "POST",
+            });
+
+            if (!res.ok) throw new Error("Failed to close case");
+
+            const updatedCase = await res.json();
+
+            setSelectedCase(updatedCase);
+            setShowCloseModal(false);
+        } catch (error) {
+            console.error("Error closing case:", error);
+            alert("Failed to close case.");
+        }
+    };
+
+    const handleDismissCase = async () => {
+        try {
+            const res = await fetch(`/api/cases/${selectedCase.case_id}/dismiss`, {
+                method: "POST",
+            });
+
+            if (!res.ok) throw new Error("Failed to dismiss case");
+
+            const updatedCase = await res.json();
+
+            setSelectedCase(updatedCase);
+            setShowDismissModal(false);
+        } catch (error) {
+            console.error("Error dismissing case:", error);
+            alert("Failed to dismiss case.");
+        }
+    };
 
     // Fetching payments
     useEffect(() => {
@@ -325,13 +365,15 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                 <button
                                     title="Closing or Finishing the Case"
                                     className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700"
+                                    onClick={() => setShowCloseModal(true)}
                                 >
                                     <CheckCircle size={20} />
                                     Close Case
                                 </button>
                                 <button
                                     title="Dismissing Case"
-                                    className="inline-flex gap-2 rounded-lg bg-gray-600 px-3 py-2 text-sm text-white hover:bg-gray-700"
+                                    className="inline-flex gap-2 rounded-lg bg-red-600 px-3 py-2 text-sm text-white hover:bg-red-700"
+                                    onClick={() => setShowDismissModal(true)}
                                 >
                                     <XCircle size={20} />
                                     Dismiss Case
@@ -432,6 +474,23 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                         </div>
                     </>
                 )}
+                {showCloseModal && (
+                    <CaseActionModal
+                        caseData={selectedCase}
+                        type="close"
+                        onClose={() => setShowCloseModal(false)}
+                        onConfirm={handleCloseCase}
+                    />
+                )}
+                {showDismissModal && (
+                    <CaseActionModal
+                        caseData={selectedCase}
+                        type="dismiss"
+                        onClose={() => setShowDismissModal(false)}
+                        onConfirm={handleDismissCase}
+                    />
+                )}
+
             </div>
         </div>
     );
