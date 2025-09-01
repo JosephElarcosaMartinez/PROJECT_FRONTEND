@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from "react";
-import { Paperclip, Download, Loader2 } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback } from "react";
+import { Paperclip, Download, Loader2, X, Lock } from "lucide-react";
 import { useAuth } from "../../context/auth-context";
 
 // Constants
@@ -60,6 +60,16 @@ export default function Tasks() {
   const [loading, setLoading] = useState(false);
   const [uploadingTaskId, setUploadingTaskId] = useState(null);
   const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [modalTaskId, setModalTaskId] = useState(null);
+  const [droppedFile, setDroppedFile] = useState(null);
+  const [password, setPassword] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState(null);
+  const [showPasswordPrompt, setShowPasswordPrompt] = useState(false);
+  const [downloadTaskId, setDownloadTaskId] = useState(null);
+  const [downloadPassword, setDownloadPassword] = useState("");
+  const [downloading, setDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState(null);
 
   const API_BASE = 'http://localhost:3000';
 
@@ -84,6 +94,7 @@ export default function Tasks() {
             completedDate: row.td_date_completed || null,
             status: row.td_status || 'Pending',
             attachmentPath: row.td_doc_path || null,
+            passwordProtected: row.password_protected || false,
             priority: row.td_due_date ? getPriorityFromDueDate(row.td_due_date) : 'Low'
         };
       });
@@ -119,15 +130,51 @@ export default function Tasks() {
     currentPage * ITEMS_PER_PAGE
   );
 
-  const handleFileChange = async (e, taskId) => {
+  const estimateStrength = useCallback((pwd) => {
+    if (!pwd) return null;
+    let score = 0;
+    if (pwd.length >= 8) score++;
+    if (/[A-Z]/.test(pwd)) score++;
+    if (/[a-z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd)) score++;
+    if (/[^A-Za-z0-9]/.test(pwd)) score++;
+    if (pwd.length >= 14) score++;
+    if (score <= 2) return 'Weak';
+    if (score <= 4) return 'Medium';
+    return 'Strong';
+  }, []);
+
+  const openModal = (taskId) => {
+    setModalTaskId(taskId);
+    setDroppedFile(null);
+    setPassword("");
+    setPasswordStrength(null);
+    setShowModal(true);
+  };
+  const closeModal = () => { if (uploadingTaskId) return; setShowModal(false); };
+
+  const onDrop = (e) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file) setDroppedFile(file);
+  };
+  const onDragOver = (e) => e.preventDefault();
+  const onFileInput = (e) => {
     const file = e.target.files[0];
-    if (!file) return;
-    setUploadingTaskId(taskId);
+    if (file) setDroppedFile(file);
+  };
+
+  useEffect(() => { setPasswordStrength(estimateStrength(password)); }, [password, estimateStrength]);
+
+  const submitUpload = async () => {
+    if (!droppedFile || !modalTaskId) return;
+    setUploadingTaskId(modalTaskId);
     setError(null);
     try {
       const form = new FormData();
-      form.append('file', file);
-      form.append('taskId', taskId);
+      form.append('file', droppedFile);
+      form.append('taskId', modalTaskId);
+      if (password) form.append('password', password);
       const res = await fetch(`${API_BASE}/api/tasks/upload`, {
         method: 'POST',
         body: form,
@@ -135,6 +182,7 @@ export default function Tasks() {
       });
       if (!res.ok) throw new Error('Upload failed');
       await fetchTasks();
+      closeModal();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -142,21 +190,41 @@ export default function Tasks() {
     }
   };
 
-  const handleDownload = async (taskId, filename='document.pdf') => {
+  const triggerDownload = (task) => {
+    if (task.passwordProtected) {
+      setDownloadTaskId(task.id);
+      setDownloadPassword("");
+      setDownloadError(null);
+      setShowPasswordPrompt(true);
+    } else {
+      performDownload(task.id, task.title + '.pdf');
+    }
+  };
+
+  const performDownload = async (taskId, filename='document.pdf', pwd=null) => {
+    setDownloading(true);
+    setDownloadError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/tasks/${taskId}/attachment`, { credentials: 'include' });
+      const url = new URL(`${API_BASE}/api/tasks/${taskId}/attachment`);
+      if (pwd) url.searchParams.set('password', pwd);
+      const res = await fetch(url.toString(), { credentials: 'include' });
+      if (res.status === 401) { setDownloadError('Password required'); return; }
+      if (res.status === 403) { setDownloadError('Invalid password'); return; }
       if (!res.ok) throw new Error('Download failed');
       const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
+      const objectUrl = URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
+      a.href = objectUrl;
       a.download = filename;
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(objectUrl);
+      setShowPasswordPrompt(false);
     } catch (e) {
-      setError(e.message);
+      setDownloadError(e.message);
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -254,22 +322,19 @@ export default function Tasks() {
 
               {/* File Upload */}
               <div className="mt-4 flex items-center justify-between gap-2">
-                <label className="inline-flex items-center gap-2 cursor-pointer text-blue-600 hover:underline text-xs">
-                  <Paperclip size={14} />
-                  {uploadingTaskId === task.id ? 'Uploading...' : (task.attachmentPath ? 'Replace File' : 'Attach File')}
-                  <input
-                    type="file"
-                    className="hidden"
-                    disabled={uploadingTaskId === task.id}
-                    onChange={(e) => handleFileChange(e, task.id)}
-                  />
-                </label>
+                <button
+                  disabled={uploadingTaskId === task.id}
+                  onClick={() => openModal(task.id)}
+                  className="inline-flex items-center gap-2 text-blue-600 hover:underline text-xs disabled:opacity-50"
+                >
+                  <Paperclip size={14} /> {uploadingTaskId === task.id ? 'Uploading...' : (task.attachmentPath ? 'Replace File' : 'Attach File')}
+                </button>
                 {task.attachmentPath && (
                   <button
-                    onClick={() => handleDownload(task.id, task.title + '.pdf')}
+                    onClick={() => triggerDownload(task)}
                     className="text-green-600 hover:text-green-800 text-xs inline-flex items-center gap-1"
                   >
-                    <Download size={14} /> Download
+                    <Download size={14} /> {task.passwordProtected && <Lock size={12} className="inline" />} Download
                   </button>
                 )}
               </div>
@@ -310,6 +375,103 @@ export default function Tasks() {
           >
             &gt;
           </button>
+        </div>
+      )}
+
+      {/* Upload Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={closeModal}>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md p-6 relative" onClick={e => e.stopPropagation()}>
+            <button className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 dark:hover:text-white" onClick={closeModal} disabled={!!uploadingTaskId}>
+              <X size={18} />
+            </button>
+            <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Attach Document</h3>
+            <div className="space-y-5">
+              <div>
+                <label className="block text-sm font-medium mb-1">Password (optional)</label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  placeholder="Enter a password to protect this file"
+                  className="w-full border border-gray-300 dark:border-slate-600 rounded-md px-3 py-2 bg-white dark:bg-slate-700 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={!!uploadingTaskId}
+                />
+                {passwordStrength && (
+                  <p className="mt-1 text-xs">Password Strength: {passwordStrength === 'Strong' ? <span className="text-green-600">Strong</span> : passwordStrength === 'Medium' ? <span className="text-yellow-600">Medium</span> : <span className="text-red-600">Weak</span>}</p>
+                )}
+              </div>
+              <div
+                onDrop={onDrop}
+                onDragOver={onDragOver}
+                className="rounded-xl border-2 border-dashed flex flex-col items-center justify-center h-44 cursor-pointer text-sm select-none bg-gray-50 dark:bg-slate-700 border-gray-300 dark:border-slate-500 hover:border-blue-500 transition"
+                onClick={() => document.getElementById('fileInputHidden')?.click()}
+              >
+                {!droppedFile && <span className="text-gray-500">Drag & Drop file here or click to browse</span>}
+                {droppedFile && (
+                  <div className="relative text-center px-4">
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); if (!uploadingTaskId) setDroppedFile(null); }}
+                      className="absolute -top-2 -right-2 bg-red-600 hover:bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shadow"
+                      title="Remove file"
+                      disabled={!!uploadingTaskId}
+                    >
+                      ×
+                    </button>
+                    <p className="font-medium text-gray-800 dark:text-white truncate max-w-[200px]">{droppedFile.name}</p>
+                    <p className="text-xs text-gray-500 mt-1">{(droppedFile.size/1024/1024).toFixed(2)} MB</p>
+                    <p className="text-[10px] mt-1 text-gray-400">Click area to choose a different file</p>
+                  </div>
+                )}
+                <input id="fileInputHidden" type="file" className="hidden" onChange={onFileInput} disabled={!!uploadingTaskId} />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button onClick={closeModal} className="px-4 py-2 text-sm rounded-md border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700" disabled={!!uploadingTaskId}>Cancel</button>
+                <button
+                  onClick={submitUpload}
+                  disabled={!droppedFile || !!uploadingTaskId}
+                  className="px-4 py-2 text-sm rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                >
+                  {uploadingTaskId === modalTaskId && <Loader2 size={16} className="animate-spin" />} Upload
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showPasswordPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={() => !downloading && setShowPasswordPrompt(false)}>
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg w-full max-w-sm p-5 relative" onClick={e => e.stopPropagation()}>
+            <button className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 dark:hover:text-white" onClick={() => !downloading && setShowPasswordPrompt(false)} disabled={downloading}>
+              <X size={16} />
+            </button>
+            <h4 className="text-md font-semibold mb-3 text-gray-800 dark:text-white">Enter Password</h4>
+            <p className="text-xs mb-3 text-gray-500">This document is protected. Provide the password to download.</p>
+            <input
+              type="password"
+              value={downloadPassword}
+              onChange={e => setDownloadPassword(e.target.value)}
+              className="w-full border border-gray-300 dark:border-slate-600 rounded-md px-3 py-2 bg-white dark:bg-slate-700 text-sm outline-none focus:ring-2 focus:ring-blue-500 mb-2"
+              placeholder="Password"
+              disabled={downloading}
+            />
+            {downloadError && <div className="text-xs text-red-600 mb-2">{downloadError}</div>}
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => !downloading && setShowPasswordPrompt(false)}
+                className="px-3 py-2 text-xs rounded-md border border-gray-300 dark:border-slate-600 hover:bg-gray-100 dark:hover:bg-slate-700"
+                disabled={downloading}
+              >Cancel</button>
+              <button
+                onClick={() => performDownload(downloadTaskId, 'document.pdf', downloadPassword)}
+                className="px-3 py-2 text-xs rounded-md bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                disabled={downloading || !downloadPassword}
+              >
+                {downloading && <Loader2 size={14} className="animate-spin" />} Download
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
