@@ -2,6 +2,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/context/auth-context";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { ProfileModal } from "../components/profile-modal";
+import { getNavbarLinks } from "@/constants";
 
 import { ChevronsLeft, Search, Sun, Moon, Bell } from "lucide-react";
 import default_avatar from "@/assets/default-avatar.png";
@@ -19,6 +20,8 @@ export const Header = ({ collapsed, setCollapsed }) => {
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
     const [showProfileModal, setShowProfileModal] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [searchResults, setSearchResults] = useState([]);
 
     useClickOutside([dropdownRef], () => {
         setOpen(false);
@@ -43,6 +46,19 @@ export const Header = ({ collapsed, setCollapsed }) => {
         setShowProfileModal(true);
     };
 
+    // Update search results when searchTerm changes
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        if (value.trim() === "") {
+            setSearchResults([]);
+            return;
+        }
+        const links = getNavbarLinks(user?.user_role);
+        const filtered = links.filter(link => link.label.toLowerCase().includes(value.toLowerCase()));
+        setSearchResults(filtered);
+    };
+
     return (
         <header className="relative z-10 ml-4 flex h-[60px] items-center justify-between rounded-lg bg-white px-4 shadow-md transition-colors dark:bg-slate-900">
             <div className="flex items-center gap-x-3">
@@ -52,7 +68,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                 >
                     <ChevronsLeft className={collapsed && "rotate-180"} />
                 </button>
-                <div className="input">
+                <div className="input relative">
                     <Search
                         size={20}
                         className="text-slate-500"
@@ -63,7 +79,25 @@ export const Header = ({ collapsed, setCollapsed }) => {
                         id="search"
                         placeholder="Search..."
                         className="w-full bg-transparent text-slate-900 outline-0 placeholder:text-slate-500 dark:text-slate-50"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
                     />
+                    {searchTerm && searchResults.length > 0 && (
+                        <div className="absolute left-0 top-full mt-2 w-full rounded-md bg-white shadow-lg dark:bg-slate-800 z-50">
+                            {searchResults.map(result => (
+                                <div
+                                    key={result.label}
+                                    className="px-4 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900"
+                                    onClick={() => navigate(result.path)}
+                                >
+                                    <span className="flex items-center gap-x-2">
+                                        <result.icon size={20} className="text-blue-700 dark:text-white" />
+                                        {result.label}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 

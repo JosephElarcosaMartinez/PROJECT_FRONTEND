@@ -8,7 +8,7 @@ export const Payments = () => {
     const [error, setError] = useState("");
     const [paymentsData, setPaymentsData] = useState([]);
     const [cases, setCases] = useState([]);
-    const [selectedCaseBalance, setSelectedCaseBalance] = useState(null);
+
 
     // Helpers
     const formatCurrency = (amount) =>
@@ -30,6 +30,14 @@ export const Payments = () => {
         });
     };
 
+    const getRemainingBalance = (caseId) => {
+        const caseData = cases.find((c) => c.case_id === Number(caseId));
+        if (!caseData) return 0;
+
+        // Use the case_balance field from API
+        return Number(caseData.case_balance);
+    };
+
     // fetching here the cases for the add payment modal
     useEffect(() => {
         const fetchCases = async () => {
@@ -45,8 +53,7 @@ export const Payments = () => {
 
                 const data = await res.json();
                 if (res.ok) {
-                    // setCases(data);
-                    setCases(data.filter((c) => c.case_balance > 0));
+                    setCases(data);
                 } else {
                     console.error("Failed to fetch cases:", data.error);
                 }
@@ -112,34 +119,89 @@ export const Payments = () => {
     const paginatedPayments = filteredPayments.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
     // Add Payment
-    const handleAddPayment = async (amount) => {
-        if (amount > selectedCaseBalance) {
-            toast.error("Payment amount exceeds the case balance.");
-            return;
+    const handleAddPayment = async (amount, balance) => {
+        if (amount > balance) {
+            return toast.error("Payment amount exceeds the remaining balance.");
+
         }
+        else {
+            // Add Payment
 
-        const toastId = toast.loading("Adding payment...", { duration: 4000 });
-        try {
-            const res = await fetch("http://localhost:3000/api/payments", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(addPayment),
-            });
+            const paymentAmount = Number(amount);
+            const remainingBalance = Number(balance);
 
-            const data = await res.json();
+            // Validate amount
+            if (isNaN(paymentAmount)) {
+                return toast.error("Invalid payment amount.");
+            }
 
-            if (res.ok) {
+            if (paymentAmount <= 0) {
+                return toast.error("Payment amount must be greater than zero.");
+            }
+
+            if (paymentAmount > remainingBalance) {
+                return toast.error("Payment amount exceeds the remaining balance.");
+            }
+
+            // Proceed if valid
+            const toastId = toast.loading("Adding payment...", { duration: 4000 });
+
+            try {
+                const res = await fetch("http://localhost:3000/api/payments", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(addPayment), // make sure `addPayment` includes amount, caseId, etc.
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    // Stop here if API failed
+                    toast.error(data.error || "Failed to add payment", { id: toastId });
+                    return;
+                }
+
+                // ✅ Only run this if response is successful
                 setPaymentsData((prev) => [...prev, data]);
+
+                // Deduct from case balance (if tracked)
+                setCaseBalance?.((prevBalance) => prevBalance - paymentAmount);
 
                 toast.success("Payment added successfully!", { id: toastId, duration: 4000 });
                 setAddPayment(null);
-            } else {
-                toast.error(data.error || "Failed to add payment");
-            }
-        } catch (err) {
-            console.error("Error adding payment:", err);
-            toast.error("Error adding payment");
+
+            } catch (err) {
+                console.error("Error adding payment:", err);
+                toast.error("Error adding payment", { id: toastId });
+
+            };
+
+
+            // const toastId = toast.loading("Adding payment...", { duration: 4000 });
+            // try {
+            //     const res = await fetch("http://localhost:3000/api/payments", {
+            //         method: "POST",
+            //         headers: { "Content-Type": "application/json" },
+            //         body: JSON.stringify(addPayment),
+            //     });
+
+            //     const data = await res.json();
+
+            //     if (res.ok) {
+            //         setPaymentsData((prev) => [...prev, data]);
+
+            //         toast.success("Payment added successfully!", { id: toastId, duration: 4000 });
+            //         setAddPayment(null);
+            //     } else {
+            //         toast.error(data.error || "Failed to add payment");
+            //     }
+            // } catch (err) {
+            //     console.error("Error adding payment:", err);
+            //     toast.error("Error adding payment");
+
+            // }
         }
+
     };
 
     const handleDeletePayment = (payment) => {
@@ -307,36 +369,36 @@ export const Payments = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="w-full max-w-2xl rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
                         <h3 className="mb-6 text-xl font-bold text-blue-900 dark:text-slate-200">Add Payment</h3>
+
                         <div className="grid grid-cols-1 gap-4 text-sm text-blue-900 sm:grid-cols-2">
                             <div>
                                 <label className="font-semibold dark:text-blue-700">Case</label>
                                 <select
                                     value={addPayment.case_id}
-                                    onChange={(e) => {
-                                        const caseId = parseInt(e.target.value, 10);
-                                        const selected = cases.find((c) => c.case_id === caseId);
-
-                                        setAddPayment({ ...addPayment, case_id: e.target.value });
-                                        setSelectedCaseBalance(selected ? selected.case_balance : null);
-                                    }}
+                                    onChange={(e) => setAddPayment({ ...addPayment, case_id: e.target.value })}
                                     className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
                                 >
-                                    <option
-                                        value=""
-                                        disabled
-                                    >
+                                    <option value="" disabled>
                                         Select Case
                                     </option>
                                     {cases.map((c) => (
-                                        <option
-                                            key={c.case_id}
-                                            value={c.case_id}
-                                        >
+                                        <option key={c.case_id} value={c.case_id}>
                                             {c.case_id} – {c.client_fullname} ({c.ct_name})
                                         </option>
                                     ))}
                                 </select>
+
+                                {/* Show balance if case selected */}
+                                {addPayment.case_id && (
+                                    <p className="mt-2 text-xs font-medium text-gray-600 dark:text-gray-300">
+                                        Remaining Balance:{" "}
+                                        <span className="font-bold text-green-600 dark:text-green-400">
+                                            {formatCurrency(getRemainingBalance(addPayment.case_id))}
+                                        </span>
+                                    </p>
+                                )}
                             </div>
+
                             <div>
                                 <label className="font-semibold dark:text-blue-700">Lawyer</label>
                                 <input
@@ -347,6 +409,7 @@ export const Payments = () => {
                                 />
                                 <p className="mt-1 text-xs text-gray-500">(Your User ID)</p>
                             </div>
+
                             <div>
                                 <label className="font-semibold dark:text-blue-700">Amount</label>
                                 <input
@@ -369,12 +432,8 @@ export const Payments = () => {
                                     className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
                                     placeholder="0.00"
                                 />
-                                <p className="mt-1 text-xs text-gray-500">
-                                    {selectedCaseBalance !== null
-                                        ? `Remaining Balance: ${formatCurrency(selectedCaseBalance)}`
-                                        : "Select a case to see balance"}
-                                </p>
                             </div>
+
                             <div>
                                 <label className="font-semibold dark:text-blue-700">Payment Type</label>
                                 <select
@@ -382,10 +441,7 @@ export const Payments = () => {
                                     onChange={(e) => setAddPayment({ ...addPayment, payment_type: e.target.value })}
                                     className="w-full rounded-md border px-3 py-2 dark:bg-slate-700 dark:text-slate-50"
                                 >
-                                    <option
-                                        value=""
-                                        disabled
-                                    >
+                                    <option value="" disabled>
                                         Select Payment Type
                                     </option>
                                     <option value="Cheque">Cheque</option>
@@ -393,6 +449,7 @@ export const Payments = () => {
                                 </select>
                             </div>
                         </div>
+
                         <div className="mt-6 flex justify-end gap-2">
                             <button
                                 onClick={() => setAddPayment(null)}
@@ -401,7 +458,11 @@ export const Payments = () => {
                                 Cancel
                             </button>
                             <button
-                                onClick={() => handleAddPayment(parseFloat(addPayment.payment_amount))}
+                                onClick={() => {
+                                    const remaining = getRemainingBalance(addPayment.case_id);
+                                    handleAddPayment(addPayment.payment_amount, remaining);
+                                }}
+
                                 className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
                             >
                                 Add Payment
@@ -410,6 +471,7 @@ export const Payments = () => {
                     </div>
                 </div>
             )}
+
         </div>
     );
 };
