@@ -19,7 +19,6 @@ const Cases = () => {
     const addCaseModalRef = useRef();
     const navigate = useNavigate();
 
-
     // Fetch cases data from API
     useEffect(() => {
         const fetchCases = async () => {
@@ -51,17 +50,15 @@ const Cases = () => {
     };
 
     const [newCase, setNewCase] = useState({
-        id: "",
-        name: "",
-        category: "",
-        client: "",
-        branch: "",
-        filedDate: "",
-        description: "",
-        fee: "",
-        status: "Pending",
-        lawyer: "Unassigned",
-        balance: "P 0.00",
+        client_id: "",
+        cc_id: "",
+        ct_id: "",
+        user_id: user.user_role === "Lawyer" ? user.user_id : "",
+        case_cabinet: "",
+        case_drawer: "",
+        case_fee: "",
+        case_remarks: "",
+        case_status: user.user_role === "Lawyer" ? "Processing" : "Pending",
     });
 
     useClickOutside([addCaseModalRef], () => setIsModalOpen(false));
@@ -91,17 +88,15 @@ const Cases = () => {
         ]);
 
         setNewCase({
-            id: "",
-            name: "",
-            category: "",
-            client: "",
-            branch: "",
-            filedDate: "",
-            description: "",
-            fee: "",
-            status: "Pending",
-            lawyer: "Unassigned",
-            balance: "P 0.00",
+            client_id: "",
+            cc_id: "",
+            ct_id: "",
+            user_id: user.user_role === "Lawyer" ? user.user_id : "",
+            case_cabinet: "",
+            case_drawer: "",
+            case_fee: "",
+            case_remarks: "",
+            case_status: user.user_role === "Lawyer" ? "Processing" : "Pending",
         });
 
         setIsModalOpen(false);
@@ -115,7 +110,7 @@ const Cases = () => {
         } else {
             setStatusFilter("");
         }
-    }, [tableData])
+    }, [tableData]);
 
     const filteredCases = tableData.filter((cases) => {
         const matchesStatus = statusFilter ? cases.case_status === statusFilter : true;
@@ -301,13 +296,13 @@ const Cases = () => {
             />
             {/* Add New Case Modal */}
             <AddNewCase
+                user={user}
                 isModalOpen={isModalOpen}
                 setIsModalOpen={setIsModalOpen}
                 handleAddCase={handleAddCase}
                 newCase={newCase}
                 setNewCase={setNewCase}
                 addCaseModalRef={addCaseModalRef}
-                user={user}
             />
         </div>
     );

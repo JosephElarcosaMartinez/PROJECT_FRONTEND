@@ -143,7 +143,7 @@ const Settings = () => {
         <div className="flex h-full">
             {/* Sidebar */}
             <aside className="w-72 bg-white dark:bg-gray-900 border-r dark:border-gray-700 shadow-md">
-                <div className="p-4 font-semibold text-lg border-b dark:border-gray-700 flex items-center gap-2">
+                <div className="p-4 font-semibold text-lg border-b dark:text-slate-300 dark:border-gray-700 flex items-center gap-2">
                     <SettingsIcon size={22} />
                     <span>Settings</span>
                 </div>
@@ -166,7 +166,7 @@ const Settings = () => {
             </aside>
 
             {/* Content */}
-            <main className="flex-1 p-6 overflow-y-auto space-y-8">
+            <main className="flex-1 p-6 overflow-y-auto space-y-8 dark:text-slate-300">
                 {/* Categories */}
                 {activeTab === "categories" && (
                     <SettingsCard title="Case Categories & Types">

@@ -66,7 +66,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                 </div>
             </div>
 
-            <div className="relative flex items-center gap-x-2">
+            <div className="relative flex items-center gap-x-2 ">
                 <button
                     className="btn-ghost size-10"
                     onClick={() => {
@@ -85,14 +85,14 @@ export const Header = ({ collapsed, setCollapsed }) => {
 
                 <button
                     onClick={() => navigate("notifications")}
-                    className="btn-ghost size-10"
+                    className="btn-ghost size-10 "
                 >
                     <Bell size={20} />
                 </button>
 
                 <button
                     onClick={() => navigate("settings")}
-                    className="btn-ghost size-10"
+                    className="btn-ghost size-10 "
                 >
                     <Settings size={20} />
                 </button>
