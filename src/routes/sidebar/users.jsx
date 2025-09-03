@@ -90,17 +90,28 @@ const Users = () => {
         const fullName = [userToSuspend.user_fname, userToSuspend.user_mname, userToSuspend.user_lname].filter(Boolean).join(" ");
 
         const toastId = toast.loading(`Updating user: ${fullName}`, {
-            duration: Infinity,
+            duration: 4000,
         });
 
         try {
+            const payload = {
+                user_fname: userToSuspend.user_fname,
+                user_mname: userToSuspend.user_mname,
+                user_lname: userToSuspend.user_lname,
+                user_email: userToSuspend.user_email,
+                user_phonenum: userToSuspend.user_phonenum,
+                user_role: userToSuspend.user_role,
+                user_status: "Suspended",
+                branch_id: userToSuspend.branch_id,
+            };
+
             const res = await fetch(`${API_BASE}/api/users/${userToSuspend.user_id}`, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ ...userToSuspend, user_status: "Suspended" }),
+                body: JSON.stringify(payload),
             });
 
             if (!res.ok) {
@@ -126,17 +137,28 @@ const Users = () => {
 
         if (confirmActivate) {
             const toastId = toast.loading(`Activating: ${fullName}`, {
-                duration: Infinity,
+                duration: 4000,
             });
 
             try {
+                const payload = {
+                    user_fname: u.user_fname,
+                    user_mname: u.user_mname,
+                    user_lname: u.user_lname,
+                    user_email: u.user_email,
+                    user_phonenum: u.user_phonenum,
+                    user_role: u.user_role,
+                    user_status: "Active",
+                    branch_id: u.branch_id,
+                };
+
                 const res = await fetch(`${API_BASE}/api/users/${u.user_id}`, {
                     method: "PUT",
                     credentials: "include",
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ ...u, user_status: "Active" }),
+                    body: JSON.stringify(payload),
                 });
 
                 if (!res.ok) {
@@ -217,7 +239,7 @@ const Users = () => {
             {error && (
                 <div className="mb-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-red-50 shadow">
                     <div>
-                        <span>{error}</span>
+                        <span>{error.toString()}</span>
                     </div>
                 </div>
             )}
@@ -225,7 +247,7 @@ const Users = () => {
             {/* Header */}
             <div className="mb-6">
                 <h2 className="title">Users</h2>
-                <p className="text-sm text-gray-500">Manage system users and their roles</p>
+                <p className="text-sm dark:text-slate-300">Manage system users and their roles</p>
             </div>
 
             {/* Role Filters */}
@@ -548,23 +570,9 @@ const Users = () => {
                             &times;
                         </button>
                     </div>
-
                 </div>
-
             )}
-
-            {/* Promotions link */}
-            <div className="mt-4">
-                <a
-                    href="/promotion"
-                    className="text-blue-600 hover:underline"
-                >
-                    Go to Promotions {">"}
-                </a>
-            </div>
-
         </div>
-
     );
 };
 

@@ -3,7 +3,7 @@ import { useAuth } from "@/context/auth-context";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { ProfileModal } from "../components/profile-modal";
 
-import { ChevronsLeft, Search, Sun, Moon, Bell } from "lucide-react";
+import { ChevronsLeft, Search, Sun, Moon, Bell, Settings } from "lucide-react";
 import default_avatar from "@/assets/default-avatar.png";
 
 import { useRef, useState } from "react";
@@ -19,6 +19,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
     const [showProfileModal, setShowProfileModal] = useState(false);
+    const [showSettingsModal, setShowSettingsModal] = useState(false);
 
     useClickOutside([dropdownRef], () => {
         setOpen(false);
@@ -37,8 +38,8 @@ export const Header = ({ collapsed, setCollapsed }) => {
         }
     };
 
-    const handleProfile = () => {
-        setShowProfileModal(true);
+    const handleSettings = () => {
+        setShowSettingsModal(true);
     };
 
     return (
@@ -89,6 +90,13 @@ export const Header = ({ collapsed, setCollapsed }) => {
                     <Bell size={20} />
                 </button>
 
+                <button
+                    onClick={() => navigate("settings")}
+                    className="btn-ghost size-10"
+                >
+                    <Settings size={20} />
+                </button>
+
                 {/* Profile Image Dropdown */}
                 <div
                     className="relative"
@@ -116,7 +124,10 @@ export const Header = ({ collapsed, setCollapsed }) => {
                                         : "No user"}
                             </div>
                             <button
-                                onClick={handleProfile}
+                                onClick={() => {
+                                    setShowProfileModal(true);
+                                    setOpen(false);
+                                }}
                                 className="w-full rounded px-2 py-1 text-left text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                             >
                                 Profile

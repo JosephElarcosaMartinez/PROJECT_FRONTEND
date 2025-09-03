@@ -27,6 +27,7 @@ import ChangePass from "./auth/changepass";
 import Promotion from "./components/promotion";
 import { UnauthorizedAccess } from "./auth/unauthorized";
 import { Payments } from "./routes/sidebar/payments";
+import Settings from "./components/settings";
 
 export default function App() {
     const router = createBrowserRouter([
@@ -75,6 +76,7 @@ export default function App() {
                         { path: "notifications/notif-settings", element: <NotificationSettings /> },
                         { path: "promotion", element: <Promotion /> },
                         { path: "payments", element: <Payments /> },
+                        { path: "settings", element: <Settings /> },
                     ],
                 },
             ],

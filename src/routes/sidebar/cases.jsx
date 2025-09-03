@@ -275,12 +275,6 @@ const Cases = () => {
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </button>
-                                            <button
-                                                className="p-1.5 text-red-600 hover:text-red-800"
-                                                onClick={() => alert(`Dismissing the case of ${cases.client_fullname}`)}
-                                            >
-                                                <SquareX className="h-4 w-4" />
-                                            </button>
                                         </div>
                                     </td>
                                 </tr>
@@ -312,6 +306,8 @@ const Cases = () => {
                 handleAddCase={handleAddCase}
                 newCase={newCase}
                 setNewCase={setNewCase}
+                addCaseModalRef={addCaseModalRef}
+                user={user}
             />
         </div>
     );

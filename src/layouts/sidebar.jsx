@@ -22,16 +22,16 @@ export const Sidebar = forwardRef(({ collapsed }, ref) => {
             )}
         >
             {/* Logo Section */}
-            <div className="flex items-center justify-center gap-x-3 p-1 border-b border-white/20 pb-3 pt-3">
+            <div className="flex items-center justify-center gap-x-3 p-3 border-b border-white/20 pb-3 pt-3">
                 <img
                     src={light_logo2}
                     alt="legalvault_logo_light"
-                    className="h-12 w-25 dark:hidden "
+                    className="h-16 w-22 dark:hidden "
                 />
                 <img
                     src={light_logo2}
                     alt="legalvault_logo_dark"
-                    className="h-12 w-25 hidden dark:block"
+                    className="h-16 w-25 hidden dark:block"
                 />
 
                 {!collapsed && (
