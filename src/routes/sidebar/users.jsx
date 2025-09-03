@@ -252,20 +252,34 @@ const Users = () => {
 
             {/* Role Filters */}
             <div className="mb-4 flex flex-wrap gap-2">
-                {roles.map((role) => (
-                    <button
-                        key={role}
-                        onClick={() => setSelectedRole(role)}
-                        className={`rounded-full border border-slate-400 px-4 py-1.5 text-sm ${selectedRole === role ? "border-none bg-blue-600 text-white" : "border-gray-300 text-gray-800 dark:text-white"
-                            }`}
-                    >
-                        {role}
-                    </button>
-                ))}
+                {roles.map((role) => {
+                    const baseColors = {
+                        All: "bg-blue-500 text-white font-semibold",
+                        Admin: "bg-blue-500 text-white font-semibold",
+                        Lawyer: "bg-blue-500 text-white font-semibold",
+                        Paralegal: "bg-blue-500 text-white font-semibold",
+                        Staff: "bg-blue-500 text-white font-semibold",
+                    };
+
+                    const active = selectedRole === role;
+                    return (
+                        <button
+                            key={role}
+                            onClick={() => setSelectedRole(role)}
+                            className={`rounded-full px-4 py-2 text-sm font-medium transition ${active
+                                ? baseColors[role]
+                                : "bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200"
+                                }`}
+                        >
+                            {role}
+                        </button>
+                    );
+                })}
             </div>
 
+
             {/* Search & Add Button */}
-            <div className="mb-6 flex flex-col items-center gap-4 md:flex-row">
+            <div className="card shadow-md mb-6 flex flex-col items-center gap-4 md:flex-row">
                 {/* Search input with icon inside */}
                 <div className="relative w-full md:flex-1">
                     <Search

@@ -114,7 +114,7 @@ const Userlogs = () => {
       </div>
 
       {/* Filters */}
-      <div className="mb-8 flex flex-wrap items-center gap-4 rounded-xl bg-white p-4 shadow-md dark:bg-slate-900">
+      <div className="card shadow-md mb-6 flex flex-col items-center gap-4 md:flex-row">
         <div className="relative flex-grow">
           <Search
             size={18}

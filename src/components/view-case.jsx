@@ -2,7 +2,6 @@ import { useRef, useState, useEffect } from "react";
 import { X, MapPin, ArrowLeft, Trash2, XCircle, CheckCircle } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { useAuth } from "@/context/auth-context";
-import CaseActionModal from "./case-action-modal";
 
 const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
     const { user } = useAuth();
@@ -12,45 +11,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
 
     const [showPayments, setShowPayments] = useState(false);
     const [payments, setPayments] = useState([]);
-    const [showCloseModal, setShowCloseModal] = useState(false);
-    const [showDismissModal, setShowDismissModal] = useState(false);
-
-    // Handlers for closing and dismissing case
-    const handleCloseCase = async () => {
-        try {
-            const res = await fetch(`/api/cases/${selectedCase.case_id}/close`, {
-                method: "POST",
-            });
-
-            if (!res.ok) throw new Error("Failed to close case");
-
-            const updatedCase = await res.json();
-
-            setSelectedCase(updatedCase);
-            setShowCloseModal(false);
-        } catch (error) {
-            console.error("Error closing case:", error);
-            alert("Failed to close case.");
-        }
-    };
-
-    const handleDismissCase = async () => {
-        try {
-            const res = await fetch(`/api/cases/${selectedCase.case_id}/dismiss`, {
-                method: "POST",
-            });
-
-            if (!res.ok) throw new Error("Failed to dismiss case");
-
-            const updatedCase = await res.json();
-
-            setSelectedCase(updatedCase);
-            setShowDismissModal(false);
-        } catch (error) {
-            console.error("Error dismissing case:", error);
-            alert("Failed to dismiss case.");
-        }
-    };
+    const [users, setUsers] = useState([]);
 
     // Fetching payments
     useEffect(() => {
@@ -72,6 +33,33 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
             fetchPayments();
         }
     }, [showPayments, selectedCase]);
+
+    // Fetching users for knowing who assigned the lawyer
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/users", { method: "GET", credentials: "include" });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || "Failed to fetch users.");
+                } else {
+                    setUsers(data);
+                }
+            } catch (error) {
+                console.error("Error fetching users:", error);
+            }
+        };
+        fetchUsers();
+    }, []);
+
+    // Function to get the name of the user who assigned the lawyer
+    const getAssignerName = (assignedById) => {
+        const assigner = users.find((u) => u.user_id === assignedById);
+        return assigner
+            ? `Atty. ${assigner.user_fname} ${assigner.user_mname ? assigner.user_mname[0] + "." : ""} ${assigner.user_lname}`
+            : "Unknown";
+    };
 
     useClickOutside([modalRef], () => {
         setSelectedCase(null);
@@ -130,7 +118,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
 
                 {!showPayments ? (
                     <>
-                        <div className="mb-6 flex items-center justify-between">
+                        <div className="mb-4 flex items-center justify-between">
                             <div>
                                 <h2 className="text-2xl font-semibold">
                                     Case {selectedCase.case_id}
@@ -143,7 +131,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                 </h2>
                                 <div className="mt-1 flex gap-4 text-sm text-gray-600 dark:text-gray-300">
                                     <span>Cabinet #: {selectedCase.case_cabinet}</span>
-                                    <span>Drawer #: {selectedCase.case_drawer}</span>
+                                    {selectedCase.case_drawer && <span>Drawer #: {selectedCase.case_drawer}</span>}
                                 </div>
                             </div>
                             <div className="mr-7 flex items-center gap-1 text-sm text-slate-500">
@@ -193,6 +181,9 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         value={selectedCase.user_id ? `Atty. ${getLawyerFullName(selectedCase.user_id)}` : "Unassigned"}
                                         className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm dark:bg-slate-800"
                                     />
+                                    {selectedCase.assigned_by && (
+                                        <p className="mt-1 text-xs text-gray-500">Assigned by: {getAssignerName(selectedCase.assigned_by)}</p>
+                                    )}
                                 </div>
                                 <div className="col-span-2">
                                     <label className="text-sm font-semibold">Description / Remarks</label>
@@ -266,12 +257,12 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         <strong>Status:</strong>{" "}
                                         <span
                                             className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${selectedCase.case_status === "Pending"
-                                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
-                                                : selectedCase.case_status === "Processing"
-                                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
-                                                    : selectedCase.case_status === "Completed"
-                                                        ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                    : selectedCase.case_status === "Processing"
+                                                        ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
+                                                        : selectedCase.case_status === "Completed"
+                                                            ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                            : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
                                                 }`}
                                         >
                                             {selectedCase.case_status}
@@ -288,13 +279,13 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                             </div>
                         </div>
 
-                        <div className="mt-6 overflow-x-auto rounded-lg border">
+                        <div className="mt-2 overflow-x-auto rounded-lg border">
                             <div className="flex items-center justify-between p-4">
                                 <h3 className="text-sm font-semibold">Documents</h3>
 
                                 {selectedCase.case_status === "Processing" && (
                                     <div className="flex gap-2">
-                                        <button className="rounded border border-teal-600 px-4 py-1.5 text-sm text-teal-600 hover:bg-teal-700 hover:text-white">
+                                        <button className="rounded border border-blue-600 px-4 py-1.5 text-sm text-blue-600 hover:bg-blue-700 hover:text-white">
                                             Add Task Document
                                         </button>
                                         <input
@@ -365,15 +356,13 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                 <button
                                     title="Closing or Finishing the Case"
                                     className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700"
-                                    onClick={() => setShowCloseModal(true)}
                                 >
                                     <CheckCircle size={20} />
                                     Close Case
                                 </button>
                                 <button
                                     title="Dismissing Case"
-                                    className="inline-flex gap-2 rounded-lg bg-red-600 px-3 py-2 text-sm text-white hover:bg-red-700"
-                                    onClick={() => setShowDismissModal(true)}
+                                    className="inline-flex gap-2 rounded-lg bg-gray-600 px-3 py-2 text-sm text-white hover:bg-gray-700"
                                 >
                                     <XCircle size={20} />
                                     Dismiss Case
@@ -474,23 +463,6 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                         </div>
                     </>
                 )}
-                {showCloseModal && (
-                    <CaseActionModal
-                        caseData={selectedCase}
-                        type="close"
-                        onClose={() => setShowCloseModal(false)}
-                        onConfirm={handleCloseCase}
-                    />
-                )}
-                {showDismissModal && (
-                    <CaseActionModal
-                        caseData={selectedCase}
-                        type="dismiss"
-                        onClose={() => setShowDismissModal(false)}
-                        onConfirm={handleDismissCase}
-                    />
-                )}
-
             </div>
         </div>
     );

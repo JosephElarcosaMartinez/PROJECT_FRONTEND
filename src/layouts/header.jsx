@@ -3,7 +3,7 @@ import { useAuth } from "@/context/auth-context";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { ProfileModal } from "../components/profile-modal";
 
-import { ChevronsLeft, Search, Sun, Moon, Bell, Settings } from "lucide-react";
+import { ChevronsLeft, Search, Sun, Moon, Bell } from "lucide-react";
 import default_avatar from "@/assets/default-avatar.png";
 
 import { useRef, useState } from "react";
@@ -19,7 +19,6 @@ export const Header = ({ collapsed, setCollapsed }) => {
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
     const [showProfileModal, setShowProfileModal] = useState(false);
-    const [showSettingsModal, setShowSettingsModal] = useState(false);
 
     useClickOutside([dropdownRef], () => {
         setOpen(false);
@@ -35,11 +34,13 @@ export const Header = ({ collapsed, setCollapsed }) => {
                 id: toastId,
                 duration: 4000,
             });
+        } else {
+            toast.dismiss(toastId, { duration: 4000 });
         }
     };
 
-    const handleSettings = () => {
-        setShowSettingsModal(true);
+    const handleProfile = () => {
+        setShowProfileModal(true);
     };
 
     return (
@@ -66,7 +67,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                 </div>
             </div>
 
-            <div className="relative flex items-center gap-x-2 ">
+            <div className="relative flex items-center gap-x-2">
                 <button
                     className="btn-ghost size-10"
                     onClick={() => {
@@ -85,16 +86,9 @@ export const Header = ({ collapsed, setCollapsed }) => {
 
                 <button
                     onClick={() => navigate("notifications")}
-                    className="btn-ghost size-10 "
+                    className="btn-ghost size-10"
                 >
                     <Bell size={20} />
-                </button>
-
-                <button
-                    onClick={() => navigate("settings")}
-                    className="btn-ghost size-10 "
-                >
-                    <Settings size={20} />
                 </button>
 
                 {/* Profile Image Dropdown */}
@@ -106,7 +100,9 @@ export const Header = ({ collapsed, setCollapsed }) => {
                         className="flex h-10 items-center rounded-full bg-blue-900 p-1 pr-0 transition hover:bg-blue-800 dark:bg-blue-950 dark:hover:bg-[#173B7E]"
                         onClick={() => setOpen(!open)}
                     >
-                        <span className="px-3 text-sm font-medium text-white">Hi, {user.user_role === "Admin" ? "Super Lawyer" : user.user_role}</span>
+                        <span className="px-3 text-sm font-medium text-white">
+                            Hi, {user.user_role === "Admin" ? "Super Lawyer" : user.user_role}
+                        </span>
                         <img
                             src={user?.user_profile ? `http://localhost:3000${user.user_profile}` : default_avatar}
                             alt="profile"
@@ -124,10 +120,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                                         : "No user"}
                             </div>
                             <button
-                                onClick={() => {
-                                    setShowProfileModal(true);
-                                    setOpen(false);
-                                }}
+                                onClick={handleProfile}
                                 className="w-full rounded px-2 py-1 text-left text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                             >
                                 Profile

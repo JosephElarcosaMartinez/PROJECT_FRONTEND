@@ -67,6 +67,14 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
         fetchCaseCategoriesAndTypes();
     }, []);
 
+    useEffect(() => {
+        if (newCase.user_id) {
+            setNewCase((prev) => ({ ...prev, case_status: "Processing" }));
+        } else {
+            setNewCase((prev) => ({ ...prev, case_status: "Pending" }));
+        }
+    }, [newCase.user_id]);
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div
@@ -164,25 +172,35 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                             value={newCase.user_id}
                             onChange={(e) => setNewCase({ ...newCase, user_id: e.target.value })}
                             className="w-full rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
-                            disabled={user.user_role !== "Admin" || !newCase.ct_id} // disabled if not Admin or no case type
+                            disabled={user.user_role !== "Admin" || !newCase.cc_id} // disabled if not Admin or no case category
                         >
                             <option
                                 value=""
                                 disabled
                             >
-                                {user.user_role !== "Admin" ? "Only Admin can assign" : !newCase.ct_id ? "Select Case Type first" : "Select Lawyer"}
+                                {user.user_role !== "Admin"
+                                    ? `${user.user_fname} ${user.user_mname} ${user.user_lname}`
+                                    : !newCase.cc_id
+                                        ? "Select Category first"
+                                        : "Select Lawyer"}
                             </option>
 
-                            {lawyers
-                                .filter((lawyer) => lawyer.ct_id === parseInt(newCase.ct_id)) // only lawyers with this case type
-                                .map((lawyer) => (
-                                    <option
-                                        key={lawyer.user_id}
-                                        value={lawyer.user_id}
-                                    >
-                                        {lawyer.user_fname}
-                                    </option>
-                                ))}
+                            {user.user_role === "Admin" ? (
+                                lawyers
+                                    .filter((lawyer) => lawyer.cc_id === parseInt(newCase.cc_id)) // filter lawyers by category
+                                    .map((lawyer) => (
+                                        <option
+                                            key={lawyer.user_id}
+                                            value={lawyer.user_id}
+                                        >
+                                            {lawyer.user_fname} {lawyer.user_mname} {lawyer.user_lname}
+                                        </option>
+                                    ))
+                            ) : (
+                                <option value={newCase.user_id}>
+                                    {user.user_fname} {user.user_mname} {user.user_lname}
+                                </option>
+                            )}
                         </select>
                     </div>
 
@@ -191,22 +209,37 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                         <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Fee</label>
                         <input
                             type="number"
-                            step="0.01"
                             value={newCase.case_fee}
                             onChange={(e) => setNewCase({ ...newCase, case_fee: e.target.value })}
+                            onBlur={() => {
+                                // On blur, if fee is empty or less than 0, set to 0.00
+                                if (!newCase.case_fee || parseFloat(newCase.case_fee) < 0) {
+                                    setNewCase((prev) => ({ ...prev, case_fee: "0.00" }));
+                                } else {
+                                    // Format to two decimal places
+                                    const formattedFee = parseFloat(newCase.case_fee).toFixed(2);
+                                    setNewCase((prev) => ({ ...prev, case_fee: formattedFee }));
+                                }
+                            }}
                             className="w-full rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
                             placeholder="0.00"
                         />
+                        {newCase.ct_id && (
+                            <p className="mt-1 text-xs text-gray-500">
+                                Fee range:{" "}
+                                {caseCategoryTypes.find((type) => type.ct_id === parseInt(newCase.ct_id))?.ct_fee || "No range fee info available"}
+                            </p>
+                        )}
                     </div>
 
                     {/* Case Status */}
                     <div>
                         <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Case Status</label>
                         <input
+                            type="text"
                             value={newCase.case_status}
-                            onChange={(e) => setNewCase({ ...newCase, case_status: e.target.value })}
-                            className="w-full rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
                             readOnly
+                            className="w-full rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
                         />
                     </div>
 
@@ -217,7 +250,7 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                             value={newCase.case_remarks}
                             onChange={(e) => setNewCase({ ...newCase, case_remarks: e.target.value })}
                             className="w-full resize-none rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
-                            rows={4}
+                            rows={3}
                         ></textarea>
                     </div>
 
