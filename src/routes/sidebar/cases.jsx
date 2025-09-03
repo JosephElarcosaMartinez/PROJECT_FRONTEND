@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Pencil, SquareX, CircleX, Eye, Search } from "lucide-react";
+import { Pencil, Eye, Search } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
@@ -14,16 +14,41 @@ const Cases = () => {
     const [tableData, setTableData] = useState([]);
     const [error, setError] = useState(null);
     const [statusFilter, setStatusFilter] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 10;
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCase, setSelectedCase] = useState(null);
     const addCaseModalRef = useRef();
     const navigate = useNavigate();
 
-    const totalPages = Math.ceil(filteredCases.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentCases = filteredCases.slice(startIndex, startIndex + itemsPerPage);
+    // filter cases
+    const formatDateTime = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toLocaleString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+        });
+    };
 
+    const filteredCases = tableData.filter((cases) => {
+        const matchesStatus = statusFilter ? cases.case_status === statusFilter : true;
+        const searchLower = search.toLowerCase();
+        const matchesSearch =
+            (cases.case_id && cases.case_id.toString().includes(search)) ||
+            (cases.ct_name && cases.ct_name.toLowerCase().includes(searchLower)) ||
+            (cases.client_fullname && cases.client_fullname.toLowerCase().includes(searchLower)) ||
+            (cases.case_status && cases.case_status.toLowerCase().includes(searchLower)) ||
+            (formatDateTime(cases.case_date_created) &&
+                formatDateTime(cases.case_date_created).toLowerCase().includes(searchLower));
+        return matchesStatus && matchesSearch;
+    });
+
+    const totalPages = Math.ceil(filteredCases.length / rowsPerPage) || 1;
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const currentCases = filteredCases.slice(startIndex, startIndex + rowsPerPage);
 
     // Fetch cases data from API
     useEffect(() => {
@@ -43,17 +68,7 @@ const Cases = () => {
             }
         };
         fetchCases();
-    }, []);
-
-    const formatDateTime = (dateString) => {
-        if (!dateString) return "";
-        const date = new Date(dateString);
-        return date.toLocaleString("en-US", {
-            month: "long",
-            day: "numeric",
-            year: "numeric",
-        });
-    };
+    }, [user]);
 
     const [newCase, setNewCase] = useState({
         client_id: "",
@@ -82,9 +97,7 @@ const Cases = () => {
     }, []);
 
     const handleAddCase = async () => {
-        const toastId = toast.loading("Adding new case...", {
-            duration: 4000,
-        });
+        const toastId = toast.loading("Adding new case...", { duration: 4000 });
 
         try {
             const payload = {
@@ -107,7 +120,7 @@ const Cases = () => {
                 throw new Error("Failed to add case");
             }
 
-            const addedCase = res.json();
+            const addedCase = await res.json();
             setTableData((prevData) => [addedCase, ...prevData]);
             setIsModalOpen(false);
             setNewCase({
@@ -128,11 +141,10 @@ const Cases = () => {
             console.error("Error adding case:", error);
             setError("Failed to add case. Please try again.");
             toast.error("Failed to add case. Please try again.", { id: toastId, duration: 4000 });
-            return;
         }
     };
 
-    // Set default statusFilter to 'Pending' if there are pending cases, else '' (All)
+    // Set default statusFilter
     useEffect(() => {
         if (tableData.some((c) => c.case_status === "Pending")) {
             setStatusFilter("Pending");
@@ -140,18 +152,6 @@ const Cases = () => {
             setStatusFilter("");
         }
     }, [tableData]);
-
-    const filteredCases = tableData.filter((cases) => {
-        const matchesStatus = statusFilter ? cases.case_status === statusFilter : true;
-        const searchLower = search.toLowerCase();
-        const matchesSearch =
-            (cases.case_id && cases.case_id.toString().includes(search)) ||
-            (cases.ct_name && cases.ct_name.toLowerCase().includes(searchLower)) ||
-            (cases.client_fullname && cases.client_fullname.toLowerCase().includes(searchLower)) ||
-            (cases.case_status && cases.case_status.toLowerCase().includes(searchLower)) ||
-            (formatDateTime(cases.case_date_created) && formatDateTime(cases.case_date_created).toLowerCase().includes(searchLower));
-        return matchesStatus && matchesSearch;
-    });
 
     // get the full name of the (assigned) lawyer
     const getLawyerFullName = (lawyerId) => {
@@ -165,7 +165,11 @@ const Cases = () => {
 
     return (
         <div className="mx-auto">
-            {error && <div className="mb-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-red-50 shadow">{error}</div>}
+            {error && (
+                <div className="mb-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-red-50 shadow">
+                    {error}
+                </div>
+            )}
 
             <div className="mb-6">
                 <h2 className="title">Cases</h2>
@@ -175,7 +179,6 @@ const Cases = () => {
             {/* Tabs */}
             <div className="mb-4 flex gap-2">
                 {["All", "Pending", "Processing", "Completed", "Dismissed"].map((tab) => {
-                    // assign base colors
                     const baseColors = {
                         All: "bg-blue-500 text-white font-semibold",
                         Pending: "bg-yellow-500 text-white font-semibold",
@@ -189,22 +192,21 @@ const Cases = () => {
                         <button
                             key={tab}
                             onClick={() => setStatusFilter(tab === "All" ? "" : tab)}
-                            className={`rounded-full px-4 py-2 text-sm font-medium transition ${active ? baseColors[tab] : "bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200"}`}
+                            className={`rounded-full px-4 py-2 text-sm font-medium transition ${active
+                                ? baseColors[tab]
+                                : "bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200"
+                                }`}
                         >
                             {tab}
                         </button>
                     );
-                    white;
                 })}
             </div>
 
             {/* Search and Buttons */}
             <div className="card mb-5 flex flex-col gap-3 overflow-x-auto p-4 shadow-md md:flex-row md:items-center md:gap-x-3">
-                <div className="focus:ring-0.5 flex flex-grow items-center gap-2 rounded-md border border-gray-300 bg-transparent px-3 py-2 focus-within:border-blue-600 focus-within:ring-blue-400 dark:border-slate-600 dark:focus-within:border-blue-600">
-                    <Search
-                        size={18}
-                        className="text-gray-600 dark:text-gray-400"
-                    />
+                <div className="flex flex-grow items-center gap-2 rounded-md border border-gray-300 bg-transparent px-3 py-2 focus-within:border-blue-600 focus-within:ring-blue-400 dark:border-slate-600 dark:focus-within:border-blue-600">
+                    <Search size={18} className="text-gray-600 dark:text-gray-400" />
                     <input
                         type="text"
                         placeholder="Search cases by name, client, date filed, status or lawyer..."
@@ -246,8 +248,8 @@ const Cases = () => {
                         </tr>
                     </thead>
                     <tbody className="text-slate-950 dark:text-white">
-                        {filteredCases.length > 0 ? (
-                            filteredCases.map((cases) => (
+                        {currentCases.length > 0 ? (
+                            currentCases.map((cases) => (
                                 <tr
                                     key={cases.case_id}
                                     className="border-t border-gray-200 transition hover:bg-blue-100 dark:border-gray-700 dark:hover:bg-blue-950"
@@ -270,13 +272,11 @@ const Cases = () => {
                                             {cases.case_status}
                                         </span>
                                     </td>
-
                                     {cases.user_id ? (
                                         <td className="px-4 py-3">{getLawyerFullName(cases.user_id)}</td>
                                     ) : (
                                         <td className="px-4 py-3 italic text-gray-500">Unassigned</td>
                                     )}
-
                                     <td className="px-4 py-3">
                                         {cases?.case_balance !== null && cases?.case_balance !== undefined
                                             ? new Intl.NumberFormat("en-PH", {
@@ -295,7 +295,9 @@ const Cases = () => {
                                             </button>
                                             <button
                                                 className="p-1.5 text-yellow-500 hover:text-yellow-700"
-                                                onClick={() => alert(`Editing ${cases.ct_name} of ${cases.client_fullname}`)}
+                                                onClick={() =>
+                                                    alert(`Editing ${cases.ct_name} of ${cases.client_fullname}`)
+                                                }
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </button>
@@ -313,45 +315,44 @@ const Cases = () => {
                                 </td>
                             </tr>
                         )}
-
-                        {/* Pagination */}
-                        <div className="flex justify-end items-center gap-3 mt-4">
-                            <button
-                                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-                                disabled={currentPage === 1}
-                                className={`px-3 py-1 border rounded ${currentPage === 1
-                                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                    : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-                                    }`}
-                            >
-                                &lt;
-                            </button>
-
-                            <span className="text-sm text-gray-700 dark:text-white">
-                                Page {currentPage} of {totalPages}
-                            </span>
-
-                            <button
-                                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                className={`px-3 py-1 border rounded ${currentPage === totalPages
-                                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                    : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-                                    }`}
-                            >
-                                &gt;
-                            </button>
-                        </div>
                     </tbody>
                 </table>
             </div>
 
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="flex justify-end items-center gap-3 mt-4 p-4">
+                    <button
+                        onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                        disabled={currentPage === 1}
+                        className={`px-3 py-1 border rounded ${currentPage === 1
+                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+                            }`}
+                    >
+                        &lt;
+                    </button>
+
+                    <span className="text-sm text-gray-700 dark:text-white">
+                        Page {currentPage} of {totalPages}
+                    </span>
+
+                    <button
+                        onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                        disabled={currentPage === totalPages}
+                        className={`px-3 py-1 border rounded ${currentPage === totalPages
+                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+                            }`}
+                    >
+                        &gt;
+                    </button>
+                </div>
+            )}
+
             {/* View Case Modal */}
-            <ViewModal
-                selectedCase={selectedCase}
-                tableData={tableData}
-                setSelectedCase={setSelectedCase}
-            />
+            <ViewModal selectedCase={selectedCase} tableData={tableData} setSelectedCase={setSelectedCase} />
+
             {/* Add New Case Modal */}
             <AddNewCase
                 user={user}

@@ -234,6 +234,12 @@ const Users = () => {
         return matchesSearch && matchesRole;
     });
 
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 10;
+    const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
+    const paginatedUsers = filteredUsers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
     return (
         <div className="dark:bg-slate-950">
             {error && (
@@ -252,34 +258,22 @@ const Users = () => {
 
             {/* Role Filters */}
             <div className="mb-4 flex flex-wrap gap-2">
-                {roles.map((role) => {
-                    const baseColors = {
-                        All: "bg-blue-500 text-white font-semibold",
-                        Admin: "bg-blue-500 text-white font-semibold",
-                        Lawyer: "bg-blue-500 text-white font-semibold",
-                        Paralegal: "bg-blue-500 text-white font-semibold",
-                        Staff: "bg-blue-500 text-white font-semibold",
-                    };
-
-                    const active = selectedRole === role;
-                    return (
-                        <button
-                            key={role}
-                            onClick={() => setSelectedRole(role)}
-                            className={`rounded-full px-4 py-2 text-sm font-medium transition ${active
-                                ? baseColors[role]
+                {roles.map((role) => (
+                    <button
+                        key={role}
+                        onClick={() => setSelectedRole(role)}
+                        className={`rounded-full px-4 py-2 text-sm ${selectedRole === role
+                                ? "border-none bg-blue-600 text-white"
                                 : "bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200"
-                                }`}
-                        >
-                            {role}
-                        </button>
-                    );
-                })}
+                            }`}
+                    >
+                        {role}
+                    </button>
+                ))}
             </div>
 
-
             {/* Search & Add Button */}
-            <div className="card shadow-md mb-6 flex flex-col items-center gap-4 md:flex-row">
+            <div className="mb-6 flex flex-col items-center gap-4 md:flex-row">
                 {/* Search input with icon inside */}
                 <div className="relative w-full md:flex-1">
                     <Search
@@ -319,8 +313,8 @@ const Users = () => {
                         </tr>
                     </thead>
                     <tbody className="dark:text-slate-50">
-                        {filteredUsers.length > 0 ? (
-                            filteredUsers.map((u) => (
+                        {paginatedUsers.length > 0 ? (
+                            paginatedUsers.map((u) => (
                                 <tr
                                     key={u.user_id}
                                     className="border-t border-gray-200 hover:bg-blue-50 dark:border-slate-700 dark:hover:bg-blue-950"
@@ -330,12 +324,12 @@ const Users = () => {
                                             src={u.user_profile ? `${API_BASE}${u.user_profile}` : default_avatar}
                                             alt={`${u.user_fname || ""} ${u.user_lname || ""}`.trim()}
                                             className={`h-10 w-10 rounded-full border-2 object-cover p-0.5 ${u.user_status === "Active"
-                                                ? "border-green-500"
-                                                : u.user_status === "Pending"
-                                                    ? "border-yellow-500"
-                                                    : u.user_status === "Suspended"
-                                                        ? "border-red-500"
-                                                        : "border-gray-300"
+                                                    ? "border-green-500"
+                                                    : u.user_status === "Pending"
+                                                        ? "border-yellow-500"
+                                                        : u.user_status === "Suspended"
+                                                            ? "border-red-500"
+                                                            : "border-gray-300"
                                                 }`}
                                         />
                                         <span className="font-medium">
@@ -349,12 +343,12 @@ const Users = () => {
                                     <td className="px-4 py-3">
                                         <span
                                             className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${u.user_status === "Active"
-                                                ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                : u.user_status === "Pending"
-                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
-                                                    : u.user_status === "Suspended"
-                                                        ? "bg-red-100 text-red-700 dark:bg-red-700/20 dark:text-red-300"
-                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                                    ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                    : u.user_status === "Pending"
+                                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                        : u.user_status === "Suspended"
+                                                            ? "bg-red-100 text-red-700 dark:bg-red-700/20 dark:text-red-300"
+                                                            : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
                                                 }`}
                                         >
                                             {u.user_status}
@@ -412,6 +406,31 @@ const Users = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="mt-2 flex justify-end px-4 py-3 text-sm text-gray-700 dark:text-white">
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="rounded border border-gray-300 bg-white px-3 py-1 hover:bg-gray-100 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+                        >
+                            &lt;
+                        </button>
+                        <span>
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="rounded border border-gray-300 bg-white px-3 py-1 hover:bg-gray-100 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+                        >
+                            &gt;
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Add User Modal */}
             {isModalOpen && (
