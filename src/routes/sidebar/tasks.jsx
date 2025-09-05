@@ -197,7 +197,7 @@ export default function Tasks() {
               className="relative bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-md p-5 flex flex-col justify-between hover:shadow-xl transition-shadow duration-200"
             >
               {/* Priority Badge */}
-              <div className="absolute top-3 right-3">
+              <div className="absolute top-3 right-3">  
                 <span
                   className={`px-3 py-1 rounded-full text-xs font-semibold ${task.priority === "High"
                     ? "bg-red-100 text-red-600"

@@ -270,7 +270,7 @@ export const Payments = () => {
                 </select>
                 <button
                     onClick={() => setAddPayment({ case_id: "", user_id: user.user_id, payment_amount: "", payment_type: "" })}
-                    className="flex h-10 items-center justify-center rounded-lg bg-green-600 px-4 text-sm font-medium text-white shadow hover:bg-green-700"
+                    className="flex h-10 items-center justify-center rounded-md bg-green-600 px-4 text-sm font-medium text-white shadow hover:bg-green-700"
                 >
                     Add Payment
                 </button>

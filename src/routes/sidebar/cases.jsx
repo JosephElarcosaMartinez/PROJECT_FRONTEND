@@ -6,6 +6,7 @@ import ViewModal from "../../components/view-case";
 import { useAuth } from "@/context/auth-context";
 import AddNewCase from "../../components/add-case";
 import toast from "react-hot-toast";
+import EditCaseModal from "../../components/edit-case";
 
 const Cases = () => {
     const { user } = useAuth();
@@ -21,6 +22,8 @@ const Cases = () => {
     const [selectedCase, setSelectedCase] = useState(null);
     const addCaseModalRef = useRef();
     const navigate = useNavigate();
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const [caseToEdit, setCaseToEdit] = useState(null);
 
     // filter cases
     const formatDateTime = (dateString) => {
@@ -144,6 +147,32 @@ const Cases = () => {
         }
     };
 
+    //code for editing case
+    const handleCaseUpdate = async (updatedCase) => {
+        const toastId = toast.loading("Updating case...");
+        try {
+            const res = await fetch(`http://localhost:3000/api/cases/${updatedCase.case_id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedCase),
+            });
+
+            if (!res.ok) throw new Error("Failed to update case.");
+
+            const updated = await res.json();
+
+            setTableData((prevData) =>
+                prevData.map((c) => (c.case_id === updated.case_id ? updated : c))
+            );
+
+            toast.success("Case updated successfully!", { id: toastId });
+        } catch (error) {
+            console.error("Error updating case:", error);
+            toast.error("Failed to update case.", { id: toastId });
+        }
+    };
+
+
     // Set default statusFilter
     useEffect(() => {
         if (tableData.some((c) => c.case_status === "Pending")) {
@@ -219,13 +248,13 @@ const Cases = () => {
                 <div className="flex flex-shrink-0 gap-2 whitespace-nowrap">
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className="flex h-10 items-center justify-center rounded-lg bg-green-600 px-4 text-sm font-medium text-white shadow hover:bg-green-700"
+                        className="flex h-10 items-center justify-center rounded-md bg-green-600 px-4 text-sm font-medium text-white shadow hover:bg-green-700"
                     >
                         New Case
                     </button>
                     <button
                         onClick={() => navigate("/clients")}
-                        className="flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white shadow hover:bg-blue-700"
+                        className="flex h-10 items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-medium text-white shadow hover:bg-blue-700"
                     >
                         View Clients
                     </button>
@@ -295,9 +324,14 @@ const Cases = () => {
                                             </button>
                                             <button
                                                 className="p-1.5 text-yellow-500 hover:text-yellow-700"
-                                                onClick={() =>
-                                                    alert(`Editing ${cases.ct_name} of ${cases.client_fullname}`)
-                                                }
+                                                onClick={() => {
+                                                    setCaseToEdit({
+                                                        ...cases,
+                                                        lawyer_fullname: getLawyerFullName(cases.user_id),
+                                                        assigned_by_name: getLawyerFullName(cases.assigned_by),
+                                                    });
+                                                    setEditModalOpen(true);
+                                                }}
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </button>
@@ -352,6 +386,15 @@ const Cases = () => {
 
             {/* View Case Modal */}
             <ViewModal selectedCase={selectedCase} tableData={tableData} setSelectedCase={setSelectedCase} />
+            {/* Edit Case Modal */
+                <EditCaseModal
+                    isOpen={editModalOpen}
+                    onClose={() => setEditModalOpen(false)}
+                    caseData={caseToEdit}
+                    onUpdate={handleCaseUpdate}
+                />
+
+            }
 
             {/* Add New Case Modal */}
             <AddNewCase
