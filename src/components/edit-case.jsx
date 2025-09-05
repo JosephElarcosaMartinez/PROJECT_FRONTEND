@@ -1,37 +1,69 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 
-const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate }) => {
+const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
     const modalRef = useRef();
-
-    // Handle click outside
-    useClickOutside(modalRef, () => {
-        if (isOpen) onClose();
-    });
-
-    const [formData, setFormData] = useState({
-        ct_name: "",
-        cc_name: "",
-        client_fullname: "",
-        lawyer_fullname: "",
-        case_remarks: "",
-        case_cabinet: "",
-        case_drawer: "",
-    });
-
-    const [errors, setErrors] = useState({});
 
     useClickOutside([modalRef], () => {
         if (isOpen) onClose();
     });
 
+    const [formData, setFormData] = useState({
+        client_id: "",
+        cc_id: "",
+        ct_id: "",
+        user_id: "",
+        case_remarks: "",
+        case_cabinet: "",
+        case_drawer: "",
+    });
+
+    const [clients, setClients] = useState([]);
+    const [caseCategories, setCaseCategories] = useState([]);
+    const [caseCategoryTypes, setCaseCategoryTypes] = useState([]);
+    const [lawyers, setLawyers] = useState([]);
+    const [errors, setErrors] = useState({});
+
+    // Fetch dropdown data
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [clientsRes, categoriesRes, typesRes, lawyersRes] = await Promise.all([
+                    fetch("http://localhost:3000/api/clients", { credentials: "include" }),
+                    fetch("http://localhost:3000/api/case-categories", { credentials: "include" }),
+                    fetch("http://localhost:3000/api/case-category-types", { credentials: "include" }),
+                    fetch("http://localhost:3000/api/lawyer-specializations", { credentials: "include" }),
+                ]);
+
+                const [clientsData, categoriesData, typesData, lawyersData] = await Promise.all([
+                    clientsRes.json(),
+                    categoriesRes.json(),
+                    typesRes.json(),
+                    lawyersRes.json(),
+                ]);
+
+                setClients(clientsData);
+                setCaseCategories(categoriesData);
+                setCaseCategoryTypes(typesData);
+                setLawyers(lawyersData);
+            } catch (err) {
+                console.error("Error fetching dropdown data:", err);
+            }
+        };
+
+        if (isOpen) {
+            fetchData();
+        }
+    }, [isOpen]);
+
+    // Populate form with existing caseData
     useEffect(() => {
         if (caseData) {
             setFormData({
-                ct_name: caseData.ct_name || "",
-                cc_name: caseData.cc_name || "",
-                client_fullname: caseData.client_fullname || "",
-                lawyer_fullname: caseData.lawyer_fullname || "",
+                client_id: caseData.client_id || "",
+                cc_id: caseData.cc_id || "",
+                ct_id: caseData.ct_id || "",
+                user_id: caseData.user_id || "",
                 case_remarks: caseData.case_remarks || "",
                 case_cabinet: caseData.case_cabinet || "",
                 case_drawer: caseData.case_drawer || "",
@@ -42,13 +74,13 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        // Optional: restrict to numeric for cabinet and drawer
+        // Allow only numbers for cabinet/drawer
         if ((name === "case_cabinet" || name === "case_drawer") && value !== "" && !/^\d*$/.test(value)) {
             return;
         }
 
         setFormData((prev) => ({ ...prev, [name]: value }));
-        setErrors((prev) => ({ ...prev, [name]: "" })); // clear error when typing
+        setErrors((prev) => ({ ...prev, [name]: "" }));
     };
 
     const validate = () => {
@@ -80,59 +112,108 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div
                 ref={modalRef}
-                className="w-full max-w-4xl rounded-lg bg-white p-8 dark:bg-slate-800"
+                className="w-full max-w-4xl rounded-lg bg-white p-8 dark:bg-slate-800 overflow-y-auto max-h-[90vh]"
             >
                 <h3 className="mb-4 text-2xl font-bold">Edit Case {caseData.case_id}</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    {/* Case Name */}
-                    <div>
-                        <label className="text-sm font-medium text-gray-700 dark:text-white">Case Name</label>
-                        <input
-                            type="text"
-                            name="ct_name"
-                            value={formData.ct_name}
-                            onChange={handleChange}
-                            className="w-full mt-1 rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                        />
-                    </div>
-
-                    {/* Category */}
-                    <div>
-                        <label className="text-sm font-medium text-gray-700 dark:text-white">Category</label>
-                        <input
-                            type="text"
-                            name="cc_name"
-                            value={formData.cc_name}
-                            onChange={handleChange}
-                            className="w-full mt-1 rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                        />
-                    </div>
-
-                    {/* Client */}
+                    {/* Client Dropdown */}
                     <div>
                         <label className="text-sm font-medium text-gray-700 dark:text-white">Client</label>
-                        <input
-                            type="text"
-                            name="client_fullname"
-                            value={formData.client_fullname}
+                        <select
+                            name="client_id"
+                            value={formData.client_id}
                             onChange={handleChange}
                             className="w-full mt-1 rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                        />
+                        >
+                            <option value="" disabled>Select Client</option>
+                            {clients.map((client) => (
+                                <option key={client.client_id} value={client.client_id}>
+                                    {client.client_fullname}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
-                    {/* Lawyer */}
+                    {/* Case Category Dropdown */}
                     <div>
-                        <label className="text-sm font-medium text-gray-700 dark:text-white">Lawyer</label>
-                        <input
-                            type="text"
-                            name="lawyer_fullname"
-                            value={formData.lawyer_fullname}
-                            onChange={handleChange}
+                        <label className="text-sm font-medium text-gray-700 dark:text-white">Category</label>
+                        <select
+                            name="cc_id"
+                            value={formData.cc_id}
+                            onChange={(e) => {
+                                setFormData((prev) => ({
+                                    ...prev,
+                                    cc_id: e.target.value,
+                                    ct_id: "", // Reset case type when category changes
+                                }));
+                            }}
                             className="w-full mt-1 rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                        />
+                        >
+                            <option value="" disabled>Select Category</option>
+                            {caseCategories.map((cat) => (
+                                <option key={cat.cc_id} value={cat.cc_id}>
+                                    {cat.cc_name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
 
+                    {/* Case Type Dropdown */}
+                    <div>
+                        <label className="text-sm font-medium text-gray-700 dark:text-white">Case Type</label>
+                        <select
+                            name="ct_id"
+                            value={formData.ct_id}
+                            onChange={handleChange}
+                            className="w-full mt-1 rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                            disabled={!formData.cc_id}
+                        >
+                            <option value="" disabled>
+                                {formData.cc_id ? "Select Case Type" : "Select Category first"}
+                            </option>
+                            {caseCategoryTypes
+                                .filter((type) => type.cc_id === parseInt(formData.cc_id))
+                                .map((type) => (
+                                    <option key={type.ct_id} value={type.ct_id}>
+                                        {type.ct_name}
+                                    </option>
+                                ))}
+                        </select>
+                    </div>
+
+                    {/* Lawyer Dropdown */}
+                    <div>
+                        <label className="text-sm font-medium text-gray-700 dark:text-white">Assign to Lawyer</label>
+                        <select
+                            name="user_id"
+                            value={formData.user_id}
+                            onChange={handleChange}
+                            className="w-full mt-1 rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                            disabled={user.user_role !== "Admin" || !formData.cc_id}
+                        >
+                            <option value="" disabled>
+                                {user.user_role !== "Admin"
+                                    ? `${user.user_fname} ${user.user_mname} ${user.user_lname}`
+                                    : !formData.cc_id
+                                        ? "Select Category first"
+                                        : "Select Lawyer"}
+                            </option>
+                            {user.user_role === "Admin" ? (
+                                lawyers
+                                    .filter((lawyer) => lawyer.cc_id === parseInt(formData.cc_id))
+                                    .map((lawyer) => (
+                                        <option key={lawyer.user_id} value={lawyer.user_id}>
+                                            {lawyer.user_fname} {lawyer.user_mname} {lawyer.user_lname}
+                                        </option>
+                                    ))
+                            ) : (
+                                <option value={formData.user_id}>
+                                    {user.user_fname} {user.user_mname} {user.user_lname}
+                                </option>
+                            )}
+                        </select>
+                    </div>
                 </div>
 
                 {/* Remarks */}
@@ -147,8 +228,8 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate }) => {
                     ></textarea>
                 </div>
 
+                {/* Cabinet and Drawer */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    {/* Cabinet */}
                     <div>
                         <label className="text-sm font-medium text-gray-700 dark:text-white">Cabinet</label>
                         <input
@@ -160,10 +241,8 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate }) => {
                         />
                         {errors.case_cabinet && <p className="text-sm text-red-500">{errors.case_cabinet}</p>}
                     </div>
-
-                    {/* Drawer */}
                     <div>
-                        <label className="text-sm font-medium text-gray-700 dark:text-white">Drawer </label>
+                        <label className="text-sm font-medium text-gray-700 dark:text-white">Drawer</label>
                         <input
                             type="text"
                             name="case_drawer"
@@ -175,19 +254,19 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate }) => {
                     </div>
                 </div>
 
-                {/* Buttons */}
-                <div className="flex justify-end gap-3 mt-4">
+                {/* Action Buttons */}
+                <div className="flex justify-end mt-6 space-x-4">
                     <button
+                        className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-700"
                         onClick={onClose}
-                        className="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
                     >
                         Cancel
                     </button>
                     <button
+                        className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
                         onClick={handleSubmit}
-                        className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                     >
-                        Update
+                        Update Case
                     </button>
                 </div>
             </div>

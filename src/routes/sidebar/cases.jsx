@@ -386,15 +386,15 @@ const Cases = () => {
 
             {/* View Case Modal */}
             <ViewModal selectedCase={selectedCase} tableData={tableData} setSelectedCase={setSelectedCase} />
-            {/* Edit Case Modal */
-                <EditCaseModal
-                    isOpen={editModalOpen}
-                    onClose={() => setEditModalOpen(false)}
-                    caseData={caseToEdit}
-                    onUpdate={handleCaseUpdate}
-                />
 
-            }
+            {/* Edit Case Modal */}
+            <EditCaseModal
+                isOpen={editModalOpen}
+                onClose={() => setEditModalOpen(false)}
+                caseData={caseToEdit}
+                onUpdate={handleCaseUpdate}
+                user={user}
+            />
 
             {/* Add New Case Modal */}
             <AddNewCase
