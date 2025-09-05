@@ -257,13 +257,13 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                 {/* Action Buttons */}
                 <div className="flex justify-end mt-6 space-x-4">
                     <button
-                        className="px-4 py-2 rounded bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-700 dark:text-white"
+                        className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
                         onClick={onClose}
                     >
                         Cancel
                     </button>
                     <button
-                        className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+                        className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                         onClick={handleSubmit}
                     >
                         Update Case

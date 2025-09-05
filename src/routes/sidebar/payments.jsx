@@ -161,7 +161,7 @@ export const Payments = () => {
                     return;
                 }
 
-                // ✅ Only run this if response is successful
+                //Only run this if response is successful
                 setPaymentsData((prev) => [...prev, data]);
 
                 // Deduct from case balance (if tracked)
@@ -205,9 +205,9 @@ export const Payments = () => {
     };
 
     const handleDeletePayment = (payment) => {
-        const toastId = toast.loading("Deleting payment...", { duration: 4000 });
-
         if (window.confirm(`Are you sure you want to delete payment ID ${payment.payment_id}? This action cannot be undone.`)) {
+
+            const toastId = toast.loading("Deleting payment...", { duration: 4000 });
             try {
                 fetch(`http://localhost:3000/api/payments/${payment.payment_id}`, {
                     method: "DELETE",
@@ -277,22 +277,19 @@ export const Payments = () => {
             </div>
 
             {/* Payments Table */}
-            <div className="card w-full overflow-x-auto">
+            <div className="card w-full overflow-x-auto rounded-xl shadow-md">
                 <div className="overflow-y-auto">
                     <table className="min-w-full table-auto text-left text-sm">
-                        <thead className="card-title z-100 sticky top-0 bg-white text-xs uppercase dark:bg-slate-900">
+                        <thead className="sticky top-0 bg-gradient-to-r from-blue-50 to-blue-100 text-xs uppercase text-black-900 dark:from-slate-800 dark:to-slate-900 dark:text-slate-200">
                             <tr>
-                                <th className="px-4 py-3">Payment ID</th>
-                                <th className="px-4 py-3">Client</th>
-                                <th className="px-4 py-3">Case ID</th>
-                                <th className="px-4 py-3">Amount</th>
-                                <th className="px-4 py-3">Date</th>
-                                <th className="px-4 py-3">Payment Type</th>
-                                <th className="px-4 py-3">Added By</th>
-                                <th className="px-4 py-3">Action</th>
+                                {["Payment ID", "Client", "Case ID", "Amount", "Date", "Payment Type", "Added By", "Action"].map((col) => (
+                                    <th key={col} className="px-4 py-3 font-semibold tracking-wider">
+                                        {col}
+                                    </th>
+                                ))}
                             </tr>
                         </thead>
-                        <tbody className="text-gray-700 dark:text-white">
+                        <tbody className="text-gray-700 dark:text-slate-100">
                             {paginatedPayments.length > 0 ? (
                                 paginatedPayments.map((p) => (
                                     <tr
@@ -307,15 +304,27 @@ export const Payments = () => {
                                         >
                                             {p.case_id}
                                         </td>
-                                        <td className="px-4 py-3 font-bold text-green-600 dark:text-green-400">{formatCurrency(p.payment_amount)}</td>
+                                        <td className="px-4 py-3 font-bold text-green-600 dark:text-green-400">
+                                            {formatCurrency(p.payment_amount)}
+                                        </td>
                                         <td className="px-4 py-3">{formatDateTime(p.payment_date)}</td>
-                                        <td className="px-4 py-3">{p.payment_type}</td>
                                         <td className="px-4 py-3">
-                                            {p.user_fname} {p.user_mname ? p.user_mname[0] + "." : ""} {p.user_lname}
+                                            <span
+                                                className={`rounded-full px-3 py-1 text-xs font-semibold ${p.payment_type === "Cash"
+                                                    ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-400"
+                                                    : "bg-purple-100 text-purple-700 dark:bg-purple-700/20 dark:text-purple-400"
+                                                    }`}
+                                            >
+                                                {p.payment_type}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            {p.user_fname} {p.user_mname ? p.user_mname[0] + "." : ""}{" "}
+                                            {p.user_lname}
                                         </td>
                                         <td className="px-4 py-3 text-center">
                                             <button
-                                                className="p-1.5 text-red-600 hover:text-red-800"
+                                                className="rounded-full p-1.5 text-red-600 transition hover:bg-red-100 hover:text-red-800 dark:hover:bg-red-800/30"
                                                 onClick={() => handleDeletePayment(p)}
                                                 title="Delete Payment"
                                             >
@@ -338,6 +347,7 @@ export const Payments = () => {
                     </table>
                 </div>
             </div>
+
 
             {/* Pagination */}
             {totalPages > 1 && (
