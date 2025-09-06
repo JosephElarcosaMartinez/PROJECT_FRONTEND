@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Settings } from "lucide-react";
+import { Settings, Bell } from "lucide-react";
 
 const Notifications = () => {
   const navigate = useNavigate();
@@ -84,99 +84,122 @@ const Notifications = () => {
   }, [notifications]);
 
   return (
-    <div>
-      <div className="bg-blue rounded-xl p-4 sm:p-6 shadow-sm dark:bg-slate-900">
+    <div className="w-full">
+      <div className="rounded-xl bg-white dark:bg-slate-900 shadow-sm p-6">
         {/* Header */}
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
-              Notifications
-            </h1>
-            <p className="text-sm text-gray-500">
-              Manage how you receive notifications and updates
-            </p>
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-2">
+            <Bell className="text-blue-600 dark:text-blue-400" size={35} />
+            <div>
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+                Notifications
+              </h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Manage your recent updates and system alerts
+              </p>
+            </div>
           </div>
           <button
             onClick={() => navigate("/notifications/notif-settings")}
-            className="text-blue-700 hover:text-blue-900"
+            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
           >
-            <Settings size={24} />
+            <Settings className="text-gray-600 dark:text-gray-300" size={22} />
           </button>
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-2 my-4">
+        <div className="flex justify-end gap-3 mb-5">
           <button
             onClick={markAllAsRead}
-            className="text-sm px-3 py-1 rounded bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-slate-600"
+            className="text-sm px-4 py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-slate-800 dark:text-blue-400 dark:hover:bg-slate-700 transition"
           >
             Mark all as read
           </button>
           <button
             onClick={clearAll}
-            className="text-sm px-3 py-1 rounded bg-gray-200 dark:bg-slate-700 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-slate-600"
+            className="text-sm px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 dark:bg-slate-800 dark:text-red-400 dark:hover:bg-slate-700 transition"
           >
             Clear All
           </button>
         </div>
 
-        {/* Notifications */}
-        {paginatedData.map((note) => (
-          <div
-            key={note.id}
-            onClick={() => toggleReadStatus(note.id)}
-            className={`cursor-pointer flex items-start gap-3 mb-3 w-full rounded-xl border 
-              ${note.isRead
-                ? "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700"
-                : "bg-blue-200 dark:bg-slate-700 border-blue-200 dark:border-slate-600"
-              } p-4 transition hover:shadow-sm`}
-          >
-            <div className="flex flex-col w-full">
-              <div className="flex justify-between items-center">
-                <p className="text-sm text-gray-800 dark:text-white font-medium">
-                  {note.message}
-                </p>
-                {!note.isRead && (
-                  <span className="w-2 h-2 rounded-full bg-blue-500 mt-1 mr-1"></span>
-                )}
-              </div>
-              <div className="text-xs mt-1 text-gray-500 dark:text-gray-400">
-                <span>Created by: {note.createdBy}</span> &middot;{" "}
-                <span>{note.dateCreated}</span> &middot;{" "}
-                <span>{note.createdEarlier}</span>
+        {/* Notifications List */}
+        <div className="space-y-4 ">
+          {paginatedData.map((note) => (
+            <div
+              key={note.id}
+              onClick={() => toggleReadStatus(note.id)}
+              className={`cursor-pointer flex items-start gap-3 rounded-xl border p-4 transition 
+                ${note.isRead
+                  ? "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:shadow-md"
+                  : "bg-blue-50 dark:bg-slate-700 border-blue-200 dark:border-slate-600 shadow-md hover:shadow-lg"
+                }`}
+            >
+              <div className="flex flex-col w-full">
+                <div className="flex justify-between items-start">
+                  <p
+                    className={`text-sm leading-relaxed ${note.isRead
+                      ? "text-gray-700 dark:text-gray-200"
+                      : "text-gray-900 dark:text-white font-medium"
+                      }`}
+                  >
+                    {note.message}
+                  </p>
+                  {!note.isRead && (
+                    <span className="w-2 h-2 rounded-full bg-blue-500 mt-1 ml-2 flex-shrink-0"></span>
+                  )}
+                </div>
+                <div className="text-xs mt-2 text-gray-500 dark:text-gray-400">
+                  <span className="font-medium">{note.createdBy}</span> ·{" "}
+                  <span>{note.dateCreated}</span> · <span>{note.createdEarlier}</span>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))}
+
+          {notifications.length === 0 && (
+            <div className="text-center py-12 text-gray-500 dark:text-gray-400 text-sm">
+              No notifications found
+            </div>
+          )}
+        </div>
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex justify-end items-center gap-3 mt-4">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-              disabled={currentPage === 1}
-              className={`px-3 py-1 border rounded ${currentPage === 1
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-                }`}
-            >
-              &lt;
-            </button>
-
-            <span className="text-sm text-gray-700 dark:text-white">
-              Page {currentPage} of {totalPages}
+          <div className="flex justify-between items-center mt-6">
+            <span className="text-sm text-gray-600 dark:text-gray-300">
+              Showing {startIndex + 1} -{" "}
+              {Math.min(startIndex + itemsPerPage, notifications.length)} of{" "}
+              {notifications.length}
             </span>
 
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-              disabled={currentPage === totalPages}
-              className={`px-3 py-1 border rounded ${currentPage === totalPages
-                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-                }`}
-            >
-              &gt;
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className={`px-3 py-1 border rounded-lg text-sm transition ${currentPage === 1
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-slate-800"
+                  : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+                  }`}
+              >
+                &lt;
+              </button>
+
+              <span className="text-sm text-gray-700 dark:text-gray-200">
+                Page {currentPage} of {totalPages}
+              </span>
+
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                disabled={currentPage === totalPages}
+                className={`px-3 py-1 border rounded-lg text-sm transition ${currentPage === totalPages
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-slate-800"
+                  : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+                  }`}
+              >
+                &gt;
+              </button>
+            </div>
           </div>
         )}
       </div>

@@ -2,6 +2,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/context/auth-context";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { ProfileModal } from "../components/profile-modal";
+import { getNavbarLinks } from "@/constants";
 
 import { ChevronsLeft, Search, Sun, Moon, Bell } from "lucide-react";
 import default_avatar from "@/assets/default-avatar.png";
@@ -19,6 +20,8 @@ export const Header = ({ collapsed, setCollapsed }) => {
     const [open, setOpen] = useState(false);
     const dropdownRef = useRef(null);
     const [showProfileModal, setShowProfileModal] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [searchResults, setSearchResults] = useState([]);
 
     useClickOutside([dropdownRef], () => {
         setOpen(false);
@@ -34,11 +37,26 @@ export const Header = ({ collapsed, setCollapsed }) => {
                 id: toastId,
                 duration: 4000,
             });
+        } else {
+            toast.dismiss(toastId, { duration: 4000 });
         }
     };
 
     const handleProfile = () => {
         setShowProfileModal(true);
+    };
+
+    // Update search results when searchTerm changes
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        if (value.trim() === "") {
+            setSearchResults([]);
+            return;
+        }
+        const links = getNavbarLinks(user?.user_role);
+        const filtered = links.filter(link => link.label.toLowerCase().includes(value.toLowerCase()));
+        setSearchResults(filtered);
     };
 
     return (
@@ -50,7 +68,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                 >
                     <ChevronsLeft className={collapsed && "rotate-180"} />
                 </button>
-                <div className="input">
+                <div className="input relative">
                     <Search
                         size={20}
                         className="text-slate-500"
@@ -61,7 +79,25 @@ export const Header = ({ collapsed, setCollapsed }) => {
                         id="search"
                         placeholder="Search..."
                         className="w-full bg-transparent text-slate-900 outline-0 placeholder:text-slate-500 dark:text-slate-50"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
                     />
+                    {searchTerm && searchResults.length > 0 && (
+                        <div className="absolute left-0 top-full mt-2 w-full rounded-md bg-white shadow-lg dark:bg-slate-800 z-50">
+                            {searchResults.map(result => (
+                                <div
+                                    key={result.label}
+                                    className="px-4 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900"
+                                    onClick={() => navigate(result.path)}
+                                >
+                                    <span className="flex items-center gap-x-2">
+                                        <result.icon size={20} className="text-blue-700 dark:text-white" />
+                                        {result.label}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -98,7 +134,9 @@ export const Header = ({ collapsed, setCollapsed }) => {
                         className="flex h-10 items-center rounded-full bg-blue-900 p-1 pr-0 transition hover:bg-blue-800 dark:bg-blue-950 dark:hover:bg-[#173B7E]"
                         onClick={() => setOpen(!open)}
                     >
-                        <span className="px-3 text-sm font-medium text-white">Hi, {user.user_role}</span>
+                        <span className="px-3 text-sm font-medium text-white">
+                            Hi, {user.user_role === "Admin" ? "Super Lawyer" : user.user_role}
+                        </span>
                         <img
                             src={user?.user_profile ? `http://localhost:3000${user.user_profile}` : default_avatar}
                             alt="profile"

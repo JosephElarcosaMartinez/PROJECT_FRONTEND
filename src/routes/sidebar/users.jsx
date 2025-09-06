@@ -90,17 +90,28 @@ const Users = () => {
         const fullName = [userToSuspend.user_fname, userToSuspend.user_mname, userToSuspend.user_lname].filter(Boolean).join(" ");
 
         const toastId = toast.loading(`Updating user: ${fullName}`, {
-            duration: Infinity,
+            duration: 4000,
         });
 
         try {
+            const payload = {
+                user_fname: userToSuspend.user_fname,
+                user_mname: userToSuspend.user_mname,
+                user_lname: userToSuspend.user_lname,
+                user_email: userToSuspend.user_email,
+                user_phonenum: userToSuspend.user_phonenum,
+                user_role: userToSuspend.user_role,
+                user_status: "Suspended",
+                branch_id: userToSuspend.branch_id,
+            };
+
             const res = await fetch(`${API_BASE}/api/users/${userToSuspend.user_id}`, {
                 method: "PUT",
                 credentials: "include",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ ...userToSuspend, user_status: "Suspended" }),
+                body: JSON.stringify(payload),
             });
 
             if (!res.ok) {
@@ -126,17 +137,28 @@ const Users = () => {
 
         if (confirmActivate) {
             const toastId = toast.loading(`Activating: ${fullName}`, {
-                duration: Infinity,
+                duration: 4000,
             });
 
             try {
+                const payload = {
+                    user_fname: u.user_fname,
+                    user_mname: u.user_mname,
+                    user_lname: u.user_lname,
+                    user_email: u.user_email,
+                    user_phonenum: u.user_phonenum,
+                    user_role: u.user_role,
+                    user_status: "Active",
+                    branch_id: u.branch_id,
+                };
+
                 const res = await fetch(`${API_BASE}/api/users/${u.user_id}`, {
                     method: "PUT",
                     credentials: "include",
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ ...u, user_status: "Active" }),
+                    body: JSON.stringify(payload),
                 });
 
                 if (!res.ok) {
@@ -212,12 +234,18 @@ const Users = () => {
         return matchesSearch && matchesRole;
     });
 
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const rowsPerPage = 10;
+    const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
+    const paginatedUsers = filteredUsers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
     return (
         <div className="dark:bg-slate-950">
             {error && (
                 <div className="mb-4 w-full rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-red-50 shadow">
                     <div>
-                        <span>{error}</span>
+                        <span>{error.toString()}</span>
                     </div>
                 </div>
             )}
@@ -234,7 +262,9 @@ const Users = () => {
                     <button
                         key={role}
                         onClick={() => setSelectedRole(role)}
-                        className={`rounded-full border border-slate-400 px-4 py-1.5 text-sm ${selectedRole === role ? "border-none bg-blue-600 text-white" : "border-gray-300 text-gray-800 dark:text-white"
+                        className={`rounded-full px-4 py-2 text-sm ${selectedRole === role
+                            ? "border-none bg-blue-600 text-white"
+                            : "bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200"
                             }`}
                     >
                         {role}
@@ -243,7 +273,7 @@ const Users = () => {
             </div>
 
             {/* Search & Add Button */}
-            <div className="mb-6 flex flex-col items-center gap-4 md:flex-row">
+            <div className="card shadow-md mb-6 flex flex-col items-center gap-4 md:flex-row">
                 {/* Search input with icon inside */}
                 <div className="relative w-full md:flex-1">
                     <Search
@@ -262,7 +292,7 @@ const Users = () => {
                 {/* Add user button */}
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white shadow hover:bg-blue-700"
+                    className="flex h-10 items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-medium text-white shadow hover:bg-blue-700"
                 >
                     Add User
                 </button>
@@ -283,8 +313,8 @@ const Users = () => {
                         </tr>
                     </thead>
                     <tbody className="dark:text-slate-50">
-                        {filteredUsers.length > 0 ? (
-                            filteredUsers.map((u) => (
+                        {paginatedUsers.length > 0 ? (
+                            paginatedUsers.map((u) => (
                                 <tr
                                     key={u.user_id}
                                     className="border-t border-gray-200 hover:bg-blue-50 dark:border-slate-700 dark:hover:bg-blue-950"
@@ -308,7 +338,7 @@ const Users = () => {
                                     </td>
                                     <td className="px-4 py-3">{u.user_email}</td>
                                     <td className="px-4 py-3">{u.user_phonenum}</td>
-                                    <td className="px-4 py-3">{u.user_role}</td>
+                                    <td className="px-4 py-3">{u.user_role === "Admin" ? "Super Lawyer" : u.user_role}</td>
                                     <td className="px-4 py-3">{formatDateTime(u.user_date_created)}</td>
                                     <td className="px-4 py-3">
                                         <span
@@ -376,6 +406,31 @@ const Users = () => {
                     </tbody>
                 </table>
             </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+                <div className="mt-2 flex justify-end px-4 py-3 text-sm text-gray-700 dark:text-white">
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="rounded border border-gray-300 bg-white px-3 py-1 hover:bg-gray-100 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+                        >
+                            &lt;
+                        </button>
+                        <span>
+                            Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="rounded border border-gray-300 bg-white px-3 py-1 hover:bg-gray-100 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+                        >
+                            &gt;
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Add User Modal */}
             {isModalOpen && (
@@ -548,23 +603,9 @@ const Users = () => {
                             &times;
                         </button>
                     </div>
-
                 </div>
-
             )}
-
-            {/* Promotions link */}
-            <div className="mt-4">
-                <a
-                    href="/promotion"
-                    className="text-blue-600 hover:underline"
-                >
-                    Go to Promotions {">"}
-                </a>
-            </div>
-
         </div>
-
     );
 };
 
