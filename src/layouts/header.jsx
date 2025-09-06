@@ -4,7 +4,7 @@ import { useClickOutside } from "@/hooks/use-click-outside";
 import { ProfileModal } from "../components/profile-modal";
 import { getNavbarLinks } from "@/constants";
 
-import { ChevronsLeft, Search, Sun, Moon, Bell } from "lucide-react";
+import { ChevronsLeft, Settings, Search, Sun, Moon, Bell } from "lucide-react";
 import default_avatar from "@/assets/default-avatar.png";
 
 import { useRef, useState } from "react";
@@ -123,6 +123,14 @@ export const Header = ({ collapsed, setCollapsed }) => {
                     className="btn-ghost size-10"
                 >
                     <Bell size={20} />
+                </button>
+
+                <button
+                    onClick={() => navigate("settings")}
+
+                    className="btn-ghost size-10"
+                >
+                    <Settings size={20} />
                 </button>
 
                 {/* Profile Image Dropdown */}
