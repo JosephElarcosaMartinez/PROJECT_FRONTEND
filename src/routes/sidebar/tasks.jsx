@@ -83,19 +83,19 @@ export default function Tasks() {
       const data = await res.json();
       // Map backend rows to UI fields
       const mapped = data.map(row => {
-        const due = row.td_due_date || row.td_due_date?.substring?.(0,10) || '';
+        const due = row.td_due_date || row.td_due_date?.substring?.(0, 10) || '';
         return {
           id: row.td_id,
           title: row.td_name || 'Untitled Task',
           case: row.td_case_id || row.td_case || '-',
-            description: row.td_description || '',
-            assignedTo: row.td_to || '-',
-            dueDate: due,
-            completedDate: row.td_date_completed || null,
-            status: row.td_status || 'Pending',
-            attachmentPath: row.td_doc_path || null,
-            passwordProtected: row.password_protected || false,
-            priority: row.td_due_date ? getPriorityFromDueDate(row.td_due_date) : 'Low'
+          description: row.td_description || '',
+          assignedTo: row.td_to || '-',
+          dueDate: due,
+          completedDate: row.td_date_completed || null,
+          status: row.td_status || 'Pending',
+          attachmentPath: row.td_doc_path || null,
+          passwordProtected: row.password_protected || false,
+          priority: row.td_due_date ? getPriorityFromDueDate(row.td_due_date) : 'Low'
         };
       });
       setTasks(mapped);
@@ -201,7 +201,7 @@ export default function Tasks() {
     }
   };
 
-  const performDownload = async (taskId, filename='document.pdf', pwd=null) => {
+  const performDownload = async (taskId, filename = 'document.pdf', pwd = null) => {
     setDownloading(true);
     setDownloadError(null);
     try {
@@ -280,92 +280,92 @@ export default function Tasks() {
           <Loader2 className="animate-spin" size={18} /> Loading tasks...
         </div>
       ) : (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {currentTasks.map((task) => {
-          const isOverdue =
-            task.status !== "Completed" && new Date(task.dueDate) < new Date();
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {currentTasks.map((task) => {
+            const isOverdue =
+              task.status !== "Completed" && new Date(task.dueDate) < new Date();
 
-          return (
-            <div
-              key={task.id}
-              className="relative bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-md p-5 flex flex-col justify-between hover:shadow-xl transition-shadow duration-200"
-            >
-              {/* Priority Badge */}
-              <div className="absolute top-3 right-3">  
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${task.priority === "High"
-                    ? "bg-red-100 text-red-600"
-                    : task.priority === "Mid"
-                      ? "bg-yellow-100 text-yellow-600"
-                      : "bg-gray-200 text-gray-700"
-                    }`}
-                >
-                  {task.priority}
-                </span>
-              </div>
+            return (
+              <div
+                key={task.id}
+                className="relative bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-md p-5 flex flex-col justify-between hover:shadow-xl transition-shadow duration-200"
+              >
+                {/* Priority Badge */}
+                <div className="absolute top-3 right-3">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-semibold ${task.priority === "High"
+                      ? "bg-red-100 text-red-600"
+                      : task.priority === "Mid"
+                        ? "bg-yellow-100 text-yellow-600"
+                        : "bg-gray-200 text-gray-700"
+                      }`}
+                  >
+                    {task.priority}
+                  </span>
+                </div>
 
-              {/* Task Title & Case */}
-              <div className="mb-3">
-                <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-400 leading-snug">
-                  {task.title}
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Case: <span className="font-medium">{task.case}</span>
+                {/* Task Title & Case */}
+                <div className="mb-3">
+                  <h3 className="text-lg font-semibold text-blue-700 dark:text-blue-400 leading-snug">
+                    {task.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    Case: <span className="font-medium">{task.case}</span>
+                  </p>
+                </div>
+
+                {/* Description */}
+                <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
+                  {task.description}
                 </p>
-              </div>
 
-              {/* Description */}
-              <p className="text-sm text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
-                {task.description}
-              </p>
-
-              {/* Assignee & Dates */}
-              <div className="space-y-1 text-sm">
-                <p>
-                  <span className="font-medium text-gray-700 dark:text-gray-200">
-                    Assigned to:
-                  </span>{" "}
-                  {task.assignedTo}
-                </p>
-                <p>
-                  <span className="font-medium text-red-600">Due:</span> {task.dueDate}
-                  {isOverdue && (
-                    <span className="text-red-500 font-medium ml-1">(Overdue)</span>
+                {/* Assignee & Dates */}
+                <div className="space-y-1 text-sm">
+                  <p>
+                    <span className="font-medium text-gray-700 dark:text-gray-200">
+                      Assigned to:
+                    </span>{" "}
+                    {task.assignedTo}
+                  </p>
+                  <p>
+                    <span className="font-medium text-red-600">Due:</span> {task.dueDate}
+                    {isOverdue && (
+                      <span className="text-red-500 font-medium ml-1">(Overdue)</span>
+                    )}
+                  </p>
+                  {task.status === "Completed" && (
+                    <p className="text-green-600">
+                      <span className="font-medium">Completed:</span>{" "}
+                      {task.completedDate}
+                    </p>
                   )}
-                </p>
-                {task.status === "Completed" && (
-                  <p className="text-green-600">
-                    <span className="font-medium">Completed:</span>{" "}
-                    {task.completedDate}
-                  </p>
-                )}
-              </div>
+                </div>
 
-              {/* File Upload */}
-              <div className="mt-4 pt-3 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between">
-                {task.attachment && (
-                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate w-40">
-                    📎 {task.attachment.name}
-                  </p>
-                )}
-                <label className="inline-flex items-center gap-2 cursor-pointer text-blue-600 hover:text-blue-800 text-sm font-medium">
-                  <Paperclip size={16} />
-                  {task.attachment ? "Change File" : "Attach File"}
-                  <input
-                    type="file"
-                    className="hidden"
-                    onChange={(e) => handleFileChange(e, task.id)}
-                  />
-                </label>
+                {/* File Upload */}
+                <div className="mt-4 pt-3 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between">
+                  {task.attachment && (
+                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate w-40">
+                      📎 {task.attachment.name}
+                    </p>
+                  )}
+                  <label className="inline-flex items-center gap-2 cursor-pointer text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    <Paperclip size={16} />
+                    {task.attachment ? "Change File" : "Attach File"}
+                    <input
+                      type="file"
+                      className="hidden"
+                      onChange={(e) => handleFileChange(e, task.id)}
+                    />
+                  </label>
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
-
+            );
+          })}
+        </div>
+      )}
 
       {/* Pagination */}
-  {!loading && totalPages > 1 && (
+      {!loading && totalPages > 1 && (
         <div className="flex justify-end items-center gap-3 mt-4">
           <button
             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -437,7 +437,7 @@ export default function Tasks() {
                       ×
                     </button>
                     <p className="font-medium text-gray-800 dark:text-white truncate max-w-[200px]">{droppedFile.name}</p>
-                    <p className="text-xs text-gray-500 mt-1">{(droppedFile.size/1024/1024).toFixed(2)} MB</p>
+                    <p className="text-xs text-gray-500 mt-1">{(droppedFile.size / 1024 / 1024).toFixed(2)} MB</p>
                     <p className="text-[10px] mt-1 text-gray-400">Click area to choose a different file</p>
                   </div>
                 )}
