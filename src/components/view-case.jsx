@@ -122,12 +122,6 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                             <div>
                                 <h2 className="text-2xl font-semibold">
                                     Case {selectedCase.case_id}
-                                    {/* {" "}
-                                    {selectedCase.case_verdict && selectedCase.case_status === "Completed" && (
-                                        <span className="rounded-full bg-green-600 px-2 text-sm font-medium text-white">
-                                            {selectedCase.case_verdict}
-                                        </span>
-                                    )} */}
                                 </h2>
                                 <div className="mt-1 flex gap-4 text-sm text-gray-600 dark:text-gray-300">
                                     <span>Cabinet #: {selectedCase.case_cabinet}</span>
@@ -253,16 +247,24 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         </p>
                                     )}
 
+                                    {selectedCase.last_updated_by && (
+                                        <p>
+                                            <strong>Last Updated By:</strong>
+                                             {/* using getAssignerName function here to get the name of the user who last updated the case */}
+                                            <span className="ml-2 text-slate-500">{getAssignerName(selectedCase.last_updated_by)}</span>
+                                        </p>
+                                    )}
+
                                     <p>
                                         <strong>Status:</strong>{" "}
                                         <span
                                             className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${selectedCase.case_status === "Pending"
-                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
-                                                    : selectedCase.case_status === "Processing"
-                                                        ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
-                                                        : selectedCase.case_status === "Completed"
-                                                            ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                            : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                : selectedCase.case_status === "Processing"
+                                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
+                                                    : selectedCase.case_status === "Completed"
+                                                        ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
                                                 }`}
                                         >
                                             {selectedCase.case_status}
