@@ -1,3 +1,5 @@
+// This modal is used for both closing and dismissing a case
+
 import React from "react";
 import { X } from "lucide-react";
 
@@ -8,6 +10,16 @@ const CaseActionModal = ({ caseData, type, onClose, onConfirm }) => {
     const title = isClose ? "Close Case" : "Dismiss Case";
     const btnColor = isClose ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700";
     const actionText = isClose ? "close" : "dismiss";
+
+    const [verdict, setVerdict] = React.useState(caseData.verdict || "");
+
+    const handleVerdictChange = (e) => {
+        setVerdict(e.target.value);
+    };
+
+    const handleConfirm = () => {
+        onConfirm({ ...caseData, case_verdict: verdict });
+    };
 
     return (
         <div
@@ -25,10 +37,30 @@ const CaseActionModal = ({ caseData, type, onClose, onConfirm }) => {
                     <X className="h-6 w-6" />
                 </button>
 
-                <h2 className="text-xl font-semibold mb-4">{title}</h2>
+                <h2 className="mb-4 text-xl font-semibold">{title}</h2>
                 <p className="mb-6">
                     Are you sure you want to <strong>{actionText}</strong> Case {caseData.case_id}? This action cannot be undone.
                 </p>
+
+                {/* Input verdict of case before closing */}
+                {type === "close" && (
+                    <div className="mb-6">
+                        <label
+                            className="mb-2 block text-sm"
+                            htmlFor="verdict"
+                        >
+                            Verdict / Outcome of the Case
+                        </label>
+                        <textarea
+                            id="verdict"
+                            className="w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-slate-800 dark:focus:border-blue-400"
+                            rows={3}
+                            placeholder="Enter the verdict or outcome of the case..."
+                            value={verdict}
+                            onChange={handleVerdictChange}
+                        ></textarea>
+                    </div>
+                )}
 
                 <div className="flex justify-end gap-3">
                     <button
@@ -38,7 +70,7 @@ const CaseActionModal = ({ caseData, type, onClose, onConfirm }) => {
                         Cancel
                     </button>
                     <button
-                        onClick={() => onConfirm(caseData)}
+                        onClick={handleConfirm}
                         className={`rounded-lg px-4 py-2 text-sm font-medium text-white ${btnColor}`}
                     >
                         Confirm

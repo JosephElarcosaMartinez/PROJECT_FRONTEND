@@ -2,6 +2,8 @@ import { useRef, useState, useEffect } from "react";
 import { X, MapPin, ArrowLeft, Trash2, XCircle, CheckCircle } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { useAuth } from "@/context/auth-context";
+import CaseActionModal from "./case-action-modal";
+import toast from "react-hot-toast";
 
 const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
     const { user } = useAuth();
@@ -12,6 +14,9 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
     const [showPayments, setShowPayments] = useState(false);
     const [payments, setPayments] = useState([]);
     const [users, setUsers] = useState([]);
+
+    const [isActionModalOpen, setIsActionModalOpen] = useState(false);
+    const [actionType, setActionType] = useState("");
 
     // Fetching payments
     useEffect(() => {
@@ -103,6 +108,38 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
             currency: "PHP",
         }).format(amount);
 
+    const handleCaseAction = async (type, updatedCase) => {
+        if (!selectedCase) return;
+        try {
+            const toastId = toast.loading(type === "close" ? "Closing case..." : "Dismissing case...", {
+                duration: 4000,
+            });
+
+            const res = await fetch(`http://localhost:3000/api/cases/${selectedCase.case_id}`, {
+                method: "PUT",
+                credentials: "include",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    ...updatedCase,
+                    case_status: type === "close" ? "Completed" : "Dismissed",
+                    last_updated_by: user.user_id,
+                }),
+            });
+
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.error || "Failed to update case status.");
+            }
+
+            toast.success(`Case ${type === "close" ? "closed" : "dismissed"} successfully!`, { id: toastId, duration: 4000 });
+            setSelectedCase({ ...updatedCase, case_status: type === "close" ? "Completed" : "Dismissed" });
+            setIsActionModalOpen(false);
+        } catch (error) {
+            console.error("Error updating case status:", error);
+            toast.error("Failed to update case status. Please try again.");
+        }
+    };
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div
@@ -120,9 +157,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                     <>
                         <div className="mb-4 flex items-center justify-between">
                             <div>
-                                <h2 className="text-2xl font-semibold">
-                                    Case {selectedCase.case_id}
-                                </h2>
+                                <h2 className="text-2xl font-semibold">Case {selectedCase.case_id}</h2>
                                 <div className="mt-1 flex gap-4 text-sm text-gray-600 dark:text-gray-300">
                                     <span>Cabinet #: {selectedCase.case_cabinet}</span>
                                     {selectedCase.case_drawer && <span>Drawer #: {selectedCase.case_drawer}</span>}
@@ -176,7 +211,11 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm dark:bg-slate-800"
                                     />
                                     {selectedCase.assigned_by && (
-                                        <p className="mt-1 text-xs text-gray-500">Assigned by: {getAssignerName(selectedCase.assigned_by)}</p>
+                                        <p className="mt-1 text-xs text-gray-500">
+                                            {selectedCase.user_id
+                                                ? `Assigned by: ${getAssignerName(selectedCase.assigned_by)}`
+                                                : `Created by: ${getAssignerName(selectedCase.assigned_by)}`}
+                                        </p>
                                     )}
                                 </div>
                                 <div className="col-span-2">
@@ -250,7 +289,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                     {selectedCase.last_updated_by && (
                                         <p>
                                             <strong>Last Updated By:</strong>
-                                             {/* using getAssignerName function here to get the name of the user who last updated the case */}
+                                            {/* using getAssignerName function here to get the name of the user who last updated the case */}
                                             <span className="ml-2 text-slate-500">{getAssignerName(selectedCase.last_updated_by)}</span>
                                         </p>
                                     )}
@@ -358,6 +397,10 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                 <button
                                     title="Closing or Finishing the Case"
                                     className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700"
+                                    onClick={() => {
+                                        setActionType("close");
+                                        setIsActionModalOpen(true);
+                                    }}
                                 >
                                     <CheckCircle size={20} />
                                     Close Case
@@ -365,6 +408,10 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                 <button
                                     title="Dismissing Case"
                                     className="inline-flex gap-2 rounded-lg bg-gray-600 px-3 py-2 text-sm text-white hover:bg-gray-700"
+                                    onClick={() => {
+                                        setActionType("dismiss");
+                                        setIsActionModalOpen(true);
+                                    }}
                                 >
                                     <XCircle size={20} />
                                     Dismiss Case
@@ -464,6 +511,16 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                             </div>
                         </div>
                     </>
+                )}
+
+                {/* Case Action Modal */}
+                {isActionModalOpen && (
+                    <CaseActionModal
+                        caseData={selectedCase}
+                        type={actionType}
+                        onClose={() => setIsActionModalOpen(false)}
+                        onConfirm={(updatedCase) => handleCaseAction(actionType, updatedCase)}
+                    />
                 )}
             </div>
         </div>
