@@ -356,7 +356,7 @@ const Client = () => {
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="w-full max-w-screen-md rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
                         <h3 className="mb-4 text-xl font-bold text-blue-900 dark:text-slate-200">Client Information</h3>
-                        <div className="grid grid-cols-1 gap-4 text-sm text-blue-900 sm:grid-cols-2">
+                        <div className="grid grid-cols-1 gap-4 text-sm text-blue-900 sm:grid-cols-3">
                             <div>
                                 <p className="font-semibold dark:text-blue-700">Name / Company</p>
                                 <p className="text-gray-600 dark:text-slate-200">{viewClient.client_fullname}</p>
@@ -364,6 +364,10 @@ const Client = () => {
                             <div>
                                 <p className="font-semibold dark:text-blue-700">Email</p>
                                 <p className="text-gray-600 dark:text-slate-200">{viewClient.client_email || "-"}</p>
+                            </div>
+                            <div>
+                                <p className="font-semibold dark:text-blue-700">Last Updated</p>
+                                <p className="text-gray-600 dark:text-slate-200">{viewClient.client_last_updated || "-"}</p>
                             </div>
                             <div>
                                 <p className="font-semibold dark:text-blue-700">Phone</p>
