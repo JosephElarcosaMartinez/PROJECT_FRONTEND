@@ -6,7 +6,12 @@ import path from "path";
 export default defineConfig({
     plugins: [react()],
     server: {
+        host: true,
         port: 4000,
+        allowedHosts: [
+            "localhost",
+            "first-piglet-recently.ngrok-free.app"
+        ]
     },
     resolve: {
         alias: {
