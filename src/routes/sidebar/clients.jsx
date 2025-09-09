@@ -4,9 +4,19 @@ import { useClickOutside } from "@/hooks/use-click-outside";
 import AddClient from "../../components/add-client";
 import { useAuth } from "@/context/auth-context";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 const Client = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
+
+    // redirect paralegals
+    useEffect(() => {
+        if (!user) return; // wait until auth state is known
+        if (user.user_role === "Paralegal") {
+            navigate("/unauthorized");
+        }
+    }, [user, navigate]);
 
     const [tableData, setTableData] = useState([]);
     const [error, setError] = useState(null);
@@ -49,8 +59,8 @@ const Client = () => {
         fetchAll();
     }, [fetchAll]);
 
-    const getUserFullName = (createdBy) => {
-        const user = users.find((u) => u.user_id === createdBy);
+    const getUserFullName = (userId) => {
+        const user = users.find((u) => u.user_id === userId);
         return user
             ? `${user.user_fname || ""} ${user.user_mname ? user.user_mname[0] + "." : ""} ${user.user_lname || ""}`.replace(/\s+/g, " ").trim()
             : "Unknown";
@@ -80,7 +90,7 @@ const Client = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(editClient),
+                body: JSON.stringify({ ...editClient, client_last_updated_by: user.user_id }),
             });
 
             if (!res.ok) {
@@ -121,7 +131,7 @@ const Client = () => {
 
         if (confirmRestore) {
             const toastId = toast.loading(`Restoring client: ${client.client_fullname}`, {
-                duration: Infinity,
+                duration: 4000,
             });
 
             try {
@@ -227,7 +237,7 @@ const Client = () => {
 
                 <button
                     onClick={() => setAddClients(true)}
-                    className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700"
+                    className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-blue-700"
                 >
                     Add Client
                 </button>
@@ -255,10 +265,10 @@ const Client = () => {
                                     <td className="whitespace-nowrap px-4 py-3">
                                         <span
                                             className={`mr-2 inline-block h-2 w-4 rounded-full ${client.client_status === "Active"
-                                                ? "bg-green-500"
-                                                : client.client_status === "Inactive"
-                                                    ? "bg-gray-400"
-                                                    : "bg-red-500"
+                                                    ? "bg-green-500"
+                                                    : client.client_status === "Inactive"
+                                                        ? "bg-gray-400"
+                                                        : "bg-red-500"
                                                 }`}
                                         ></span>
                                         {client.client_fullname}
@@ -282,7 +292,7 @@ const Client = () => {
                                                 <Pencil className="h-4 w-4" />
                                             </button>
 
-                                            {client.client_status !== "Removed" ? (
+                                            {user.user_role !== "Staff" && client.client_status !== "Removed" ? (
                                                 <button
                                                     className="p-1.5 text-red-600 hover:text-red-800"
                                                     onClick={() => openRemoveModal(client)}
@@ -290,12 +300,15 @@ const Client = () => {
                                                     <Trash2 className="h-4 w-4" />
                                                 </button>
                                             ) : (
-                                                <button
-                                                    className="p-1.5 text-green-600 hover:text-green-800"
-                                                    onClick={() => handleRestoreClient(client)}
-                                                >
-                                                    <RefreshCcw className="h-4 w-4" />
-                                                </button>
+                                                client.client_status === "Removed" &&
+                                                user.user_role !== "Staff" && (
+                                                    <button
+                                                        className="p-1.5 text-green-600 hover:text-green-800"
+                                                        onClick={() => handleRestoreClient(client)}
+                                                    >
+                                                        <RefreshCcw className="h-4 w-4" />
+                                                    </button>
+                                                )
                                             )}
                                         </div>
                                     </td>
@@ -355,8 +368,10 @@ const Client = () => {
             {viewClient && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="w-full max-w-screen-md rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800">
-                        <h3 className="mb-4 text-xl font-bold text-blue-900 dark:text-slate-200">Client Information</h3>
-                        <div className="grid grid-cols-1 gap-4 text-sm text-blue-900 sm:grid-cols-3">
+                        <h3 className="mb-4 text-xl font-bold text-blue-900 dark:text-slate-200">
+                            Client Information <span className="text-lg font-semibold text-slate-500">(Client ID: {viewClient.client_id})</span>{" "}
+                        </h3>
+                        <div className="grid grid-cols-1 gap-4 text-sm text-blue-900 sm:grid-cols-2">
                             <div>
                                 <p className="font-semibold dark:text-blue-700">Name / Company</p>
                                 <p className="text-gray-600 dark:text-slate-200">{viewClient.client_fullname}</p>
@@ -364,10 +379,6 @@ const Client = () => {
                             <div>
                                 <p className="font-semibold dark:text-blue-700">Email</p>
                                 <p className="text-gray-600 dark:text-slate-200">{viewClient.client_email || "-"}</p>
-                            </div>
-                            <div>
-                                <p className="font-semibold dark:text-blue-700">Last Updated</p>
-                                <p className="text-gray-600 dark:text-slate-200">{viewClient.client_last_updated || "-"}</p>
                             </div>
                             <div>
                                 <p className="font-semibold dark:text-blue-700">Phone</p>
@@ -385,10 +396,10 @@ const Client = () => {
                                     <p className="text-gray-600 dark:text-slate-200">
                                         <span
                                             className={`rounded-full px-3 py-0.5 text-xs text-white ${viewClient.client_status === "Active"
-                                                ? "bg-green-500"
-                                                : viewClient.client_status === "Inactive"
-                                                    ? "bg-gray-400"
-                                                    : "bg-red-500"
+                                                    ? "bg-green-600"
+                                                    : viewClient.client_status === "Inactive"
+                                                        ? "bg-gray-500"
+                                                        : "bg-red-500"
                                                 }`}
                                         >
                                             {viewClient.client_status}
