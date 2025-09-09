@@ -289,7 +289,7 @@ const Cases = () => {
                                                     ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
                                                     : cases.case_status === "Completed"
                                                         ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                                        : "bg-red-100 text-red-700 dark:bg-red-700/50 dark:text-red-300"
                                                 }`}
                                         >
                                             {cases.case_status}
