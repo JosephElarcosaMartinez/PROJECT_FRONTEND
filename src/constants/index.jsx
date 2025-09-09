@@ -13,7 +13,7 @@ export const allNavbarLinks = [
     { label: "Payments", icon: CreditCard, path: "/payments" },
 ];
 
-// 🔧 Export a function to get filtered links based on role
+// Export a function to get filtered links based on role
 export const getNavbarLinks = (role) => {
     if (role === "Admin") {
         return allNavbarLinks;
@@ -24,7 +24,12 @@ export const getNavbarLinks = (role) => {
         return allNavbarLinks.filter((link) => link.label !== "Users" && link.label !== "Reports");
     }
 
-    if (role === "Paralegal" || role === "Staff") {
+    if (role === "Paralegal") {
+        // Only allow Home, Tasks, and Logs
+        return allNavbarLinks.filter((link) => ["Home", "Tasks", "Logs"].includes(link.label));
+    }
+
+    if (role === "Staff") {
         // Only allow Home, Clients, Tasks, and Logs
         return allNavbarLinks.filter((link) => ["Home", "Clients", "Tasks", "Logs"].includes(link.label));
     }
