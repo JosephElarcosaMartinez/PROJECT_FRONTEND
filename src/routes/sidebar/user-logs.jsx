@@ -57,6 +57,8 @@ const Userlogs = () => {
   const getTagColor = (action) => {
     if (/login/i.test(action)) return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
     if (/logout/i.test(action)) return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+    if (/added new client/i.test(action)) return "bg-violet-100 text-violet-600 dark:bg-violet-700/20 dark:text-violet-300";
+    if (/updated client/i.test(action)) return "bg-violet-100 text-violet-600 dark:bg-violet-700/20 dark:text-violet-300";
     if (/fail|error/i.test(action)) return "bg-red-100 text-red-700";
     return "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300";
   };
