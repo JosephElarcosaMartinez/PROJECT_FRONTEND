@@ -64,8 +64,8 @@ const Userlogs = () => {
   const getLogTag = (action) => {
     if (/login/i.test(action)) return "Login";
     if (/logout/i.test(action)) return "Logout";
-    // Test data for "action" is this => "New Criminal Case: Crime Against Property of Princy Gocotano"
-    if (/new/i.test(action)) return "New Case";
+    if (/new/i.test(action)) return "New Case Added";
+    if (/update/i.test(action)) return "Case Update";
     if (/fail|error/i.test(action)) return "Error";
     return "Action";
   };
@@ -165,8 +165,11 @@ const Userlogs = () => {
                   </div>
                 </div>
 
-                {/* Timestamp */}
-                <div className="ml-auto whitespace-nowrap text-sm">{formattedTime}</div>
+                {/* Timestamp and IP Address*/}
+                <div className="ml-4 text-right text-xs text-slate-500">
+                  <div>{formattedTime}</div>
+                  {user.user_role === "Admin" && log.user_ip_address && <div>IP: {log.user_ip_address}</div>}
+                </div>
               </div>
             );
           })}

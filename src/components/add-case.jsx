@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
+import CaseActionModal from "./case-action-modal";
 
 const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNewCase, addCaseModalRef, user }) => {
     if (!isModalOpen) return null;
@@ -7,6 +8,12 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
     const [caseCategories, setCaseCategories] = useState([]);
     const [caseCategoryTypes, setCaseCategoryTypes] = useState([]);
     const [lawyers, setLawyers] = useState([]);
+
+    // Placeholder handler for case action
+    const handleCaseAction = (type) => {
+        console.log(`Case ${type}d:`, newCase);
+        setIsActionModalOpen(false);
+    };
 
     // Fetching clients here for the dropdown can be implemented later
     useEffect(() => {
@@ -273,7 +280,7 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
                     <div>
                         <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Cabinet</label>
                         <input
-                            type="text"
+                            type="number"
                             value={newCase.case_cabinet}
                             onChange={(e) => setNewCase({ ...newCase, case_cabinet: e.target.value })}
                             className="w-full rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
@@ -320,6 +327,7 @@ const AddNewCase = ({ isModalOpen, setIsModalOpen, handleAddCase, newCase, setNe
             </div>
         </div>
     );
+
 };
 
 export default AddNewCase;

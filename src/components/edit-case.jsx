@@ -63,7 +63,8 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                 client_id: caseData.client_id || "",
                 cc_id: caseData.cc_id || "",
                 ct_id: caseData.ct_id || "",
-                user_id: caseData.user_id || "",
+                // user_id: caseData.user_id || null,
+                user_id: user.user_role === "Lawyer" ? user.user_id : (caseData.user_id || null),
                 case_remarks: caseData.case_remarks || "",
                 case_cabinet: caseData.case_cabinet || "",
                 case_drawer: caseData.case_drawer || "",
@@ -100,9 +101,19 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
     const handleSubmit = () => {
         if (!validate()) return;
 
-        if (onUpdate) {
-            onUpdate({ ...caseData, ...formData });
+        let updatedCase = {
+            ...caseData,
+            ...formData,
+        };
+
+        if (updatedCase.user_id) {
+            updatedCase.case_status = "Processing";
         }
+
+        if (onUpdate) {
+            onUpdate(updatedCase);
+        }
+
         onClose();
     };
 
@@ -112,11 +123,11 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
             <div
                 ref={modalRef}
-                className="w-full max-w-4xl rounded-lg bg-white p-8 dark:bg-slate-800 overflow-y-auto max-h-[90vh]"
+                className="max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-lg bg-white p-8 dark:bg-slate-800"
             >
                 <h3 className="mb-4 text-2xl font-bold dark:text-white">Edit Case {caseData.case_id}</h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                     {/* Client Dropdown */}
                     <div>
                         <label className="text-sm font-medium text-gray-700 dark:text-white">Client</label>
@@ -124,11 +135,19 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                             name="client_id"
                             value={formData.client_id}
                             onChange={handleChange}
-                            className="w-full mt-1 rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                            className="mt-1 w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                         >
-                            <option value="" disabled>Select Client</option>
+                            <option
+                                value=""
+                                disabled
+                            >
+                                Select Client
+                            </option>
                             {clients.map((client) => (
-                                <option key={client.client_id} value={client.client_id}>
+                                <option
+                                    key={client.client_id}
+                                    value={client.client_id}
+                                >
                                     {client.client_fullname}
                                 </option>
                             ))}
@@ -148,11 +167,19 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                                     ct_id: "", // Reset case type when category changes
                                 }));
                             }}
-                            className="w-full mt-1 rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                            className="mt-1 w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                         >
-                            <option value="" disabled>Select Category</option>
+                            <option
+                                value=""
+                                disabled
+                            >
+                                Select Category
+                            </option>
                             {caseCategories.map((cat) => (
-                                <option key={cat.cc_id} value={cat.cc_id}>
+                                <option
+                                    key={cat.cc_id}
+                                    value={cat.cc_id}
+                                >
                                     {cat.cc_name}
                                 </option>
                             ))}
@@ -166,16 +193,22 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                             name="ct_id"
                             value={formData.ct_id}
                             onChange={handleChange}
-                            className="w-full mt-1 rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                            className="mt-1 w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                             disabled={!formData.cc_id}
                         >
-                            <option value="" disabled>
+                            <option
+                                value=""
+                                disabled
+                            >
                                 {formData.cc_id ? "Select Case Type" : "Select Category first"}
                             </option>
                             {caseCategoryTypes
                                 .filter((type) => type.cc_id === parseInt(formData.cc_id))
                                 .map((type) => (
-                                    <option key={type.ct_id} value={type.ct_id}>
+                                    <option
+                                        key={type.ct_id}
+                                        value={type.ct_id}
+                                    >
                                         {type.ct_name}
                                     </option>
                                 ))}
@@ -189,21 +222,28 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                             name="user_id"
                             value={formData.user_id}
                             onChange={handleChange}
-                            className="w-full mt-1 rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                            className="mt-1 w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                             disabled={user.user_role !== "Admin" || !formData.cc_id}
                         >
-                            <option value="" disabled>
+                            <option
+                                value=""
+                                disabled
+                            >
                                 {user.user_role !== "Admin"
                                     ? `${user.user_fname} ${user.user_mname} ${user.user_lname}`
                                     : !formData.cc_id
                                         ? "Select Category first"
                                         : "Select Lawyer"}
                             </option>
+
                             {user.user_role === "Admin" ? (
                                 lawyers
                                     .filter((lawyer) => lawyer.cc_id === parseInt(formData.cc_id))
                                     .map((lawyer) => (
-                                        <option key={lawyer.user_id} value={lawyer.user_id}>
+                                        <option
+                                            key={lawyer.user_id}
+                                            value={lawyer.user_id}
+                                        >
                                             {lawyer.user_fname} {lawyer.user_mname} {lawyer.user_lname}
                                         </option>
                                     ))
@@ -223,13 +263,13 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                         name="case_remarks"
                         value={formData.case_remarks}
                         onChange={handleChange}
-                        className="w-full mt-1 resize-none rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                        className="mt-1 w-full resize-none rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                         rows={3}
                     ></textarea>
                 </div>
 
                 {/* Cabinet and Drawer */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
                         <label className="text-sm font-medium text-gray-700 dark:text-white">Cabinet</label>
                         <input
@@ -237,7 +277,7 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                             name="case_cabinet"
                             value={formData.case_cabinet}
                             onChange={handleChange}
-                            className="w-full mt-1 rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                            className="mt-1 w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                         />
                         {errors.case_cabinet && <p className="text-sm text-red-500">{errors.case_cabinet}</p>}
                     </div>
@@ -248,14 +288,14 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                             name="case_drawer"
                             value={formData.case_drawer}
                             onChange={handleChange}
-                            className="w-full mt-1 rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                            className="mt-1 w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                         />
                         {errors.case_drawer && <p className="text-sm text-red-500">{errors.case_drawer}</p>}
                     </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex justify-end mt-6 space-x-4">
+                <div className="mt-6 flex justify-end space-x-4">
                     <button
                         className="rounded-lg bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
                         onClick={onClose}
@@ -263,7 +303,7 @@ const EditCaseModal = ({ isOpen, onClose, caseData, onUpdate, user }) => {
                         Cancel
                     </button>
                     <button
-                        className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                        className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
                         onClick={handleSubmit}
                     >
                         Update Case
