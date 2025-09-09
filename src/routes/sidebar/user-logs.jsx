@@ -64,8 +64,10 @@ const Userlogs = () => {
   const getLogTag = (action) => {
     if (/login/i.test(action)) return "Login";
     if (/logout/i.test(action)) return "Logout";
-    if (/new/i.test(action)) return "New Case Added";
-    if (/update/i.test(action)) return "Case Update";
+    if (/added new client/i.test(action)) return "Added New Client";
+    if (/updated client/i.test(action)) return "Client Update";
+    if (/new case/i.test(action)) return "New Case Added";
+    if (/updated case/i.test(action)) return "Case Update";
     if (/fail|error/i.test(action)) return "Error";
     return "Action";
   };
