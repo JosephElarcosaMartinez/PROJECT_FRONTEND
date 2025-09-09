@@ -316,19 +316,24 @@ const Cases = () => {
                                             >
                                                 <Eye className="h-4 w-4" />
                                             </button>
-                                            <button
-                                                className="p-1.5 text-yellow-500 hover:text-yellow-700"
-                                                onClick={() => {
-                                                    setCaseToEdit({
-                                                        ...cases,
-                                                        lawyer_fullname: getLawyerFullName(cases.user_id),
-                                                        assigned_by_name: getLawyerFullName(cases.assigned_by),
-                                                    });
-                                                    setEditModalOpen(true);
-                                                }}
-                                            >
-                                                <Pencil className="h-4 w-4" />
-                                            </button>
+
+                                            {cases.case_status !== "Completed" && cases.case_status !== "Dismissed" && (
+
+                                                <button
+                                                    Title={user.user_role === "Admin" ? "Edit Case" : "Update and Take Case"}
+                                                    className="p-1.5 text-yellow-500 hover:text-yellow-700"
+                                                    onClick={() => {
+                                                        setCaseToEdit({
+                                                            ...cases,
+                                                            lawyer_fullname: getLawyerFullName(cases.user_id),
+                                                            assigned_by_name: getLawyerFullName(cases.assigned_by),
+                                                        });
+                                                        setEditModalOpen(true);
+                                                    }}
+                                                >
+                                                    <Pencil className="h-4 w-4" />
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
