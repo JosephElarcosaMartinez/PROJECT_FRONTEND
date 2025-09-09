@@ -69,7 +69,9 @@ const Cases = () => {
             try {
                 const cases_endpoint = user?.user_role === "Admin" ? "/cases" : `/cases/user/${user?.user_id}`;
 
-                const response = await fetch(`http://localhost:3000/api${cases_endpoint}`);
+                const response = await fetch(`http://localhost:3000/api${cases_endpoint}`,
+                    { credentials: 'include' }
+                );
                 if (!response.ok) {
                     throw new Error("Failed to fetch cases");
                 }
@@ -126,6 +128,7 @@ const Cases = () => {
             const res = await fetch("http://localhost:3000/api/cases", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
+                credentials: 'include',
                 body: JSON.stringify(payload),
             });
 
@@ -164,6 +167,7 @@ const Cases = () => {
             const res = await fetch(`http://localhost:3000/api/cases/${updatedCase.case_id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
+                credentials: 'include',
                 body: JSON.stringify({ ...updatedCase, last_updated_by: user.user_id }),
             });
 
