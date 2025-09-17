@@ -10,6 +10,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
+    const [files, setFiles] = useState([]);
 
     // Form state
     const [form, setForm] = useState({
@@ -23,8 +24,6 @@ export default function AddTask({ caseId, onClose, onAdded }) {
         doc_tasked_to: "",
         doc_type: "Task",
     });
-
-    const [file, setFile] = useState(null);
 
     const prioToDays = useMemo(() => ({ Low: 14, Mid: 5, High: 2 }), []);
 
@@ -52,7 +51,15 @@ export default function AddTask({ caseId, onClose, onAdded }) {
         setForm((prev) => ({ ...prev, doc_prio_level: value, doc_due_date: due }));
     };
 
-    // Fetch existing documents
+    const handleFileChange = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+        setFiles((prev) => [...prev, ...selectedFiles]);
+    };
+
+    const removeFile = (index) => {
+        setFiles((prev) => prev.filter((_, i) => i !== index));
+    };
+
     const fetchDocuments = async () => {
         if (!caseId) return;
         setLoadingDocs(true);
@@ -75,7 +82,6 @@ export default function AddTask({ caseId, onClose, onAdded }) {
         fetchDocuments();
     }, [caseId]);
 
-    // Fetch users for dropdown
     useEffect(() => {
         const fetchUsers = async () => {
             try {
@@ -104,9 +110,10 @@ export default function AddTask({ caseId, onClose, onAdded }) {
             Object.entries(form).forEach(([k, v]) => {
                 if (v !== undefined && v !== null) fd.append(k, v);
             });
-            if (file) fd.append("doc_file", file);
             if (user?.user_id) fd.append("doc_tasked_by", user.user_id);
             fd.append("case_id", caseId);
+
+            files.forEach((f) => fd.append("doc_files", f));
 
             const res = await fetch("http://localhost:3000/api/documents", {
                 method: "POST",
@@ -131,7 +138,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                 doc_tasked_to: "",
                 doc_type: "Task",
             });
-            setFile(null);
+            setFiles([]);
             fetchDocuments();
             if (onAdded) onAdded();
         } catch (e) {
@@ -141,172 +148,220 @@ export default function AddTask({ caseId, onClose, onAdded }) {
         }
     };
 
-
     return (
         <div className="space-y-4">
-            <h2 className="text-xl font-semibold">Add Task Document</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Add Task Document</h2>
 
-            <form onSubmit={onSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium mb-1">Tasked To</label>
-                    <select
-                        name="doc_tasked_to"
-                        value={form.doc_tasked_to}
-                        onChange={onChange}
-                        className="border rounded px-3 py-2"
-                        required
-                    >
-                        <option value="" disabled>
-                            Select user
-                        </option>
-                        {users
-                            .filter((u) => u.user_role === "Paralegal" || u.user_role === "Staff")
-                            .map((u) => (
-                                <option key={u.user_id} value={u.user_id}>
-                                    {u.user_fname} {u.user_mname ? u.user_mname[0] + ". " : ""}{u.user_lname}
-                                </option>
-                            ))}
-                    </select>
+            <form onSubmit={onSubmit}>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    {/* Tasked To */}
+                    <div className="flex flex-col">
+                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Tasked To</label>
+                        <select
+                            name="doc_tasked_to"
+                            value={form.doc_tasked_to}
+                            onChange={onChange}
+                            className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                            required
+                        >
+                            <option
+                                value=""
+                                disabled
+                            >
+                                Select Staff / Paralegal
+                            </option>
+                            {users
+                                .filter((u) => u.user_role === "Paralegal" || u.user_role === "Staff")
+                                .map((u) => (
+                                    <option
+                                        key={u.user_id}
+                                        value={u.user_id}
+                                    >
+                                        {u.user_fname} {u.user_mname ? u.user_mname[0] + ". " : ""}
+                                        {u.user_lname}
+                                    </option>
+                                ))}
+                        </select>
+                    </div>
+
+                    {/* Document Name */}
+                    <div className="flex flex-col">
+                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Document Name</label>
+                        <input
+                            name="doc_name"
+                            value={form.doc_name}
+                            onChange={onChange}
+                            type="text"
+                            required
+                            placeholder="e.g. Evidence Summary"
+                            className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                        />
+                    </div>
+
+                    {/* Priority */}
+                    <div className="flex flex-col">
+                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Priority Level</label>
+                        <select
+                            name="doc_prio_level"
+                            value={form.doc_prio_level}
+                            onChange={onPriorityChange}
+                            className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                            required
+                        >
+                            <option
+                                value=""
+                                disabled
+                            >
+                                Select priority
+                            </option>
+                            <option value="Low">Low</option>
+                            <option value="Mid">Mid</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+
+                    {/* Due Date */}
+                    <div className="flex flex-col">
+                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Due Date</label>
+                        <input
+                            name="doc_due_date"
+                            value={form.doc_due_date}
+                            type="date"
+                            readOnly
+                            required
+                            className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                        />
+                    </div>
+
+                    {/* Tag */}
+                    <div className="flex flex-col">
+                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Tag</label>
+                        <input
+                            name="doc_tag"
+                            value={form.doc_tag}
+                            onChange={onChange}
+                            type="text"
+                            placeholder="e.g. urgent, review"
+                            className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                        />
+                    </div>
+
+                    {/* Password */}
+                    <div className="flex flex-col">
+                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                        <input
+                            name="doc_password"
+                            value={form.doc_password}
+                            onChange={onChange}
+                            type="password"
+                            placeholder="Optional password"
+                            className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                        />
+                    </div>
                 </div>
 
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium mb-1">Document Name</label>
-                    <input
-                        name="doc_name"
-                        value={form.doc_name}
-                        onChange={onChange}
-                        type="text"
-                        required
-                        placeholder="e.g. Evidence Summary"
-                        className="border rounded px-3 py-2"
-                    />
+                <div className="mb-4 mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {/* Description */}
+                    <div className="flex flex-col">
+                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                        <textarea
+                            name="doc_description"
+                            value={form.doc_description}
+                            onChange={onChange}
+                            rows={3}
+                            placeholder="Short description"
+                            className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                        />
+                    </div>
+
+                    {/* Task */}
+                    <div className="flex flex-col">
+                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Task</label>
+                        <textarea
+                            name="doc_task"
+                            value={form.doc_task}
+                            onChange={onChange}
+                            rows={3}
+                            placeholder="Detailed task instructions"
+                            className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                        />
+                    </div>
                 </div>
 
-                <div className="md:col-span-1 flex flex-col">
-                    <label className="text-sm font-medium mb-1">Description</label>
-                    <textarea
-                        name="doc_description"
-                        value={form.doc_description}
-                        onChange={onChange}
-                        rows={3}
-                        placeholder="Short description"
-                        className="border rounded px-3 py-2"
-                    />
-                </div>
-
-                <div className="md:col-span-1 flex flex-col">
-                    <label className="text-sm font-medium mb-1">Task</label>
-                    <textarea
-                        name="doc_task"
-                        value={form.doc_task}
-                        onChange={onChange}
-                        rows={3}
-                        placeholder="Detailed task instructions"
-                        className="border rounded px-3 py-2"
-                    />
-                </div>
-
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium mb-1">File Reference (PDF)</label>
+                {/* File Reference */}
+                <div className="mb-4 flex flex-col md:col-span-3">
+                    <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">File Reference (PDF)</label>
                     <input
                         type="file"
                         accept="application/pdf"
-                        onChange={(e) => setFile(e.target.files?.[0] || null)}
-                        className="border rounded px-3 py-2"
+                        multiple
+                        onChange={handleFileChange}
+                        className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
                     />
+                    <ul className="mt-2 space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                        {files.map((file, index) => (
+                            <li
+                                key={index}
+                                className="flex items-center justify-between rounded border px-2 py-1 dark:border-gray-600"
+                            >
+                                <span>📄 {file.name}</span>
+                                <button
+                                    type="button"
+                                    onClick={() => removeFile(index)}
+                                    className="ml-2 text-red-500 hover:text-red-700"
+                                >
+                                    ❌
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
                 </div>
 
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium mb-1">Priority Level</label>
-                    <select
-                        name="doc_prio_level"
-                        value={form.doc_prio_level}
-                        onChange={onPriorityChange}
-                        className="border rounded px-3 py-2"
-                        required
-                    >
-                        <option value="" disabled>Select priority</option>
-                        <option value="Low">Low</option>
-                        <option value="Mid">Mid</option>
-                        <option value="High">High</option>
-                    </select>
-                </div>
-
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium mb-1">Due Date (auto)</label>
-                    <input
-                        name="doc_due_date"
-                        value={form.doc_due_date}
-                        onChange={onChange}
-                        type="date"
-                        className="border rounded px-3 py-2"
-                        required
-                        readOnly
-                    />
-                </div>
-
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium mb-1">Tag</label>
-                    <input
-                        name="doc_tag"
-                        value={form.doc_tag}
-                        onChange={onChange}
-                        type="text"
-                        placeholder="e.g. urgent, review"
-                        className="border rounded px-3 py-2"
-                    />
-                </div>
-
-                <div className="flex flex-col">
-                    <label className="text-sm font-medium mb-1">Password</label>
-                    <input
-                        name="doc_password"
-                        value={form.doc_password}
-                        onChange={onChange}
-                        type="password"
-                        placeholder="Optional password"
-                        className="border rounded px-3 py-2"
-                    />
-                </div>
-
-                <div className="md:col-span-2 flex items-center gap-3">
+                {/* Submit */}
+                <div className="flex justify-end gap-3 md:col-span-3">
                     <button
                         type="submit"
                         disabled={submitting}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded disabled:opacity-60"
+                        className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-60"
                     >
                         {submitting ? "Submitting..." : "Create Task Document"}
                     </button>
                 </div>
             </form>
 
+            {/* Existing Documents */}
             <div className="mt-4 overflow-x-auto">
-                <h3 className="font-medium mb-2">Existing Documents for this Case</h3>
+                <h3 className="mb-2 font-medium text-gray-900 dark:text-gray-100">Existing Documents for this Case</h3>
                 {loadingDocs ? (
-                    <p className="text-sm text-gray-500">Loading...</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
                 ) : docs.length === 0 ? (
-                    <p className="text-sm text-gray-500">No documents found.</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">No documents found.</p>
                 ) : (
-                    <table className="min-w-full text-sm border">
-                        <thead className="bg-gray-50">
+                    <table className="min-w-full border text-sm dark:border-gray-600">
+                        <thead className="bg-gray-50 dark:bg-slate-800">
                             <tr>
-                                <th className="text-left p-2 border">Name</th>
-                                <th className="text-left p-2 border">Type</th>
-                                <th className="text-left p-2 border">Priority</th>
-                                <th className="text-left p-2 border">Due</th>
-                                <th className="text-left p-2 border">Tag</th>
-                                <th className="text-left p-2 border">File</th>
+                                <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">Name</th>
+                                <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">Type</th>
+                                <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">Priority</th>
+                                <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">Due</th>
+                                <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">Tag</th>
+                                <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">File</th>
                             </tr>
                         </thead>
                         <tbody>
                             {docs.map((d) => (
-                                <tr key={d.doc_id} className="odd:bg-white even:bg-gray-50">
-                                    <td className="p-2 border">{d.doc_name}</td>
-                                    <td className="p-2 border">{d.doc_type}</td>
-                                    <td className="p-2 border">{d.doc_prio_level || "-"}</td>
-                                    <td className="p-2 border">{d.doc_due_date ? new Date(d.doc_due_date).toLocaleDateString() : "-"}</td>
-                                    <td className="p-2 border">{d.doc_tag || "-"}</td>
-                                    <td className="p-2 border">
+                                <tr
+                                    key={d.doc_id}
+                                    className="odd:bg-white even:bg-gray-50 dark:odd:bg-slate-900 dark:even:bg-slate-800"
+                                >
+                                    <td className="border p-2 dark:border-gray-600 dark:text-gray-200">{d.doc_name}</td>
+                                    <td className="border p-2 dark:border-gray-600 dark:text-gray-200">{d.doc_type}</td>
+                                    <td className="border p-2 dark:border-gray-600 dark:text-gray-200">{d.doc_prio_level || "-"}</td>
+                                    <td className="border p-2 dark:border-gray-600 dark:text-gray-200">
+                                        {d.doc_due_date ? new Date(d.doc_due_date).toLocaleDateString() : "-"}
+                                    </td>
+                                    <td className="border p-2 dark:border-gray-600 dark:text-gray-200">{d.doc_tag || "-"}</td>
+                                    <td className="border p-2 dark:border-gray-600 dark:text-gray-200">
                                         {d.doc_file ? (
                                             <a
                                                 className="text-blue-600 hover:underline"
@@ -316,7 +371,9 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                                             >
                                                 View
                                             </a>
-                                        ) : "-"}
+                                        ) : (
+                                            "-"
+                                        )}
                                     </td>
                                 </tr>
                             ))}

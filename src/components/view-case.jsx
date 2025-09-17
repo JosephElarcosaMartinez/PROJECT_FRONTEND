@@ -326,12 +326,12 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         <strong>Status:</strong>{" "}
                                         <span
                                             className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${selectedCase.case_status === "Pending"
-                                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
-                                                : selectedCase.case_status === "Processing"
-                                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
-                                                    : selectedCase.case_status === "Completed"
-                                                        ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                    : selectedCase.case_status === "Processing"
+                                                        ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
+                                                        : selectedCase.case_status === "Completed"
+                                                            ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                            : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
                                                 }`}
                                         >
                                             {selectedCase.case_status}
@@ -356,7 +356,8 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => setIsAddTaskOpen(true)}
-                                            className="rounded border border-blue-600 px-4 py-1.5 text-sm text-blue-600 hover:bg-blue-700 hover:text-white">
+                                            className="rounded border border-blue-600 px-4 py-1.5 text-sm text-blue-600 hover:bg-blue-700 hover:text-white"
+                                        >
                                             Add Task Document
                                         </button>
                                         <input
@@ -371,18 +372,18 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         >
                                             Add Document
                                         </button>
-                                        <button className="rounded bg-red-600 px-4 py-1.5 text-sm text-white hover:bg-red-700">Clear</button>
                                     </div>
                                 )}
                             </div>
                             <table className="w-full text-sm">
                                 <thead className="bg-gray-200 text-left dark:bg-slate-700">
-                                    <tr>
+                                    <tr className="text-xs">
                                         <th className="px-4 py-2">ID</th>
+                                        <th className="px-4 py-2">Type</th>
                                         <th className="px-4 py-2">Name</th>
                                         <th className="px-4 py-2">Status</th>
                                         <th className="px-4 py-2">File</th>
-                                        <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Uploaded by"}</th>
+                                        <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Submitted by"}</th>
                                         <th className="px-4 py-2">Action</th>
                                     </tr>
                                 </thead>
@@ -394,14 +395,28 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                             className="border-t border-gray-200 dark:border-gray-700"
                                         >
                                             <td className="px-4 py-2">{doc.doc_id}</td>
+                                            <td className="px-4 py-2">{doc.doc_type} Document</td>
                                             <td className="px-4 py-2">{doc.doc_name}</td>
                                             <td className="px-4 py-2">{doc.doc_status}</td>
-                                            <td className="cursor-pointer px-4 py-2 text-blue-600 underline">{doc.doc_file}</td>
-                                            <td className="px-4 py-2">{doc.doc_}</td>
+                                            <td
+                                                className="cursor-pointer px-4 py-2 text-blue-600 underline"
+                                                onClick={() =>
+                                                    window.open(
+                                                        `http://localhost:3000/uploads/${doc.doc_type === "Tasked" ? "taskedDocs" : "supportingDocs"}/${doc.doc_file}`,
+                                                        "_blank",
+                                                    )
+                                                }
+                                            >
+                                                {doc.doc_file}
+                                            </td>
+                                            <td className="px-4 py-2">{doc.doc_submitted_by}</td>
                                             <td className="space-x-2 px-4 py-2">
                                                 <button className="text-blue-600 hover:underline">Edit</button>
                                                 <button className="text-red-600 hover:underline">Reject</button>
-                                                <button className="text-red-600 hover:underline">
+                                                <button
+                                                    className="text-red-600"
+                                                    title="Delete Document"
+                                                >
                                                     <Trash2 size={16} />
                                                 </button>
                                             </td>
@@ -501,8 +516,6 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                 </p>
                             </div>
                         </div>
-
-
 
                         {/* Payments Table */}
                         <div className="card w-full overflow-x-auto rounded-xl border border-gray-200 shadow-sm dark:border-slate-700">
