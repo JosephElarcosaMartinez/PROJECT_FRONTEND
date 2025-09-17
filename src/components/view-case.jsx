@@ -4,6 +4,7 @@ import { useClickOutside } from "@/hooks/use-click-outside";
 import { useAuth } from "@/context/auth-context";
 import CaseActionModal from "./case-action-modal";
 import toast from "react-hot-toast";
+import AddTask from "./add-task";
 
 const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
     const { user } = useAuth();
@@ -11,9 +12,11 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
     const modalRef = useRef(null);
     const fileInputRef = useRef(null);
 
+    const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
     const [showPayments, setShowPayments] = useState(false);
     const [payments, setPayments] = useState([]);
     const [users, setUsers] = useState([]);
+    const [documents, setDocuments] = useState([]);
 
     const [isActionModalOpen, setIsActionModalOpen] = useState(false);
     const [actionType, setActionType] = useState("");
@@ -57,6 +60,30 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
         };
         fetchUsers();
     }, []);
+
+    // Fetching documents for the selected case
+    useEffect(() => {
+        const fetchDocuments = async () => {
+            try {
+                const res = await fetch(`http://localhost:3000/api/case/documents/${selectedCase.case_id}`, {
+                    method: "GET",
+                    credentials: "include",
+                });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || "Failed to fetch documents.");
+                }
+                setDocuments(data);
+            } catch (error) {
+                console.error("Error fetching documents:", error);
+            }
+        };
+
+        if (selectedCase) {
+            fetchDocuments();
+        }
+    }, [selectedCase]);
 
     // Function to get the name of the user who assigned the lawyer
     const getAssignerName = (assignedById) => {
@@ -304,7 +331,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                                     ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
                                                     : selectedCase.case_status === "Completed"
                                                         ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                        : "bg-red-100 text-red-700 dark:bg-red-700/50 dark:text-red-300"
+                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
                                                 }`}
                                         >
                                             {selectedCase.case_status}
@@ -327,7 +354,9 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
 
                                 {selectedCase.case_status === "Processing" && (
                                     <div className="flex gap-2">
-                                        <button className="rounded border border-blue-600 px-4 py-1.5 text-sm text-blue-600 hover:bg-blue-700 hover:text-white">
+                                        <button
+                                            onClick={() => setIsAddTaskOpen(true)}
+                                            className="rounded border border-blue-600 px-4 py-1.5 text-sm text-blue-600 hover:bg-blue-700 hover:text-white">
                                             Add Task Document
                                         </button>
                                         <input
@@ -353,32 +382,22 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         <th className="px-4 py-2">Name</th>
                                         <th className="px-4 py-2">Status</th>
                                         <th className="px-4 py-2">File</th>
-                                        <th className="px-4 py-2">Uploaded By</th>
+                                        <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Uploaded by"}</th>
                                         <th className="px-4 py-2">Action</th>
                                     </tr>
                                 </thead>
 
                                 <tbody className="text-gray-700 dark:text-white">
-                                    {[
-                                        { id: "D123", name: "Affidavit", status: "For Approval", file: "affidavit.pdf", uploader: "Joshua Go" },
-                                        { id: "D124", name: "Pleadings", status: "Approved", file: "pleadings.pdf", uploader: "Noel Glow" },
-                                        {
-                                            id: "D125",
-                                            name: "Special Proceedings",
-                                            status: "Approved",
-                                            file: "proceedings.pdf",
-                                            uploader: "Joseph Grow",
-                                        },
-                                    ].map((doc) => (
+                                    {documents.map((doc) => (
                                         <tr
-                                            key={doc.id}
+                                            key={doc.doc_id}
                                             className="border-t border-gray-200 dark:border-gray-700"
                                         >
-                                            <td className="px-4 py-2">{doc.id}</td>
-                                            <td className="px-4 py-2">{doc.name}</td>
-                                            <td className="px-4 py-2">{doc.status}</td>
-                                            <td className="cursor-pointer px-4 py-2 text-blue-600 underline">{doc.file}</td>
-                                            <td className="px-4 py-2">{doc.uploader}</td>
+                                            <td className="px-4 py-2">{doc.doc_id}</td>
+                                            <td className="px-4 py-2">{doc.doc_name}</td>
+                                            <td className="px-4 py-2">{doc.doc_status}</td>
+                                            <td className="cursor-pointer px-4 py-2 text-blue-600 underline">{doc.doc_file}</td>
+                                            <td className="px-4 py-2">{doc.doc_}</td>
                                             <td className="space-x-2 px-4 py-2">
                                                 <button className="text-blue-600 hover:underline">Edit</button>
                                                 <button className="text-red-600 hover:underline">Reject</button>
@@ -391,6 +410,28 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* Add Task Modal */}
+                        {isAddTaskOpen && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                                <div className="relative w-full max-w-3xl rounded-xl bg-white p-6 shadow-xl dark:bg-slate-900">
+                                    <button
+                                        className="absolute right-4 top-4 text-gray-500 hover:text-gray-800 dark:hover:text-white"
+                                        onClick={() => setIsAddTaskOpen(false)}
+                                    >
+                                        <X className="h-6 w-6" />
+                                    </button>
+                                    <AddTask
+                                        caseId={selectedCase.case_id}
+                                        onClose={() => setIsAddTaskOpen(false)}
+                                        onAdded={() => {
+                                            setIsAddTaskOpen(false);
+                                            // Optionally refresh documents
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        )}
 
                         {/* close case and dismiss case button when the case is not yet completed */}
                         {selectedCase.case_status === "Processing" && (
@@ -460,6 +501,8 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                 </p>
                             </div>
                         </div>
+
+
 
                         {/* Payments Table */}
                         <div className="card w-full overflow-x-auto rounded-xl border border-gray-200 shadow-sm dark:border-slate-700">
