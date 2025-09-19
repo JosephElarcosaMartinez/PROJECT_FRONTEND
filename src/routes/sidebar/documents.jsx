@@ -106,52 +106,69 @@ const Documents = () => {
             {/* Document Table */}
             <div className="card overflow-x-auto">
                 <table className="w-full text-left text-sm text-gray-800 dark:text-white">
-                    <thead className="border-b text-gray-800 dark:text-white">
+                    <thead className="text-xs uppercase dark:text-slate-300">
                         <tr>
-                            <th className="px-4 py-3 font-medium">Document</th>
-                            <th className="px-4 py-3 font-medium">Case ID</th>
-                            <th className="px-4 py-3 font-medium">Type</th>
-                            <th className="px-4 py-3 font-medium">Uploaded/Tasked By</th>
-                            <th className="px-4 py-3 font-medium">Due Date</th>
-                            <th className="px-4 py-3 text-center font-medium ">Actions</th>
+                            <th className="px-4 py-3">Document ID</th>
+                            <th className="px-4 py-3">Name</th>
+                            <th className="px-4 py-3">File</th>
+                            <th className="px-4 py-3">Case ID</th>
+                            <th className="px-4 py-3">Type</th>
+                            <th className="px-4 py-3">Submitted By</th>
+                            <th className="px-4 py-3 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {paginatedDocs.map((doc) => (
-                            <tr
-                                key={doc.doc_id}
-                                className="border-t hover:bg-blue-100 dark:hover:bg-blue-950"
-                            >
-                                <td className="flex items-center gap-2 px-4 py-4 font-medium text-blue-800">
-                                    <FileText size={18} /> {doc.doc_name || "Untitled"}
-                                </td>
-                                <td className="px-4 py-3">{doc.case_id ?? "-"}</td>
-                                <td className="px-4 py-3">{doc.doc_type || "-"}</td>
-                                <td className="px-4 py-3">-</td>
-                                <td className="px-4 py-3">{doc.doc_submitted_by ?? doc.doc_tasked_by ?? "-"}</td>
-                                <td className="px-4 py-3">{doc.doc_due_date ? new Date(doc.doc_due_date).toLocaleDateString() : "-"}</td>
-                                <td className="flex justify-center gap-4 px-4 py-3">
-                                    {doc.doc_file ? (
-                                        <a
-                                            href={`http://localhost:3000${doc.doc_file}`}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="text-blue-600 hover:text-blue-800"
-                                        >
-                                            <Download size={16} />
-                                        </a>
-                                    ) : (
-                                        <span className="text-gray-400"></span>
-                                    )}
-                                    <button
-                                        className="text-red-500 hover:text-red-700"
-                                        onClick={() => confirmDelete(doc)}
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
+                        {paginatedDocs.filter((doc) => doc.doc_file).length === 0 ? (
+                            <tr>
+                                <td
+                                    colSpan={10}
+                                    className="px-4 py-3 text-center text-gray-400"
+                                >
+                                    No documents with files to display.
                                 </td>
                             </tr>
-                        ))}
+                        ) : (
+                            paginatedDocs
+                                .filter((doc) => doc.doc_file)
+                                .map((doc) => (
+                                    <tr
+                                        key={doc.doc_id}
+                                        className="border-t border-gray-200 transition hover:bg-blue-100 dark:border-gray-700 dark:hover:bg-blue-950"
+                                    >
+                                        <td className="px-4 py-3">{doc.doc_id}</td>
+                                        <td className="flex items-center gap-2 px-4 py-4 font-medium text-blue-800">{doc.doc_name || "Untitled"}</td>
+                                        <td className="px-4 py-3">
+                                            <a
+                                                href={`http://localhost:3000/uploads/${doc.doc_type === "Tasked" ? "taskedDocs" : "supportingDocs"}/${doc.doc_file}`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="flex text-red-600 hover:text-red-800"
+                                            >
+                                                <FileText size={16} /> {doc.doc_file}
+                                            </a>
+                                        </td>
+                                        <td className="px-4 py-3">{doc.case_id}</td>
+                                        <td className="px-4 py-3">{doc.doc_type}</td>
+                                        <td className="px-4 py-3">{doc.doc_submitted_by}</td>
+                                        <td className="flex justify-center gap-4 px-4 py-3">
+                                            <a
+                                                href={`http://localhost:3000${doc.doc_file}`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="text-blue-600 hover:text-blue-800"
+                                            >
+                                                <Download size={16} />
+                                            </a>
+                                            <button
+                                                className="text-red-500 hover:text-red-700"
+                                                onClick={() => confirmDelete(doc)}
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                        )}
                     </tbody>
                 </table>
             </div>

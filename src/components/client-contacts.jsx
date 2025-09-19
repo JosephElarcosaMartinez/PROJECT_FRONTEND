@@ -31,7 +31,9 @@ const ClientContact = () => {
             : `http://localhost:3000/api/a-lawyer-client-contacts/${user.user_id}`;
 
         const clients_endpoint =
-          user?.user_role === "Admin" || user?.user_role === "Staff" ? "http://localhost:3000/api/clients" : `http://localhost:3000/api/clients/${user.user_id}`;
+          user?.user_role === "Admin" || user?.user_role === "Staff"
+            ? "http://localhost:3000/api/clients"
+            : `http://localhost:3000/api/clients/${user.user_id}`;
 
         // Fetch both contacts and clients in parallel
         const [contactsRes, clientsRes] = await Promise.all([
@@ -205,7 +207,7 @@ const ClientContact = () => {
               paginatedContacts.map((contact) => (
                 <tr
                   key={contact.contact_id}
-                  className="border-t border-gray-200 hover:bg-blue-50 dark:hover:bg-slate-800"
+                  className="border-t border-gray-200 hover:bg-blue-50 dark:border-gray-700 dark:hover:bg-slate-800"
                 >
                   <td className="px-4 py-3">{contact.contact_fullname}</td>
                   <td className="px-4 py-3">{contact.contact_email}</td>
@@ -342,6 +344,8 @@ export default ClientContact;
 
 // EditContactModal Component
 const EditContactModal = ({ contact, onClose, onSave, clients = [] }) => {
+  const { user } = useAuth();
+
   const [formData, setFormData] = useState(contact || {});
 
   // Sync when contact prop changes
@@ -366,7 +370,7 @@ const EditContactModal = ({ contact, onClose, onSave, clients = [] }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, contact_updated_by: user.user_id }),
       });
 
       if (!res.ok) {
