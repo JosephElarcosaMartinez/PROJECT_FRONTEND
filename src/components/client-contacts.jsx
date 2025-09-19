@@ -90,7 +90,7 @@ const ClientContact = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(newContact),
+        body: JSON.stringify({ ...newContact, contact_created_by: user.user_id }),
       });
 
       if (!res.ok) {
