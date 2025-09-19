@@ -1,207 +1,180 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Settings, Bell } from "lucide-react";
+import { Settings } from "lucide-react";
 
 const Notifications = () => {
   const navigate = useNavigate();
-
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      message: "Case #2024-098 has been moved to the archive folder.",
-      dateCreated: "2025-08-07 13:45",
-      createdBy: "System",
-      createdEarlier: "2 hours ago",
-      isRead: false,
-    },
-    {
-      id: 2,
-      message:
-        "New evidence file ‘CCTV Footage.zip’ has been shared with you under Case #2025-016.",
-      dateCreated: "2025-08-06 17:30",
-      createdBy: "Atty. John Cruz",
-      createdEarlier: "1 day ago",
-      isRead: false,
-    },
-    {
-      id: 3,
-      message: "Emma Thompson updated their profile.",
-      dateCreated: "2025-08-06 09:12",
-      createdBy: "Emma Thompson",
-      createdEarlier: "1 day ago",
-      isRead: true,
-    },
-    {
-      id: 4,
-      message: "Your document has already been approved.",
-      dateCreated: "2025-08-05 14:20",
-      createdBy: "Admin",
-      createdEarlier: "2 days ago",
-      isRead: true,
-    },
-    {
-      id: 5,
-      message:
-        "Your document upload has been received and logged by the system.",
-      dateCreated: "2025-08-05 08:00",
-      createdBy: "System",
-      createdEarlier: "2 days ago",
-      isRead: false,
-    },
-    {
-      id: 6,
-      message: "Reminder: Court hearing for Case #2025-019 is tomorrow.",
-      dateCreated: "2025-08-04 11:00",
-      createdBy: "Paralegal Support",
-      createdEarlier: "3 days ago",
-      isRead: false,
-    },
-  ]);
-
+  const [notifications, setNotifications] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const pageSize = 10; // number of notifications per page
 
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+  const totalPages = Math.ceil(notifications.length / pageSize);
+
+  // Helper to show "x minutes/hours/days ago"
+  const timeAgo = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+
+    let interval = Math.floor(seconds / 31536000);
+    if (interval >= 1) return interval === 1 ? "1 year ago" : `${interval} years ago`;
+
+    interval = Math.floor(seconds / 2592000);
+    if (interval >= 1) return interval === 1 ? "1 month ago" : `${interval} months ago`;
+
+    interval = Math.floor(seconds / 86400);
+    if (interval >= 1) return interval === 1 ? "1 day ago" : `${interval} days ago`;
+
+    interval = Math.floor(seconds / 3600);
+    if (interval >= 1) return interval === 1 ? "1 hour ago" : `${interval} hours ago`;
+
+    interval = Math.floor(seconds / 60);
+    if (interval >= 1) return interval === 1 ? "1 minute ago" : `${interval} minutes ago`;
+
+    return "Just now";
   };
 
+  // Fetch notifications when component mounts
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/notifications", {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          setNotifications(data);
+        } else {
+          console.error("Failed to fetch notifications:", data.error);
+        }
+      } catch (err) {
+        console.error("Error fetching notifications:", err);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
+  // Mark all as read (frontend-only for now)
+  const markAllAsRead = () => {
+    setNotifications((prev) => prev.map((note) => ({ ...note, is_read: true })));
+  };
+
+  // Clear all (frontend-only for now)
   const clearAll = () => {
     setNotifications([]);
   };
 
-  const toggleReadStatus = (id) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: !n.isRead } : n))
-    );
-  };
-
-  const totalPages = Math.ceil(notifications.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedData = notifications.slice(startIndex, startIndex + itemsPerPage);
-
-  useEffect(() => {
-    setCurrentPage(1); // Reset page if the data ever changes
-  }, [notifications]);
+  // Paginated notifications
+  const startIdx = (currentPage - 1) * pageSize;
+  const paginatedNotifications = notifications.slice(startIdx, startIdx + pageSize);
 
   return (
-    <div className="w-full">
-      <div className="rounded-xl bg-white dark:bg-slate-900 shadow-sm p-6">
+    <div>
+      <div className="bg-blue rounded-xl p-4 shadow-sm dark:bg-slate-900 sm:p-6">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <div className="flex items-center gap-2">
-            <Bell className="text-blue-600 dark:text-blue-400" size={35} />
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
-                Notifications
-              </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                Manage your recent updates and system alerts
-              </p>
-            </div>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-gray-800 dark:text-white sm:text-2xl">Notifications</h1>
+            <p className="text-sm text-gray-500">Manage how you receive notifications and updates</p>
           </div>
           <button
             onClick={() => navigate("/notifications/notif-settings")}
-            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
+            className="text-blue-700 hover:text-blue-900"
           >
-            <Settings className="text-gray-600 dark:text-gray-300" size={22} />
+            <Settings size={24} />
           </button>
         </div>
 
-        {/* Actions */}
-        <div className="flex justify-end gap-3 mb-5">
+        {/* Action buttons */}
+        <div className="mb-4 flex justify-end gap-2">
           <button
             onClick={markAllAsRead}
-            className="text-sm px-4 py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-slate-800 dark:text-blue-400 dark:hover:bg-slate-700 transition"
+            className="rounded bg-gray-200 px-3 py-1 text-sm text-gray-800 hover:bg-gray-300 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
           >
             Mark all as read
           </button>
           <button
             onClick={clearAll}
-            className="text-sm px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 dark:bg-slate-800 dark:text-red-400 dark:hover:bg-slate-700 transition"
+            className="rounded bg-gray-200 px-3 py-1 text-sm text-gray-800 hover:bg-gray-300 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
           >
             Clear All
           </button>
         </div>
 
-        {/* Notifications List */}
-        <div className="space-y-4 ">
-          {paginatedData.map((note) => (
+        {/* Notifications list */}
+        {paginatedNotifications.length > 0 ? (
+          paginatedNotifications.map((note) => (
             <div
-              key={note.id}
-              onClick={() => toggleReadStatus(note.id)}
-              className={`cursor-pointer flex items-start gap-3 rounded-xl border p-4 transition 
-                ${note.isRead
-                  ? "bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:shadow-md"
-                  : "bg-blue-50 dark:bg-slate-700 border-blue-200 dark:border-slate-600 shadow-md hover:shadow-lg"
-                }`}
+              key={note.notification_id}
+              className={`mb-3 flex w-full items-start gap-3 rounded-xl border p-4 ${note.is_read ? "bg-gray-100 dark:bg-slate-700" : "bg-white dark:bg-slate-800"
+                } border-gray-200 dark:border-slate-700`}
             >
-              <div className="flex flex-col w-full">
-                <div className="flex justify-between items-start">
-                  <p
-                    className={`text-sm leading-relaxed ${note.isRead
-                      ? "text-gray-700 dark:text-gray-200"
-                      : "text-gray-900 dark:text-white font-medium"
-                      }`}
-                  >
-                    {note.message}
-                  </p>
-                  {!note.isRead && (
-                    <span className="w-2 h-2 rounded-full bg-blue-500 mt-1 ml-2 flex-shrink-0"></span>
-                  )}
-                </div>
-                <div className="text-xs mt-2 text-gray-500 dark:text-gray-400">
-                  <span className="font-medium">{note.createdBy}</span> ·{" "}
-                  <span>{note.dateCreated}</span> · <span>{note.createdEarlier}</span>
-                </div>
+              <input
+                type="checkbox"
+                unChecked={note.is_read}
+                className="mt-1"
+              />
+              <div>
+                <p
+                  className={`text-sm ${note.is_read ? "font-normal text-gray-600 dark:text-slate-300" : "font-bold text-gray-800 dark:text-white"
+                    }`}
+                >
+                  {note.notification_message}
+                </p>
+                <span className="text-xs text-gray-400">
+                  {timeAgo(note.date_created)}
+                </span>
               </div>
             </div>
-          ))}
+          ))
+        ) : (
+          <p className="text-sm text-gray-500 dark:text-slate-400">No notifications found</p>
+        )}
 
-          {notifications.length === 0 && (
-            <div className="text-center py-12 text-gray-500 dark:text-gray-400 text-sm">
-              No notifications found
-            </div>
-          )}
-        </div>
+        {/* Footer with pagination */}
+        <div className="mt-6 flex flex-col items-center justify-between gap-2 text-xs text-gray-500 dark:text-gray-400 sm:flex-row">
+          <span>
+            Showing {paginatedNotifications.length} of {notifications.length} notifications
+          </span>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex justify-between items-center mt-6">
-            <span className="text-sm text-gray-600 dark:text-gray-300">
-              Showing {startIndex + 1} -{" "}
-              {Math.min(startIndex + itemsPerPage, notifications.length)} of{" "}
-              {notifications.length}
-            </span>
-
-            <div className="flex items-center gap-2">
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="mt-2 flex items-center justify-end gap-3 p-2 sm:mt-0">
               <button
                 onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                 disabled={currentPage === 1}
-                className={`px-3 py-1 border rounded-lg text-sm transition ${currentPage === 1
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-slate-800"
+                className={`rounded border px-3 py-1 ${currentPage === 1
+                  ? "cursor-not-allowed bg-gray-200 text-gray-400"
                   : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
                   }`}
               >
                 &lt;
               </button>
 
-              <span className="text-sm text-gray-700 dark:text-gray-200">
+              <span className="text-sm text-gray-700 dark:text-white">
                 Page {currentPage} of {totalPages}
               </span>
 
               <button
                 onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className={`px-3 py-1 border rounded-lg text-sm transition ${currentPage === totalPages
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed dark:bg-slate-800"
+                className={`rounded border px-3 py-1 ${currentPage === totalPages
+                  ? "cursor-not-allowed bg-gray-200 text-gray-400"
                   : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
                   }`}
               >
                 &gt;
               </button>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

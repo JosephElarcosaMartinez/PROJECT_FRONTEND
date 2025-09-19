@@ -326,12 +326,12 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         <strong>Status:</strong>{" "}
                                         <span
                                             className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${selectedCase.case_status === "Pending"
-                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
-                                                    : selectedCase.case_status === "Processing"
-                                                        ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
-                                                        : selectedCase.case_status === "Completed"
-                                                            ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                            : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                : selectedCase.case_status === "Processing"
+                                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
+                                                    : selectedCase.case_status === "Completed"
+                                                        ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
                                                 }`}
                                         >
                                             {selectedCase.case_status}
