@@ -346,22 +346,50 @@ export const Payments = () => {
                                 />
                                 <p className="mt-1 text-xs text-gray-500">(Your User ID)</p>
                             </div>
+
                             <div>
                                 <label className="font-semibold dark:text-blue-700">Amount</label>
                                 <input
-                                    type="text"
+                                    type="number"
+                                    min="0"
+                                    step="0.01"
                                     value={addPayment.payment_amount}
-                                    onChange={(e) =>
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+
+                                        // Allow empty string for editing
+                                        if (value === "") {
+                                            setAddPayment({
+                                                ...addPayment,
+                                                payment_amount: "",
+                                            });
+                                            return;
+                                        }
+
+                                        // Prevent negative values
+                                        if (parseFloat(value) < 0) {
+                                            alert("Amount cannot be negative!");
+                                            return;
+                                        }
+
                                         setAddPayment({
                                             ...addPayment,
-                                            payment_amount: e.target.value,
-                                        })
-                                    }
+                                            payment_amount: value,
+                                        });
+                                    }}
                                     onBlur={() => {
-                                        if (addPayment.payment_amount !== "") {
+                                        if (addPayment.payment_amount === "") return; // don't alert if user cleared it
+
+                                        if (parseFloat(addPayment.payment_amount) >= 0) {
                                             setAddPayment({
                                                 ...addPayment,
                                                 payment_amount: parseFloat(addPayment.payment_amount).toFixed(2),
+                                            });
+                                        } else {
+                                            alert("Invalid amount! Resetting to 0.00");
+                                            setAddPayment({
+                                                ...addPayment,
+                                                payment_amount: "0.00",
                                             });
                                         }
                                     }}
@@ -374,6 +402,7 @@ export const Payments = () => {
                                         : "Select a case to see balance"}
                                 </p>
                             </div>
+
                             <div>
                                 <label className="font-semibold dark:text-blue-700">Payment Type</label>
                                 <select
