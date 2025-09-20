@@ -7,7 +7,7 @@ import { getNavbarLinks } from "@/constants";
 import { ChevronsLeft, Settings, Search, Sun, Moon, Bell } from "lucide-react";
 import default_avatar from "@/assets/default-avatar.png";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PropTypes from "prop-types";
 import toast from "react-hot-toast";
@@ -22,6 +22,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
     const [showProfileModal, setShowProfileModal] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [searchResults, setSearchResults] = useState([]);
+    const [searchLoading, setSearchLoading] = useState(false);
 
     useClickOutside([dropdownRef], () => {
         setOpen(false);
@@ -46,17 +47,127 @@ export const Header = ({ collapsed, setCollapsed }) => {
         setShowProfileModal(true);
     };
 
-    // Update search results when searchTerm changes
+    // Helper: search nav links
+    const searchNavLinks = (term) => {
+        const links = getNavbarLinks(user?.user_role || "");
+        return (links || [])
+            .filter((l) => l.label.toLowerCase().includes(term.toLowerCase()))
+            .map((l) => ({
+                key: `nav:${l.label}`,
+                type: "Navigate",
+                label: l.label,
+                sub: l.path,
+                path: l.path,
+            }));
+    };
+
+    // Global search across routes and backend entities (cases, clients, documents)
+    useEffect(() => {
+        let active = true;
+        if (!searchTerm.trim()) {
+            setSearchResults([]);
+            setSearchLoading(false);
+            return;
+        }
+
+        setSearchLoading(true);
+        const timer = setTimeout(async () => {
+            try {
+                const term = searchTerm.trim();
+                const results = [...searchNavLinks(term)];
+
+                // Fetch in parallel
+                const [casesRes, clientsRes, docsRes] = await Promise.all([
+                    fetch(`http://localhost:3000/api/cases/search?q=${encodeURIComponent(term)}`, { credentials: "include" }).catch(() => null),
+                    fetch("http://localhost:3000/api/clients", { credentials: "include" }).catch(() => null),
+                    fetch("http://localhost:3000/api/documents", { credentials: "include" }).catch(() => null),
+                ]);
+
+                if (!active) return;
+
+                // Cases
+                if (casesRes && casesRes.ok) {
+                    const cases = await casesRes.json();
+                    (Array.isArray(cases) ? cases : []).forEach((c) => {
+                        const label = c.ct_name ? `${c.ct_name} (Case #${c.case_id})` : `Case #${c.case_id}`;
+                        results.push({
+                            key: `case:${c.case_id}`,
+                            type: "Case",
+                            label,
+                            sub: c.case_status ? `Status: ${c.case_status}` : undefined,
+                            path: "/cases",
+                        });
+                    });
+                }
+
+                // Clients (filter client-side)
+                if (clientsRes && clientsRes.ok) {
+                    const clients = await clientsRes.json();
+                    (Array.isArray(clients) ? clients : [])
+                        .filter((cl) => {
+                            const full = String(cl.client_fullname || `${cl.client_fname || ""} ${cl.client_lname || ""}`).toLowerCase();
+                            return full.includes(term.toLowerCase());
+                        })
+                        .forEach((cl) => {
+                            const full = cl.client_fullname || `${cl.client_fname || ""} ${cl.client_lname || ""}`.trim();
+                            results.push({
+                                key: `client:${cl.client_id}`,
+                                type: "Client",
+                                label: full || `Client #${cl.client_id}`,
+                                sub: cl.client_email || cl.client_contact || undefined,
+                                path: "/clients",
+                            });
+                        });
+                }
+
+                // Documents (filter client-side)
+                if (docsRes && docsRes.ok) {
+                    const docs = await docsRes.json();
+                    (Array.isArray(docs) ? docs : [])
+                        .filter((d) => {
+                            const hay = `${d.doc_name || ""} ${d.doc_type || ""} ${d.doc_tag || ""}`.toLowerCase();
+                            return hay.includes(term.toLowerCase());
+                        })
+                        .forEach((d) => {
+                            results.push({
+                                key: `doc:${d.doc_id}`,
+                                type: "Document",
+                                label: d.doc_name || `Document #${d.doc_id}`,
+                                sub: d.doc_type || d.doc_tag || undefined,
+                                path: "/documents",
+                            });
+                        });
+                }
+
+                if (active) setSearchResults(results.slice(0, 20));
+            } catch (e) {
+                if (active) {
+                    setSearchResults(searchNavLinks(searchTerm));
+                }
+            } finally {
+                if (active) setSearchLoading(false);
+            }
+        }, 250); // debounce
+
+        return () => {
+            active = false;
+            clearTimeout(timer);
+        };
+    }, [searchTerm, user?.user_role]);
+
+    // Update search term and open dropdown suggestions
     const handleSearchChange = (e) => {
         const value = e.target.value;
         setSearchTerm(value);
-        if (value.trim() === "") {
-            setSearchResults([]);
-            return;
+    };
+
+    const onSelectResult = (r) => {
+        if (r?.path) {
+            navigate(r.path);
+            sessionStorage.setItem("globalSearch", searchTerm);
         }
-        const links = getNavbarLinks(user?.user_role);
-        const filtered = links.filter(link => link.label.toLowerCase().includes(value.toLowerCase()));
-        setSearchResults(filtered);
+        setSearchResults([]);
+        setSearchTerm("");
     };
 
     return (
@@ -77,25 +188,29 @@ export const Header = ({ collapsed, setCollapsed }) => {
                         type="text"
                         name="search"
                         id="search"
-                        placeholder="Search..."
+                        placeholder="Search cases, clients, documents, or pages..."
                         className="w-full bg-transparent text-slate-900 outline-0 placeholder:text-slate-500 dark:text-slate-50"
                         value={searchTerm}
                         onChange={handleSearchChange}
                     />
-                    {searchTerm && searchResults.length > 0 && (
-                        <div className="absolute left-0 top-full mt-2 w-full rounded-md bg-white shadow-lg dark:bg-slate-800 z-50">
-                            {searchResults.map(result => (
-                                <div
-                                    key={result.label}
-                                    className="px-4 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900"
-                                    onClick={() => navigate(result.path)}
-                                >
-                                    <span className="flex items-center gap-x-2">
-                                        <result.icon size={20} className="text-blue-700 dark:text-white" />
-                                        {result.label}
-                                    </span>
-                                </div>
-                            ))}
+                    {searchTerm && (
+                        <div className="absolute left-0 top-full mt-2 w-full rounded-md bg-white shadow-lg dark:bg-slate-800 z-50 max-h-80 overflow-auto">
+                            {searchLoading ? (
+                                <div className="px-4 py-3 text-sm text-slate-500">Searching...</div>
+                            ) : searchResults.length > 0 ? (
+                                searchResults.map((r) => (
+                                    <div
+                                        key={r.key}
+                                        className="px-4 py-2 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 flex items-center justify-between"
+                                        onClick={() => onSelectResult(r)}
+                                    >
+                                        <span className="truncate">{r.label}</span>
+                                        <span className="ml-3 text-xs text-slate-500">{r.type}</span>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="px-4 py-3 text-sm text-slate-500">No results</div>
+                            )}
                         </div>
                     )}
                 </div>

@@ -74,7 +74,7 @@ const Documents = () => {
             <div className="flex flex-col items-start justify-between md:flex-row md:items-center">
                 <div>
                     <h1 className="title">Documents</h1>
-                    <p className="text-sm dark:text-slate-300">Manage and organize case-related documents</p>
+                    <p className="text-sm text-gray-500">Manage and organize case-related documents</p>
                 </div>
                 <div className="mt-4 flex gap-2 md:mt-0">
                     <button
@@ -151,14 +151,6 @@ const Documents = () => {
                                         <td className="px-4 py-3">{doc.doc_type}</td>
                                         <td className="px-4 py-3">{doc.doc_submitted_by}</td>
                                         <td className="flex justify-center gap-4 px-4 py-3">
-                                            <a
-                                                href={`http://localhost:3000${doc.doc_file}`}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                                className="text-blue-600 hover:text-blue-800"
-                                            >
-                                                <Download size={16} />
-                                            </a>
                                             <button
                                                 className="text-red-500 hover:text-red-700"
                                                 onClick={() => confirmDelete(doc)}

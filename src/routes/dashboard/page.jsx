@@ -40,7 +40,7 @@ const DashboardPage = () => {
         <>
             <div className="flex flex-col gap-y-3">
                 <h1 className="title">Dashboard</h1>
-                <p className="dark:text-slate-300">Welcome back {user.user_fname}! Here's your overview.</p>
+                <p className="text-md text-gray-500">Welcome back {user.user_fname}! Here's your overview.</p>
 
                 {/* first row */}
                 <div
