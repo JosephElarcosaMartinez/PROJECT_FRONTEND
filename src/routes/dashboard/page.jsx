@@ -11,6 +11,54 @@ const DashboardPage = () => {
     const { theme } = useTheme();
     const { user } = useAuth();
     const [userLogs, setUserLogs] = useState([]);
+    const [userCount, setUserCount] = useState(0);
+    const [processingCasesCount, setProcessingCasesCount] = useState(0);
+
+    // fetching user count
+    useEffect(() => {
+        const fetchUserCount = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/users/count", {
+                    method: "GET",
+                    credentials: "include",
+                });
+                if (!res.ok) throw new Error("Failed to fetch user count");
+                const data = await res.json();
+                setUserCount(data.count);
+            } catch (error) {
+                console.error("Failed to fetch user count:", error);
+            }
+        };
+
+        if (user?.user_role === "Admin") {
+            fetchUserCount();
+        }
+    }, [user]);
+
+    // fetching processing cases count with role-based access
+    useEffect(() => {
+        const fetchProcessingCasesCount = async () => {
+            try {
+                const endpoint =
+                    user?.user_role === "Admin" || user?.user_role === "Staff"
+                        ? "http://localhost:3000/api/cases/count/processing"
+                        : `http://localhost:3000/api/cases/count/processing/user/${user.user_id}`;
+                const res = await fetch(endpoint, {
+                    method: "GET",
+                    credentials: "include",
+                });
+                if (!res.ok) throw new Error("Failed to fetch processing cases count");
+                const data = await res.json();
+                setProcessingCasesCount(data.count);
+            } catch (error) {
+                console.error("Failed to fetch processing cases count:", error);
+            }
+        };
+
+        if (user) {
+            fetchProcessingCasesCount();
+        }
+    }, [user]);
 
     // fetching user logs
     useEffect(() => {
@@ -40,35 +88,32 @@ const DashboardPage = () => {
         <>
             <div className="flex flex-col gap-y-3">
                 <h1 className="title">Dashboard</h1>
-                <p className="text-md text-gray-500">Welcome back {user.user_fname}! Here's your overview.</p>
+                <p className="dark:text-slate-300">Welcome back {user.user_fname}! Here's your overview.</p>
 
                 {/* first row */}
                 <div
-                    className={`grid grid-cols-1 gap-4 ${user.user_role === "Admin"
-                        ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                        : "lg:grid-cols-3 xl:grid-cols-3"
-                        }`}
+                    className={`grid grid-cols-1 gap-4 ${user.user_role === "Admin" ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" : "lg:grid-cols-3 xl:grid-cols-3"}`}
                 >
-                    {/* Users (Admin only) */}
+                    {/* Total Cases */}
                     {user.user_role === "Admin" && (
                         <div className="card">
                             <div className="card-header">
                                 <p className="card-title">Users</p>
-                                <div className="p-2 text-blue-500 ">
+                                <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                     <ShieldUser size={26} />
                                 </div>
                             </div>
                             <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                                <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">32</p>
+                                <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">{userCount}</p>
                             </div>
                         </div>
                     )}
 
-                    {/* Archived Cases */}
+                    {/* Total Archived Cases */}
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Archived Cases</p>
-                            <div className="p-2 text-blue-500 ">
+                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                 <Archive size={26} />
                             </div>
                         </div>
@@ -77,24 +122,24 @@ const DashboardPage = () => {
                         </div>
                     </div>
 
-                    {/* Processing Cases */}
+                    {/* Total Processing Cases */}
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Processing Cases</p>
-                            <div className="p-2 text-blue-500 ">
+                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                 <FolderOpen size={26} />
                             </div>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">5</p>
+                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">{processingCasesCount}</p>
                         </div>
                     </div>
 
-                    {/* Processing Documents */}
+                    {/* Total Processing Documents */}
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Processing Documents</p>
-                            <div className="p-2 text-blue-500 ">
+                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                 <FileMinus size={26} />
                             </div>
                         </div>
@@ -106,16 +151,13 @@ const DashboardPage = () => {
 
                 {/* second row */}
                 <div
-                    className={`grid grid-cols-1 gap-4 ${user.user_role === "Admin"
-                        ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3"
-                        : "lg:grid-cols-3 xl:grid-cols-3"
-                        }`}
+                    className={`grid grid-cols-1 gap-4 ${user.user_role === "Admin" ? "md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3" : "lg:grid-cols-3 xl:grid-cols-3"}`}
                 >
-                    {/* Clients */}
+                    {/* Total Clients */}
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Clients</p>
-                            <div className="p-2 text-blue-500">
+                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                 <Users size={26} />
                             </div>
                         </div>
@@ -124,11 +166,11 @@ const DashboardPage = () => {
                         </div>
                     </div>
 
-                    {/* Pending Approvals */}
+                    {/* Total Pending Approvals */}
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Pending Approvals</p>
-                            <div className="p-2 text-blue-500 ">
+                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                 <UserRoundMinus size={26} />
                             </div>
                         </div>
@@ -137,11 +179,11 @@ const DashboardPage = () => {
                         </div>
                     </div>
 
-                    {/* Pending Tasks */}
+                    {/* Total Pending Tasks */}
                     <div className="card">
                         <div className="card-header">
                             <p className="card-title">Pending Tasks</p>
-                            <div className="p-2 text-blue-500 ">
+                            <div className="bg-glue-500/20 w-fit rounded-lg p-2 text-blue-500 transition-colors dark:bg-blue-600/20 dark:text-blue-600">
                                 <ListTodo size={26} />
                             </div>
                         </div>
@@ -158,15 +200,39 @@ const DashboardPage = () => {
                             <p className="card-title">Overview of Cases</p>
                         </div>
                         <div className="card-body p-0">
-                            <ResponsiveContainer width="100%" height={300}>
-                                <AreaChart data={overviewData} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
+                            <ResponsiveContainer
+                                width="100%"
+                                height={300}
+                            >
+                                <AreaChart
+                                    data={overviewData}
+                                    margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+                                >
                                     <defs>
-                                        <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#2563eb" stopOpacity={0.8} />
-                                            <stop offset="95%" stopColor="#2563eb" stopOpacity={0} />
+                                        <linearGradient
+                                            id="colorTotal"
+                                            x1="0"
+                                            y1="0"
+                                            x2="0"
+                                            y2="1"
+                                        >
+                                            <stop
+                                                offset="5%"
+                                                stopColor="#2563eb"
+                                                stopOpacity={0.8}
+                                            />
+                                            <stop
+                                                offset="95%"
+                                                stopColor="#2563eb"
+                                                stopOpacity={0}
+                                            />
                                         </linearGradient>
                                     </defs>
-                                    <Tooltip cursor={false} formatter={(value) => `${value}`} active={true} />
+                                    <Tooltip
+                                        cursor={false}
+                                        formatter={(value) => `${value}`}
+                                        active={true}
+                                    />
                                     <XAxis
                                         dataKey="name"
                                         strokeWidth={0}
@@ -184,13 +250,18 @@ const DashboardPage = () => {
                                         tickFormatter={(value) => `${value}`}
                                         tickMargin={6}
                                     />
-                                    <Area type="monotone" dataKey="total" stroke="#2563eb" fillOpacity={1} fill="url(#colorTotal)" />
+                                    <Area
+                                        type="monotone"
+                                        dataKey="total"
+                                        stroke="#2563eb"
+                                        fillOpacity={1}
+                                        fill="url(#colorTotal)"
+                                    />
                                 </AreaChart>
                             </ResponsiveContainer>
                         </div>
                     </div>
 
-                    {/* Recent Activity */}
                     <div className="card col-span-1 md:col-span-2 lg:col-span-3">
                         <div className="card-header">
                             <p className="card-title">Recent Activity</p>
@@ -204,21 +275,16 @@ const DashboardPage = () => {
                                     >
                                         <div className="flex items-center gap-x-4">
                                             <img
-                                                src={
-                                                    log.user_profile
-                                                        ? `http://localhost:3000${log.user_profile}`
-                                                        : default_avatar
-                                                }
+                                                src={log.user_profile ? `http://localhost:3000${log.user_profile}` : default_avatar}
                                                 alt={`${log.user_fname || "User"}`}
                                                 className="ml-2 size-10 flex-shrink-0 rounded-full object-cover"
                                             />
                                             <div className="flex flex-col gap-y-1">
-                                                <p className="font-medium text-slate-900 dark:text-slate-50">
+                                                <p className="text-sm font-medium text-slate-900 dark:text-slate-50">
                                                     {`${log.user_fullname}` || "Unknown User"}
                                                 </p>
-                                                <p className="text-sm text-slate-500 dark:text-slate-400">
-                                                    {log.user_log_action}
-                                                </p>
+                                                <p className="text-sm text-slate-500 dark:text-slate-400">{log.user_log_action}</p>
+                                                {/* <span>{log.user_log_type}</span> */}
                                             </div>
                                         </div>
                                         <div className="text-right">
@@ -235,9 +301,7 @@ const DashboardPage = () => {
                                     </div>
                                 ))
                             ) : (
-                                <div className="p-4 text-center text-slate-500 dark:text-slate-400">
-                                    No recent activity found.
-                                </div>
+                                <div className="p-4 text-center text-slate-500 dark:text-slate-400">No recent activity found.</div>
                             )}
                         </div>
                     </div>
