@@ -105,7 +105,7 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            Add Document (Supporting Document)
+            Add Document (Support Document)
           </h2>
           <button
             onClick={onClose}
