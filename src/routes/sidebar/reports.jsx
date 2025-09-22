@@ -1,33 +1,16 @@
-import { ShieldUser, FileText, Archive, FolderKanban, } from "lucide-react";
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, } from "recharts";
+import { useEffect, useState } from "react";
+import { ShieldUser, FileText, Archive, FolderKanban } from "lucide-react";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from "recharts";
 import { useNavigate } from "react-router-dom";
-import user1 from "@/assets/Joseph_prof.png";
-import user2 from "@/assets/Joseph_prof.png";
-import user3 from "@/assets/Joseph_prof.png";
-
-const initialUsers = [
-  {
-    user: "Sarah Wilson",
-    action: "Logged out 2 minutes ago",
-    status: "Inactive",
-    date: "April 21, 2025 ",
-    image: user1,
-  },
-  {
-    user: "Bryan Wilson",
-    action: "Logged in 5 minutes ago",
-    status: "Active",
-    date: "April 21, 2025 ",
-    image: user2,
-  },
-  {
-    user: "John Wilson",
-    action: "Logged in 10 minutes ago",
-    status: "Active",
-    date: "April 21, 2025 ",
-    image: user3,
-  },
-];
+import defaultAvatar from "../../assets/default-avatar.png";
 
 const data = [
   { name: "Mon", Cases: 400, analytics: 240 },
@@ -66,16 +49,8 @@ const ChartPlaceholder = ({ title, dataKey }) => (
         >
           <defs>
             <linearGradient id="colorData" x1="0" y1="0" x2="0" y2="1">
-              <stop
-                offset="5%"
-                stopColor="#3b82f6"
-                stopOpacity={0.8}
-              />
-              <stop
-                offset="95%"
-                stopColor="#3b82f6"
-                stopOpacity={0}
-              />
+              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
+              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
             </linearGradient>
           </defs>
           <XAxis dataKey="name" stroke="#94a3b8" />
@@ -95,15 +70,54 @@ const ChartPlaceholder = ({ title, dataKey }) => (
   </div>
 );
 
+// format time compactly
+const formatDistanceToNow = (date) => {
+  const now = new Date();
+  const seconds = Math.floor((now - date) / 1000);
+
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  const weeks = Math.floor(days / 7);
+  return `${weeks}w ago`;
+};
+
 export const Reports = () => {
   const navigate = useNavigate();
+  const [logs, setLogs] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchLogs = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/user-logs", {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await res.json();
+        setLogs(data);
+      } catch (err) {
+        console.error("Error fetching logs:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLogs();
+  }, []);
 
   return (
-    <div className="space-y-6 ">
-      <h2 className="title">
-        Reports & Analytics
-      </h2>
+    <div className="space-y-6">
+      <h2 className="title">Reports & Analytics</h2>
 
+      {/* Stat Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Users"
@@ -127,6 +141,7 @@ export const Reports = () => {
         />
       </div>
 
+      {/* Chart */}
       <div className="relative rounded-xl bg-white dark:bg-gray-800 p-6 shadow-md">
         <span className="absolute top-4 right-4 z-10 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
           Last 7 Days
@@ -137,8 +152,9 @@ export const Reports = () => {
         </div>
       </div>
 
-      <div className="card ">
-        <div className="flex items-center justify-between mb-4 ">
+      {/* User Activity Logs */}
+      <div className="card">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">
             User Activity
           </h2>
@@ -150,51 +166,68 @@ export const Reports = () => {
           </button>
         </div>
 
-        <table className="w-full text-sm border-t">
-          <thead>
-            <tr className="bg-gray-100 text-left text-gray-600">
-              <th className="p-2">USER</th>
-              <th className="p-2">ACTION</th>
-              <th className="p-2">STATUS</th>
-              <th className="p-2">DATE</th>
-            </tr>
-          </thead>
-          <tbody>
-            {initialUsers.map((item, idx) => (
-              <tr
-                key={idx}
-                className="border-b hover:bg-gray-50 dark:hover:bg-gray-700"
-              >
-                <td className="flex items-center gap-2 p-2">
-                  <img
-                    src={item.image}
-                    alt={item.user}
-                    className="h-8 w-8 rounded-full object-cover"
-                  />
-                  <span className="text-slate-900 dark:text-white">
-                    {item.user}
-                  </span>
-                </td>
-                <td className="p-2 text-slate-700 dark:text-slate-300">
-                  {item.action}
-                </td>
-                <td
-                  className={`p-2 font-medium ${item.status.toLowerCase() === "active"
-                    ? "text-green-600"
-                    : "text-red-600"
-                    }`}
-                >
-                  {item.status}
-                </td>
-                <td className="p-2 text-slate-700 dark:text-slate-300">
-                  {item.date}
-                </td>
+        {loading ? (
+          <p className="text-center text-gray-500">Loading logs...</p>
+        ) : (
+          <table className="w-full text-sm border-t">
+            <thead>
+              <tr className="bg-gray-100 text-left text-gray-600">
+                <th className="p-2">USER</th>
+                <th className="p-2">ACTION</th>
+                <th className="p-2">DATE</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {logs.map((log) => (
+                <tr
+                  key={log.user_log_id}
+                  className="border-b hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  {/* USER */}
+                  <td className="flex items-center gap-2 p-2">
+                    <img
+                      src={
+                        log.user_profile
+                          ? `http://localhost:3000${log.user_profile}`
+                          : defaultAvatar
+                      }
+                      alt={log.user_fullname}
+                      className="h-8 w-8 rounded-full object-cover"
+                    />
+                    <span className="text-slate-900 dark:text-white">
+                      {log.user_fullname}
+                    </span>
+                  </td>
 
+                  {/* ACTION */}
+                  <td className="p-2">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-gray-600 dark:text-gray-400">
+                        {log.user_log_action}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {formatDistanceToNow(new Date(log.user_log_time))}
+                      </span>
+                    </div>
+                  </td>
+
+
+                  {/* DATE */}
+                  <td className="p-2 text-slate-700 dark:text-slate-300">
+                    {log.user_log_time
+                      ? new Date(log.user_log_time).toLocaleString("en-US", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })
+                      : ""}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
     </div>
   );
 };
