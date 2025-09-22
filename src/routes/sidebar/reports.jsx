@@ -90,6 +90,7 @@ export const Reports = () => {
   const navigate = useNavigate();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showAll, setShowAll] = useState(false); // 🔹 NEW state for toggle
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -112,6 +113,9 @@ export const Reports = () => {
 
     fetchLogs();
   }, []);
+
+  // only show first 5 logs if not expanded
+  const visibleLogs = showAll ? logs : logs.slice(0, 5);
 
   return (
     <div className="space-y-6">
@@ -169,63 +173,78 @@ export const Reports = () => {
         {loading ? (
           <p className="text-center text-gray-500">Loading logs...</p>
         ) : (
-          <table className="w-full text-sm border-t">
-            <thead>
-              <tr className="bg-gray-100 text-left text-gray-600">
-                <th className="p-2">USER</th>
-                <th className="p-2">ACTION</th>
-                <th className="p-2">DATE</th>
-              </tr>
-            </thead>
-            <tbody>
-              {logs.map((log) => (
-                <tr
-                  key={log.user_log_id}
-                  className="border-b hover:bg-gray-50 dark:hover:bg-gray-700"
-                >
-                  {/* USER */}
-                  <td className="flex items-center gap-2 p-2">
-                    <img
-                      src={
-                        log.user_profile
-                          ? `http://localhost:3000${log.user_profile}`
-                          : defaultAvatar
-                      }
-                      alt={log.user_fullname}
-                      className="h-8 w-8 rounded-full object-cover"
-                    />
-                    <span className="text-slate-900 dark:text-white">
-                      {log.user_fullname}
-                    </span>
-                  </td>
-
-                  {/* ACTION */}
-                  <td className="p-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium text-gray-600 dark:text-gray-400">
-                        {log.user_log_action}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {formatDistanceToNow(new Date(log.user_log_time))}
-                      </span>
-                    </div>
-                  </td>
-
-
-                  {/* DATE */}
-                  <td className="p-2 text-slate-700 dark:text-slate-300">
-                    {log.user_log_time
-                      ? new Date(log.user_log_time).toLocaleString("en-US", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })
-                      : ""}
-                  </td>
+          <>
+            <table className="w-full text-sm border-t">
+              <thead>
+                <tr className="bg-gray-100 text-left text-gray-600">
+                  <th className="p-2">USER</th>
+                  <th className="p-2">ACTION</th>
+                  <th className="p-2">DATE</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {visibleLogs.map((log) => (
+                  <tr
+                    key={log.user_log_id}
+                    className="border-b hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    {/* USER */}
+                    <td className="flex items-center gap-2 p-2">
+                      {log.user_profile ? (
+                        <img
+                          src={`http://localhost:3000${log.user_profile}`}
+                          alt={log.user_fullname}
+                          className="h-8 w-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <div className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-400 text-xs font-bold text-white">
+                          {log.user_fullname?.charAt(0).toUpperCase()}
+                        </div>
+                      )}
+                      <span className="text-slate-900 dark:text-white">
+                        {log.user_fullname}
+                      </span>
+                    </td>
+
+                    {/* ACTION */}
+                    <td className="p-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-gray-600 dark:text-gray-400">
+                          {log.user_log_action}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {formatDistanceToNow(new Date(log.user_log_time))}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* DATE */}
+                    <td className="p-2 text-slate-700 dark:text-slate-300">
+                      {log.user_log_time
+                        ? new Date(log.user_log_time).toLocaleString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                        : ""}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Show more / less toggle */}
+            {logs.length > 5 && (
+              <div className="text-center mt-3">
+                <button
+                  onClick={() => setShowAll(!showAll)}
+                  className="text-gray-800 underline hover:text-blue-300 dark:text-white dark:hover:text-blue-400"
+                >
+                  {showAll ? "Show less" : "Show More"}
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
