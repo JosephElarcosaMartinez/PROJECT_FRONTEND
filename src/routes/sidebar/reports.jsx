@@ -238,9 +238,9 @@ export const Reports = () => {
               <div className="text-center mt-3">
                 <button
                   onClick={() => setShowAll(!showAll)}
-                  className="text-gray-800 underline hover:text-blue-300 dark:text-white dark:hover:text-blue-400"
+                  className="text-blue-600 text-sm font-medium hover:underline"
                 >
-                  {showAll ? "Show less" : "Show More"}
+                  {showAll ? "Show Less" : "Show More"}
                 </button>
               </div>
             )}
