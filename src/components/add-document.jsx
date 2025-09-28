@@ -9,7 +9,7 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [files, setFiles] = useState([]);
+  const [file, setFile] = useState(null);
 
   // Form state
   const [form, setForm] = useState({
@@ -17,6 +17,8 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
     doc_description: "",
     doc_tag: "",
     doc_password: "",
+    doc_type: "Support", // keep consistent with backend
+    case_id: caseId,
   });
 
   const onChange = (e) => {
@@ -25,12 +27,11 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
   };
 
   const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    setFiles((prev) => [...prev, ...selectedFiles]);
+    setFile(e.target.files[0] || null);
   };
 
-  const removeFile = (index) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
+  const removeFile = () => {
+    setFile(null);
   };
 
   const fetchDocuments = async () => {
@@ -38,9 +39,12 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
     setLoadingDocs(true);
     setError("");
     try {
-      const res = await fetch(`http://localhost:3000/api/case/documents/${caseId}`, {
-        credentials: "include",
-      });
+      const res = await fetch(
+        `http://localhost:3000/api/case/documents/${caseId}`,
+        {
+          credentials: "include",
+        }
+      );
       if (!res.ok) throw new Error(`Failed to load documents (${res.status})`);
       const data = await res.json();
       setDocs(Array.isArray(data) ? data : []);
@@ -64,12 +68,13 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
     try {
       const fd = new FormData();
       Object.entries(form).forEach(([k, v]) => {
-        if (v !== undefined && v !== null) fd.append(k, v);
+        if (k !== "case_id" && v !== undefined && v !== null) fd.append(k, v);
       });
-      if (user?.user_id) fd.append("doc_uploaded_by", user.user_id);
+      if (user?.user_id) fd.append("doc_submitted_by", user.user_id);
       fd.append("case_id", caseId);
 
-      files.forEach((f) => fd.append("doc_files", f));
+      // only one file
+      if (file) fd.append("doc_file", file);
 
       const res = await fetch("http://localhost:3000/api/documents", {
         method: "POST",
@@ -88,8 +93,10 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
         doc_description: "",
         doc_tag: "",
         doc_password: "",
+        doc_type: "Support",
+        case_id: caseId,
       });
-      setFiles([]);
+      setFile(null);
       fetchDocuments();
       if (onAdded) onAdded();
     } catch (e) {
@@ -105,7 +112,7 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
         {/* Header */}
         <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            Add Document (Supporting Document)
+            Add Document (Support Document)
           </h2>
           <button
             onClick={onClose}
@@ -122,116 +129,96 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
 
           <form onSubmit={onSubmit} className="space-y-4">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                {/* Document Name */}
-                <div className="flex flex-col">
+              {/* Document Name */}
+              <div className="flex flex-col">
                 <label className="mb-1 text-sm font-medium">Document Name</label>
                 <input
-                    name="doc_name"
-                    value={form.doc_name}
-                    onChange={onChange}
-                    type="text"
-                    required
-                    placeholder="e.g. Affidavit"
-                    className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                  name="doc_name"
+                  value={form.doc_name}
+                  onChange={onChange}
+                  type="text"
+                  required
+                  placeholder="e.g. Affidavit"
+                  className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
                 />
-                </div>
+              </div>
 
-                {/* Tag */}
-                <div className="flex flex-col">
+              {/* Tag */}
+              <div className="flex flex-col">
                 <label className="mb-1 text-sm font-medium">Tag</label>
                 <input
-                    name="doc_tag"
-                    value={form.doc_tag}
-                    onChange={onChange}
-                    type="text"
-                    placeholder="e.g. evidence, draft"
-                    className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                  name="doc_tag"
+                  value={form.doc_tag}
+                  onChange={onChange}
+                  type="text"
+                  placeholder="e.g. evidence, draft"
+                  className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
                 />
-                </div>
+              </div>
 
-                {/* Password (optional) */}
-                <div className="flex flex-col">
+              {/* Password (optional) */}
+              <div className="flex flex-col">
                 <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Password (optional)
+                  Password (optional)
                 </label>
                 <input
-                    name="doc_password"
-                    value={form.doc_password}
-                    onChange={onChange}
-                    type="password"
-                    placeholder="Set a password if needed"
-                    className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                  name="doc_password"
+                  value={form.doc_password}
+                  onChange={onChange}
+                  type="password"
+                  placeholder="Set a password if needed"
+                  className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
                 />
-                </div>
+              </div>
             </div>
-
-            {/* Password requirements */}
-            {/* {form.doc_password.length > 0 && (
-                <div className="mt-2 max-h-32 overflow-y-auto p-3 rounded bg-yellow-100 text-xs text-gray-800 dark:bg-yellow-900 dark:text-yellow-100">
-                <p className="font-medium">Password Requirement:</p>
-                <ul className="list-disc pl-5 mt-1 space-y-1">
-                    <li>First letter of your <strong>First Name</strong> (capitalized).</li>
-                    <li>First letter of your <strong>Last Name</strong> (capitalized).</li>
-                    <li>The <strong>current month</strong> in 2-digit format (e.g., 09 for September).</li>
-                    <li>Your <strong>Birth Year</strong> (e.g., 2001).</li>
-                </ul>
-                <p className="mt-1 italic">Example (for September 2025): <code>JD092001</code></p>
-                </div>
-            )} */}
 
             {/* Description */}
             <div className="col-span-2">
-                <label className="mb-1 text-sm font-medium">Description</label>
-                <textarea
+              <label className="mb-1 text-sm font-medium">Description</label>
+              <textarea
                 name="doc_description"
                 value={form.doc_description}
                 onChange={onChange}
                 rows={2}
                 placeholder="Enter a detailed description..."
                 className="mt-1 w-full rounded-lg border bg-white px-3 py-2 text-sm dark:bg-slate-800"
-                />
+              />
             </div>
 
             {/* File Reference */}
             <div className="flex flex-col">
-                <label className="mb-1 text-sm font-medium">Attached File (PDF)</label>
-                <input
+              <label className="mb-1 text-sm font-medium">Attached File (PDF)</label>
+              <input
                 type="file"
                 accept="application/pdf"
-                multiple
                 onChange={handleFileChange}
                 className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
-                />
-                <ul className="mt-2 space-y-1 text-sm">
-                {files.map((file, index) => (
-                    <li
-                    key={index}
-                    className="flex items-center justify-between rounded border px-2 py-1 dark:border-gray-600"
-                    >
-                    <span>📄 {file.name}</span>
-                    <button
-                        type="button"
-                        onClick={() => removeFile(index)}
-                        className="ml-2 text-red-500 hover:text-red-700"
-                    >
-                        ❌
-                    </button>
-                    </li>
-                ))}
-                </ul>
+              />
+              {file && (
+                <div className="mt-2 flex items-center justify-between rounded border px-2 py-1 text-sm dark:border-gray-600">
+                  <span>📄 {file.name}</span>
+                  <button
+                    type="button"
+                    onClick={removeFile}
+                    className="ml-2 text-red-500 hover:text-red-700"
+                  >
+                    ❌
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Submit */}
             <div className="flex justify-end">
-                <button
+              <button
                 type="submit"
                 disabled={submitting}
                 className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-60"
-                >
+              >
                 {submitting ? "Submitting..." : "Add Document"}
-                </button>
+              </button>
             </div>
-            </form>
+          </form>
 
           {/* Existing Documents */}
           <div className="mt-6 overflow-x-auto">
