@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { X, MapPin, ArrowLeft, Trash2, XCircle, CheckCircle } from "lucide-react";
+import { X, MapPin, ArrowLeft, Trash2, XCircle, CheckCircle, Eye, Pen, Undo } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { useAuth } from "@/context/auth-context";
 import CaseActionModal from "./case-action-modal";
@@ -94,6 +94,15 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
         return assigner
             ? `Atty. ${assigner.user_fname} ${assigner.user_mname ? assigner.user_mname[0] + "." : ""} ${assigner.user_lname}`
             : "Unknown";
+    };
+
+    const getSubmitterName = (submittedById) => {
+        const submitter = users.find((u) => u.user_id === submittedById);
+        return submitter
+            ? submitter.user_role === "Staff"
+                ? `${submitter.user_fname} ${submitter.user_mname ? submitter.user_mname[0] + "." : ""} ${submitter.user_lname}`
+                : `Atty. ${submitter.user_fname} ${submitter.user_mname ? submitter.user_mname[0] + "." : ""} ${submitter.user_lname}`
+            : "-";
     };
 
     useClickOutside([modalRef], () => {
@@ -382,12 +391,12 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                 <thead className="bg-gray-200 text-left dark:bg-slate-700">
                                     <tr className="text-xs">
                                         <th className="px-4 py-2">ID</th>
-                                        <th className="px-4 py-2">Type</th>
                                         <th className="px-4 py-2">Name</th>
+                                        <th className="px-4 py-2">Type</th>
                                         <th className="px-4 py-2">Status</th>
-                                        <th className="px-4 py-2">File</th>
+                                        <th className="px-4 py-2">Due</th>
                                         <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Submitted by"}</th>
-                                        <th className="px-4 py-2">Action</th>
+                                        <th className="px-4 py-2">Actions</th>
                                     </tr>
                                 </thead>
 
@@ -398,26 +407,38 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                             className="border-t border-gray-200 dark:border-gray-700"
                                         >
                                             <td className="px-4 py-2">{doc.doc_id}</td>
-                                            <td className="px-4 py-2">{doc.doc_type} Document</td>
                                             <td className="px-4 py-2">{doc.doc_name}</td>
+                                            <td className="px-4 py-2">{doc.doc_type}</td>
                                             <td className="px-4 py-2">{doc.doc_status}</td>
-                                            <td
-                                                className="cursor-pointer px-4 py-2 text-blue-600 underline"
-                                                onClick={() =>
-                                                    window.open(
-                                                        `http://localhost:3000${doc.doc_file}`,
-                                                        "_blank",
-                                                    )
-                                                }
-                                            >
-                                                {doc.doc_file}
-                                            </td>
-                                            <td className="px-4 py-2">{doc.doc_submitted_by}</td>
-                                            <td className="space-x-2 px-4 py-2">
-                                                <button className="text-blue-600 hover:underline">Edit</button>
-                                                <button className="text-red-600 hover:underline">Reject</button>
+                                            <td className="px-4 py-2">{doc.doc_due_date ? formatDateTime(doc.doc_due_date) : "N/A"}</td>
+                                            <td className="px-4 py-2">{getSubmitterName(doc.doc_submitted_by)}</td>
+                                            <td className="flex gap-2 space-x-2 px-4 py-2">
+                                                {doc.doc_file && (
+                                                    <button
+                                                        className="text-blue-600 hover:text-blue-800"
+                                                        onClick={() => window.open(`http://localhost:3000${doc.doc_file}`, "_blank")}
+                                                        title="View File"
+                                                    >
+                                                        <Eye size={16} />
+                                                    </button>
+                                                )}
+
                                                 <button
-                                                    className="text-red-600"
+                                                    className="text-yellow-600 hover:text-yellow-800"
+                                                    title="Edit Document"
+                                                >
+                                                    <Pen size={16} />
+                                                </button>
+                                                {doc.doc_type !== "Support" && (
+                                                    <button
+                                                        className="text-red-600 hover:text-red-800"
+                                                        title="Reject Document"
+                                                    >
+                                                        <Undo size={16} />
+                                                    </button>
+                                                )}
+                                                <button
+                                                    className="text-red-600 hover:text-red-800"
                                                     title="Delete Document"
                                                 >
                                                     <Trash2 size={16} />
@@ -466,7 +487,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         onClose={() => setIsAddDocumentOpen(false)}
                                         onAdded={() => {
                                             setIsAddDocumentOpen(false);
-                                            // refresh documents here if needed
+                                            fetchDocuments();
                                         }}
                                     />
                                 </div>

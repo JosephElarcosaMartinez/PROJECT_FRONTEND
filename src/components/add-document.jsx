@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/auth-context.jsx";
+import toast from "react-hot-toast";
+import Spinner from "./loading.jsx";
 
 export default function AddDocument({ caseId, onClose, onAdded }) {
   const { user } = useAuth() || {};
@@ -8,8 +10,8 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
   const [loadingDocs, setLoadingDocs] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [file, setFile] = useState(null);
+  const [fileError, setFileError] = useState("");
 
   // Form state
   const [form, setForm] = useState({
@@ -27,11 +29,24 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
   };
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0] || null);
+    const selected = e.target.files[0];
+    if (!selected) return;
+
+    // File size limiting
+    if (selected.size > 10 * 1024 * 1024) {
+      setFileError("File size must be 10MB or less.");
+      setFile(null);
+      e.target.value = null;
+      return;
+    }
+
+    setFile(selected);
+    setFileError("");
   };
 
   const removeFile = () => {
     setFile(null);
+    setFileError("");
   };
 
   const fetchDocuments = async () => {
@@ -39,12 +54,9 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
     setLoadingDocs(true);
     setError("");
     try {
-      const res = await fetch(
-        `http://localhost:3000/api/case/documents/${caseId}`,
-        {
-          credentials: "include",
-        }
-      );
+      const res = await fetch(`http://localhost:3000/api/case/documents/${caseId}`, {
+        credentials: "include",
+      });
       if (!res.ok) throw new Error(`Failed to load documents (${res.status})`);
       const data = await res.json();
       setDocs(Array.isArray(data) ? data : []);
@@ -61,10 +73,11 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    if (!caseId) return;
     setSubmitting(true);
     setError("");
-    setSuccess("");
+
+    const toastId = toast.loading("Submitting...", { duration: 10000 });
+
     try {
       const fd = new FormData();
       Object.entries(form).forEach(([k, v]) => {
@@ -87,7 +100,8 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
         throw new Error(t || "Failed to create document");
       }
 
-      setSuccess("Document created.");
+      toast.success("Document added successfully", { id: toastId, duration: 4000 });
+
       setForm({
         doc_name: "",
         doc_description: "",
@@ -101,19 +115,20 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
       if (onAdded) onAdded();
     } catch (e) {
       setError(e.message || "Submission failed");
+      toast.error("Submission failed", { id: toastId, duration: 4000 });
+      console.error("Add document error:", e);
+      setSubmitting(false);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
-      <div className="bg-white dark:bg-slate-900 rounded-lg shadow-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
+      <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white shadow-lg dark:bg-slate-900">
         {/* Header */}
-        <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
-            Add Document (Support Document)
-          </h2>
+        <div className="flex items-center justify-between p-4">
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Add Document (Support Document)</h2>
           <button
             onClick={onClose}
             className="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white"
@@ -123,11 +138,13 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
         </div>
 
         {/* Body */}
-        <div className="p-4 space-y-4">
+        <div className="space-y-4 p-4">
           {error && <p className="text-red-600">{error}</p>}
-          {success && <p className="text-green-600">{success}</p>}
 
-          <form onSubmit={onSubmit} className="space-y-4">
+          <form
+            onSubmit={onSubmit}
+            className="space-y-4"
+          >
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               {/* Document Name */}
               <div className="flex flex-col">
@@ -158,9 +175,7 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
 
               {/* Password (optional) */}
               <div className="flex flex-col">
-                <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Password (optional)
-                </label>
+                <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Password (optional)</label>
                 <input
                   name="doc_password"
                   value={form.doc_password}
@@ -194,6 +209,7 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
                 onChange={handleFileChange}
                 className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
               />
+              {fileError && <p className="mt-1 text-sm text-red-600">{fileError}</p>}
               {file && (
                 <div className="mt-2 flex items-center justify-between rounded border px-2 py-1 text-sm dark:border-gray-600">
                   <span>📄 {file.name}</span>
@@ -215,16 +231,20 @@ export default function AddDocument({ caseId, onClose, onAdded }) {
                 disabled={submitting}
                 className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-60"
               >
-                {submitting ? "Submitting..." : "Add Document"}
+                {submitting ? (
+                  <>
+                    Submitting... <Spinner />
+                  </>
+                ) : (
+                  <>Add Document</>
+                )}
               </button>
             </div>
           </form>
 
           {/* Existing Documents */}
           <div className="mt-6 overflow-x-auto">
-            <h3 className="mb-2 font-medium text-gray-900 dark:text-gray-100">
-              Existing Documents for this Case
-            </h3>
+            <h3 className="mb-2 font-medium text-gray-900 dark:text-gray-100">Existing Documents for this Case</h3>
             {loadingDocs ? (
               <p className="text-sm text-gray-500">Loading...</p>
             ) : docs.length === 0 ? (
