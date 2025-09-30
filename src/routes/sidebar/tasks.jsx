@@ -1,3 +1,4 @@
+// modal for adding supporting documents to cases
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/auth-context";
 import AddDocument from "@/components/add-document.jsx";
@@ -71,7 +72,7 @@ export default function Tasks() {
                 )}
                 {cases.map((c) => (
                   <option key={c.case_id} value={c.case_id}>
-                    #{c.case_id} - {c.case_title || c.case_remarks || "Untitled Case"}
+                    {c.case_id} - {c.ct_name || c.case_remarks || "Untitled Case"}
                   </option>
                 ))}
               </select>
