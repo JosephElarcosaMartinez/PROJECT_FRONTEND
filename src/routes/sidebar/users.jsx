@@ -234,6 +234,10 @@ const Users = () => {
         return matchesSearch && matchesRole;
     });
 
+    // Legend counts (based on current filters)
+    const activeCount = filteredUsers.filter((u) => u.user_status === "Active").length;
+    const suspendedCount = filteredUsers.filter((u) => u.user_status === "Suspended").length;
+
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
@@ -272,6 +276,8 @@ const Users = () => {
                 ))}
             </div>
 
+
+
             {/* Search & Add Button */}
             <div className="card shadow-md mb-6 flex flex-col items-center gap-4 md:flex-row">
                 {/* Search input with icon inside */}
@@ -297,6 +303,23 @@ const Users = () => {
                     Add User
                 </button>
             </div>
+
+            {/* Legend: Active and Suspended */}
+            <div className="mb-4 flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                    <span className="inline-block h-3.5 w-2.5 box-full bg-green-500" />
+                    <span className="text-sm text-gray-700 dark:text-slate-300">
+                        Active: {activeCount}
+                    </span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="inline-block h-3.5 w-2.5 box-full bg-red-500" />
+                    <span className="text-sm text-gray-700 dark:text-slate-300">
+                        Suspended: {suspendedCount}
+                    </span>
+                </div>
+            </div>
+
 
             {/* Users Table */}
             <div className="card overflow-x-auto rounded-xl border shadow-md dark:border-slate-700">

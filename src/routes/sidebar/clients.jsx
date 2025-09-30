@@ -123,6 +123,10 @@ const Client = () => {
             getUserFullName(client.created_by).toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
+    // Legend counts
+    const activeCount = filteredClients.filter((c) => c.client_status === "Active").length;
+    const removedCount = filteredClients.filter((c) => c.client_status === "Removed").length;
+
     const totalPages = Math.ceil(filteredClients.length / rowsPerPage);
     const paginatedClients = filteredClients.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
@@ -210,6 +214,7 @@ const Client = () => {
                 </div>
             </div>
 
+
             <div className="card mb-6 flex flex-col items-center gap-4 rounded-lg bg-white p-4 shadow-md md:flex-row">
                 <div className="focus:ring-0.5 flex flex-grow items-center gap-2 rounded-md border border-gray-300 bg-transparent px-3 py-2 focus-within:border-blue-600 focus-within:ring-blue-400 dark:border-slate-600 dark:focus-within:border-blue-600">
                     <Search
@@ -243,6 +248,19 @@ const Client = () => {
                 </button>
             </div>
 
+            {/* Legend: Active and Inactive */}
+            <div className="mb-4 flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                    <span className="inline-block h-3.5 w-2.5 box-full bg-green-500" />
+                    <span className="text-sm text-gray-700 dark:text-slate-300">Active: {activeCount}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <span className="inline-block h-3.5 w-2.5 box-full bg-gray-400" />
+                    <span className="text-sm text-gray-700 dark:text-slate-300">Inactive: {removedCount}</span>
+                </div>
+            </div>
+
+
             <div className="card w-full overflow-x-auto">
                 <table className="min-w-full table-auto text-left text-sm">
                     <thead className="card-title text-xs uppercase">
@@ -265,10 +283,10 @@ const Client = () => {
                                     <td className="whitespace-nowrap px-4 py-3">
                                         <span
                                             className={`mr-2 inline-block h-2 w-4 rounded-full ${client.client_status === "Active"
-                                                    ? "bg-green-500"
-                                                    : client.client_status === "Inactive"
-                                                        ? "bg-gray-400"
-                                                        : "bg-red-500"
+                                                ? "bg-green-500"
+                                                : client.client_status === "Inactive"
+                                                    ? "bg-gray-400"
+                                                    : "bg-red-500"
                                                 }`}
                                         ></span>
                                         {client.client_fullname}
@@ -397,10 +415,10 @@ const Client = () => {
                                     <p className="text-gray-600 dark:text-slate-200">
                                         <span
                                             className={`rounded-full px-3 py-0.5 text-xs text-white ${viewClient.client_status === "Active"
-                                                    ? "bg-green-600"
-                                                    : viewClient.client_status === "Inactive"
-                                                        ? "bg-gray-500"
-                                                        : "bg-red-500"
+                                                ? "bg-green-600"
+                                                : viewClient.client_status === "Inactive"
+                                                    ? "bg-gray-500"
+                                                    : "bg-red-500"
                                                 }`}
                                         >
                                             {viewClient.client_status}
