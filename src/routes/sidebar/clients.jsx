@@ -248,14 +248,14 @@ const Client = () => {
                 </button>
             </div>
 
-            {/* Legend: Active, Inactive, Removed */}
+            {/* Legend: Active, Inactive*/}
             <div className="mb-4 flex items-center gap-4">
                 <div className="flex items-center gap-2">
                     <span className="inline-block h-3.5 w-2.5 box-full bg-green-500" />
                     <span className="text-sm text-gray-700 dark:text-slate-300">Active: {activeCount}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="inline-block h-3.5 w-2.5 box-full bg-red-500" />
+                    <span className="inline-block h-3.5 w-2.5 box-full bg-gray-500" />
                     <span className="text-sm text-gray-700 dark:text-slate-300">Inactive: {removedCount}</span>
                 </div>
             </div>

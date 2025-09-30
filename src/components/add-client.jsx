@@ -99,15 +99,24 @@ const AddClient = ({ AddClients, setAddClients }) => {
                 >
                     <div>
                         <h3 className="mb-2 font-semibold text-blue-700 dark:text-blue-300">Client Information</h3>
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
                             <input
                                 type="text"
-                                placeholder="Full Name"
+                                placeholder="First Name"
                                 value={clientData.client_fullname}
                                 onChange={(e) => setClientData({ ...clientData, client_fullname: e.target.value })}
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                                 required
                             />
+                            <input
+                                type="text"
+                                placeholder="Last Name"
+                                value={clientData.client_fullname}
+                                onChange={(e) => setClientData({ ...clientData, client_fullname: e.target.value })}
+                                className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                                required
+                            />
+
                             <input
                                 type="email"
                                 placeholder="Email"
@@ -123,6 +132,14 @@ const AddClient = ({ AddClients, setAddClients }) => {
                                 onChange={(e) => setClientData({ ...clientData, client_phonenum: e.target.value })}
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                             />
+                            <input
+                                type="text"
+                                placeholder="Address"
+                                value={clientData.client_address}
+                                onChange={(e) => setClientData({ ...clientData, client_address: e.target.value })}
+                                className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                                required
+                            />
                             {/* <input
                                 type="password"
                                 placeholder="Password"
@@ -136,10 +153,17 @@ const AddClient = ({ AddClients, setAddClients }) => {
 
                     <div>
                         <h3 className="mb-2 font-semibold text-blue-700 dark:text-blue-300">Contact Person</h3>
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-4 ">
                             <input
                                 type="text"
-                                placeholder="Full Name"
+                                placeholder="First Name"
+                                value={contact.contact_fullname}
+                                onChange={(e) => setContact({ ...contact, contact_fullname: e.target.value })}
+                                className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                            />
+                            <input
+                                type="text"
+                                placeholder="Last Name"
                                 value={contact.contact_fullname}
                                 onChange={(e) => setContact({ ...contact, contact_fullname: e.target.value })}
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
@@ -156,6 +180,13 @@ const AddClient = ({ AddClients, setAddClients }) => {
                                 placeholder="Phone"
                                 value={contact.contact_phone}
                                 onChange={(e) => setContact({ ...contact, contact_phone: e.target.value })}
+                                className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                            />
+                            <input
+                                type="text"
+                                placeholder="Address"
+                                value={contact.contact_address}
+                                onChange={(e) => setContact({ ...contact, contact_address: e.target.value })}
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                             />
                             <input
