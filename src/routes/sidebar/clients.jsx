@@ -123,9 +123,10 @@ const Client = () => {
             getUserFullName(client.created_by).toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
-    // Legend counts (based on all data, not the current search filter)
-    const activeCount = tableData.filter((c) => (c.client_status || "").trim().toLowerCase() === "active").length;
-    const removedCount = tableData.filter((c) => (c.client_status || "").trim().toLowerCase() === "removed").length;
+    // Legend counts (based on all clients, not just filtered)
+    const activeCount = tableData.filter((c) => c.client_status.toLowerCase() === "active").length;
+    const inactiveCount = tableData.filter((c) => c.client_status.toLowerCase() === "inactive").length;
+    const removedCount = tableData.filter((c) => c.client_status.toLowerCase() === "removed").length;
 
     const totalPages = Math.ceil(filteredClients.length / rowsPerPage);
     const paginatedClients = filteredClients.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
@@ -145,7 +146,7 @@ const Client = () => {
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: JSON.stringify({ ...client, client_status: "Active" }),
+                    body: JSON.stringify({ ...client, client_status: "Active", client_last_updated_by: user.user_id }),
                 });
 
                 if (!res.ok) {
@@ -184,7 +185,7 @@ const Client = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ ...client, client_status: "Removed" }),
+                body: JSON.stringify({ ...client, client_status: "Removed", client_last_updated_by: user.user_id }),
             });
 
             if (!res.ok) {
@@ -213,7 +214,6 @@ const Client = () => {
                     <p className="text-sm text-gray-500">Manage all client information here.</p>
                 </div>
             </div>
-
 
             <div className="card mb-6 flex flex-col items-center gap-4 rounded-lg bg-white p-4 shadow-md md:flex-row">
                 <div className="focus:ring-0.5 flex flex-grow items-center gap-2 rounded-md border border-gray-300 bg-transparent px-3 py-2 focus-within:border-blue-600 focus-within:ring-blue-400 dark:border-slate-600 dark:focus-within:border-blue-600">
@@ -247,19 +247,6 @@ const Client = () => {
                     Add Client
                 </button>
             </div>
-
-            {/* Legend: Active, Inactive*/}
-            <div className="mb-4 flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                    <span className="inline-block h-3.5 w-2.5 box-full bg-green-500" />
-                    <span className="text-sm text-gray-700 dark:text-slate-300">Active: {activeCount}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <span className="inline-block h-3.5 w-2.5 box-full bg-gray-500" />
-                    <span className="text-sm text-gray-700 dark:text-slate-300">Inactive: {removedCount}</span>
-                </div>
-            </div>
-
 
             <div className="card w-full overflow-x-auto">
                 <table className="min-w-full table-auto text-left text-sm">
@@ -346,8 +333,24 @@ const Client = () => {
                 </table>
             </div>
 
-            {totalPages > 1 && (
-                <div className="mt-2 flex items-center justify-end px-4 py-3 text-sm text-gray-700 dark:text-white">
+            <div className="mt-2 flex items-center justify-between px-4 py-3 text-sm text-gray-700 dark:text-white">
+                {/* Legend */}
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2">
+                        <span className="inline-block h-3 w-3 rounded-full bg-green-500" />
+                        <span className="text-xs text-slate-500 dark:text-slate-300">Active ({activeCount})</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="inline-block h-3 w-3 rounded-full bg-gray-400" />
+                        <span className="text-xs text-slate-500 dark:text-slate-300">Inactive ({inactiveCount})</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="inline-block h-3 w-3 rounded-full bg-red-500" />
+                        <span className="text-xs text-slate-500 dark:text-slate-300">Removed ({removedCount})</span>
+                    </div>
+                </div>
+
+                {totalPages > 1 && (
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -369,8 +372,8 @@ const Client = () => {
                             &gt;
                         </button>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
 
             {/* Client Contacts link */}
             <div className="mt-4">
@@ -403,6 +406,16 @@ const Client = () => {
                                 <p className="text-gray-600 dark:text-slate-200">{viewClient.client_phonenum || "-"}</p>
                             </div>
 
+                            <div>
+                                <p className="font-semibold dark:text-blue-700">Address</p>
+                                <p className="text-gray-600 dark:text-slate-200">{viewClient.client_address || "-"}</p>
+                            </div>
+
+                            <div>
+                                <p className="font-semibold dark:text-blue-700">Created by</p>
+                                <p className="text-gray-600 dark:text-slate-200">{getUserFullName(viewClient.created_by)}</p>
+                            </div>
+
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                                 <div>
                                     <p className="font-semibold dark:text-blue-700">Date Added</p>
@@ -428,11 +441,6 @@ const Client = () => {
                             </div>
 
                             <div>
-                                <p className="font-semibold dark:text-blue-700">Created by</p>
-                                <p className="text-gray-600 dark:text-slate-200">{getUserFullName(viewClient.created_by)}</p>
-                            </div>
-
-                            <div>
                                 <p className="font-semibold dark:text-blue-700">Last Updated by</p>
                                 <p className="text-gray-600 dark:text-slate-200">
                                     {viewClient.client_last_updated_by ? getUserFullName(viewClient.client_last_updated_by) : "-"}
@@ -448,6 +456,7 @@ const Client = () => {
                                             <th className="whitespace-nowrap px-4 py-3">Email</th>
                                             <th className="whitespace-nowrap px-4 py-3">Phone</th>
                                             <th className="whitespace-nowrap px-4 py-3">Role / Relation</th>
+                                            <th className="whitespace-nowrap px-4 py-3">Address</th>
                                         </tr>
                                     </thead>
                                     <tbody className="text-gray-600 dark:text-slate-200">
@@ -460,12 +469,13 @@ const Client = () => {
                                                         <td className="whitespace-nowrap px-4 py-2">{contact.contact_email}</td>
                                                         <td className="whitespace-nowrap px-4 py-2">{contact.contact_phone}</td>
                                                         <td className="whitespace-nowrap px-4 py-2">{contact.contact_role}</td>
+                                                        <td className="whitespace-nowrap px-4 py-2">{contact.contact_address || "-"}</td>
                                                     </tr>
                                                 ))
                                         ) : (
                                             <tr>
                                                 <td
-                                                    colSpan="4"
+                                                    colSpan="5"
                                                     className="py-3 text-center text-gray-500"
                                                 >
                                                     No contacts available for this client.
@@ -533,6 +543,14 @@ const Client = () => {
                                     <option value="Inactive">Inactive</option>
                                     {showAllClients && <option value="Removed">Removed</option>}
                                 </select>
+                            </div>
+                            <div className="col-span-2">
+                                <p className="font-semibold dark:text-blue-700">Address</p>
+                                <input
+                                    value={editClient.client_address}
+                                    onChange={(e) => setEditClient({ ...editClient, client_address: e.target.value })}
+                                    className="w-full rounded-md border px-3 py-2 text-slate-900 dark:bg-slate-700 dark:text-slate-50"
+                                />
                             </div>
                         </div>
 

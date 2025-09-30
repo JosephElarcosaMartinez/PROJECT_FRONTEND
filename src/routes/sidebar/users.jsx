@@ -234,9 +234,9 @@ const Users = () => {
         return matchesSearch && matchesRole;
     });
 
-    // Legend counts (based on current filters)
-    const activeCount = filteredUsers.filter((u) => u.user_status === "Active").length;
-    const suspendedCount = filteredUsers.filter((u) => u.user_status === "Suspended").length;
+    // Legend counts (based on all users, not just filtered)
+    const activeCount = users.filter((u) => u.user_status.toLowerCase() === "active").length;
+    const suspendedCount = users.filter((u) => u.user_status.toLowerCase() === "suspended").length;
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -257,7 +257,7 @@ const Users = () => {
             {/* Header */}
             <div className="mb-6">
                 <h2 className="title">Users</h2>
-                <p className="text-sm text-gray-500">Manage system users and their roles</p>
+                <p className="text-sm dark:text-slate-300">Manage system users and their roles</p>
             </div>
 
             {/* Role Filters */}
@@ -266,9 +266,9 @@ const Users = () => {
                     <button
                         key={role}
                         onClick={() => setSelectedRole(role)}
-                        className={`rounded-full px-4 py-2 text-sm ${selectedRole === role
-                            ? "border-none bg-blue-600 text-white"
-                            : "bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200"
+                        className={`rounded-full px-4 py-2 text-sm font-medium ${selectedRole === role
+                                ? "border-none bg-blue-600 text-white"
+                                : "bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200"
                             }`}
                     >
                         {role}
@@ -276,10 +276,8 @@ const Users = () => {
                 ))}
             </div>
 
-
-
             {/* Search & Add Button */}
-            <div className="card shadow-md mb-6 flex flex-col items-center gap-4 md:flex-row">
+            <div className="mb-6 flex flex-col items-center gap-4 md:flex-row">
                 {/* Search input with icon inside */}
                 <div className="relative w-full md:flex-1">
                     <Search
@@ -298,28 +296,11 @@ const Users = () => {
                 {/* Add user button */}
                 <button
                     onClick={() => setIsModalOpen(true)}
-                    className="flex h-10 items-center justify-center rounded-md bg-blue-600 px-4 text-sm font-medium text-white shadow hover:bg-blue-700"
+                    className="flex h-10 items-center justify-center rounded-lg bg-blue-600 px-4 text-sm font-medium text-white shadow hover:bg-blue-700"
                 >
                     Add User
                 </button>
             </div>
-
-            {/* Legend: Active and Suspended */}
-            <div className="mb-4 flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                    <span className="inline-block h-3.5 w-2.5 box-full bg-green-500" />
-                    <span className="text-sm text-gray-700 dark:text-slate-300">
-                        Active: {activeCount}
-                    </span>
-                </div>
-                <div className="flex items-center gap-2">
-                    <span className="inline-block h-3.5 w-2.5 box-full bg-red-500" />
-                    <span className="text-sm text-gray-700 dark:text-slate-300">
-                        Suspended: {suspendedCount}
-                    </span>
-                </div>
-            </div>
-
 
             {/* Users Table */}
             <div className="card overflow-x-auto rounded-xl border shadow-md dark:border-slate-700">
@@ -347,12 +328,12 @@ const Users = () => {
                                             src={u.user_profile ? `${API_BASE}${u.user_profile}` : default_avatar}
                                             alt={`${u.user_fname || ""} ${u.user_lname || ""}`.trim()}
                                             className={`h-10 w-10 rounded-full border-2 object-cover p-0.5 ${u.user_status === "Active"
-                                                ? "border-green-500"
-                                                : u.user_status === "Pending"
-                                                    ? "border-yellow-500"
-                                                    : u.user_status === "Suspended"
-                                                        ? "border-red-500"
-                                                        : "border-gray-300"
+                                                    ? "border-green-500"
+                                                    : u.user_status === "Pending"
+                                                        ? "border-yellow-500"
+                                                        : u.user_status === "Suspended"
+                                                            ? "border-red-500"
+                                                            : "border-gray-300"
                                                 }`}
                                         />
                                         <span className="font-medium">
@@ -366,12 +347,12 @@ const Users = () => {
                                     <td className="px-4 py-3">
                                         <span
                                             className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${u.user_status === "Active"
-                                                ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                : u.user_status === "Pending"
-                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
-                                                    : u.user_status === "Suspended"
-                                                        ? "bg-red-100 text-red-700 dark:bg-red-700/20 dark:text-red-300"
-                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                                    ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                    : u.user_status === "Pending"
+                                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                        : u.user_status === "Suspended"
+                                                            ? "bg-red-100 text-red-700 dark:bg-red-700/20 dark:text-red-300"
+                                                            : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
                                                 }`}
                                         >
                                             {u.user_status}
@@ -431,8 +412,20 @@ const Users = () => {
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
-                <div className="mt-2 flex justify-end px-4 py-3 text-sm text-gray-700 dark:text-white">
+            <div className="mt-2 flex items-center justify-between px-4 py-3 text-sm text-gray-700 dark:text-white">
+                {/* Legend */}
+                <div className="mb-4 flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2">
+                        <span className="inline-block h-3 w-3 rounded-full bg-green-500" />
+                        <span className="text-xs text-slate-500 dark:text-slate-300">Active ({activeCount})</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <span className="inline-block h-3 w-3 rounded-full bg-red-400" />
+                        <span className="text-xs text-slate-500 dark:text-slate-300">Suspended ({suspendedCount})</span>
+                    </div>
+                </div>
+
+                {totalPages > 1 && (
                     <div className="flex items-center gap-2">
                         <button
                             onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
@@ -452,8 +445,8 @@ const Users = () => {
                             &gt;
                         </button>
                     </div>
-                </div>
-            )}
+                )}
+            </div>
 
             {/* Add User Modal */}
             {isModalOpen && (

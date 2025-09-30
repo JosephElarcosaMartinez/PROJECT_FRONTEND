@@ -72,7 +72,7 @@ export default function Tasks() {
                 )}
                 {cases.map((c) => (
                   <option key={c.case_id} value={c.case_id}>
-                    {c.case_id} - {c.ct_name || c.case_remarks || "Untitled Case"}
+                    {c.case_id} - {c.ct_name || c.case_remarks || "Untitled Case"} ({c.client_fullname})
                   </option>
                 ))}
               </select>

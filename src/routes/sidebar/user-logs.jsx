@@ -1,16 +1,6 @@
 import React, { useEffect, useState } from "react";
 import defaultAvatar from "../../assets/default-avatar.png";
-import {
-  FileText,
-  Archive,
-  User,
-  Scale,
-  LogIn,
-  LogOut,
-  AlertTriangle,
-  Activity,
-  Search,
-} from "lucide-react";
+import { FileText, Archive, User, Scale, LogIn, LogOut, AlertTriangle, Activity, Search } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 
 const Userlogs = () => {
@@ -22,16 +12,13 @@ const Userlogs = () => {
   const [selectedDate, setSelectedDate] = useState("");
 
   const [visibleCount, setVisibleCount] = useState(5);
-  const [showAll, setShowAll] = useState(false);
 
   // fetching user logs
   useEffect(() => {
     const fetchUserLogs = async () => {
       try {
         const endpoint =
-          user?.user_role === "Admin"
-            ? "http://localhost:3000/api/user-logs"
-            : `http://localhost:3000/api/user-logs/${user.user_id}`;
+          user?.user_role === "Admin" ? "http://localhost:3000/api/user-logs" : `http://localhost:3000/api/user-logs/${user.user_id}`;
 
         const res = await fetch(endpoint, {
           method: "GET",
@@ -62,23 +49,17 @@ const Userlogs = () => {
 
     if (/login/.test(action)) return <LogIn className="h-5 w-5" />;
     if (/logout/.test(action)) return <LogOut className="h-5 w-5" />;
-    if (/fail|error/.test(action))
-      return <AlertTriangle className="h-5 w-5 text-red-500" />;
+    if (/fail|error/.test(action)) return <AlertTriangle className="h-5 w-5 text-red-500" />;
 
     return <Activity className="h-5 w-5" />;
   };
 
   const getTagColor = (action) => {
-    if (/login/i.test(action))
-      return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
-    if (/logout/i.test(action))
-      return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
-    if (/client/i.test(action))
-      return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
-    if (/contact/i.test(action))
-      return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
-    if (/case/i.test(action))
-      return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
+    if (/login/i.test(action)) return "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300";
+    if (/logout/i.test(action)) return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
+    if (/client/i.test(action)) return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
+    if (/contact/i.test(action)) return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
+    if (/case/i.test(action)) return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
     if (/fail|error/i.test(action)) return "bg-red-100 text-red-700";
     return "bg-gray-100 text-gray-700 dark:bg-gray-700/20 dark:text-gray-300";
   };
@@ -89,6 +70,8 @@ const Userlogs = () => {
     if (/new client/i.test(action)) return "New Client Added";
     if (/new contact/i.test(action)) return "New Client Contact Added";
     if (/updated client/i.test(action)) return "Client Update";
+    if (/removed client/i.test(action)) return "Client Removed";
+    if (/restored client/i.test(action)) return "Client Restored";
     if (/updated contact/i.test(action)) return "Client Contact Update";
     if (/removed contact/i.test(action)) return "Client Contact Removed";
     if (/new case/i.test(action)) return "New Case Added";
@@ -97,31 +80,17 @@ const Userlogs = () => {
     return "Action";
   };
 
-  // Filtered logs
+  // Filtered directly in render
   const filteredLogs = userLogs.filter((log) => {
     const matchSearch =
       log.user_fullname?.toLowerCase().includes(search.toLowerCase()) ||
       log.user_log_type?.toLowerCase().includes(search.toLowerCase()) ||
       log.user_log_action?.toLowerCase().includes(search.toLowerCase());
 
-    const matchDate =
-      !selectedDate || log.user_log_time?.startsWith(selectedDate);
+    const matchDate = !selectedDate || log.user_log_time?.startsWith(selectedDate);
 
     return matchSearch && matchDate;
   });
-
-  // Handle show more / less
-  const handleToggle = () => {
-    if (showAll) {
-      setVisibleCount(5); // Reset back to 5
-      setShowAll(false);
-    } else {
-      setVisibleCount((prev) => prev + 5); // Add 5 more
-      if (visibleCount + 5 >= filteredLogs.length) {
-        setShowAll(true);
-      }
-    }
-  };
 
   return (
     <div className="min-h-screen">
@@ -135,9 +104,7 @@ const Userlogs = () => {
 
       <div className="mb-6 flex flex-col gap-y-1">
         <h2 className="title">Logs</h2>
-        <p className="text-sm text-gray-500">
-          Track and monitor user activities across the platform.
-        </p>
+        <p className="text-sm dark:text-slate-300">Track and monitor user activities across the platform.</p>
       </div>
 
       {/* Filter Section */}
@@ -170,17 +137,12 @@ const Userlogs = () => {
       {filteredLogs.length > 0 ? (
         <div className="space-y-4">
           {filteredLogs.slice(0, visibleCount).map((log, index) => {
-            const fullName = `${log.user_fullname ? log.user_fullname : "Unknown User"
-              }`;
-            const avatar = log.user_profile
-              ? `http://localhost:3000${log.user_profile}`
-              : defaultAvatar;
+            const fullName = `${log.user_fullname ? log.user_fullname : "Unknown User"}`;
+            const avatar = log.user_profile ? `http://localhost:3000${log.user_profile}` : defaultAvatar;
             const icon = getLogIcon(log);
             const tag = getLogTag(log.user_log_action);
             const tagColor = getTagColor(log.user_log_action);
-            const formattedTime = new Date(
-              log.user_log_time
-            ).toLocaleString("en-US", {
+            const formattedTime = new Date(log.user_log_time).toLocaleString("en-US", {
               year: "numeric",
               month: "long",
               day: "numeric",
@@ -204,27 +166,19 @@ const Userlogs = () => {
                 <div className="flex-1">
                   <div className="mb-1 flex items-center gap-3">
                     <span className="font-semibold">{fullName}</span>
-                    <span
-                      className={`rounded px-2 py-1 text-xs font-medium ${tagColor}`}
-                    >
-                      {tag}
-                    </span>
+                    <span className={`rounded px-2 py-1 text-xs font-medium ${tagColor}`}>{tag}</span>
                   </div>
                   <div className="text-dark-700 mb-1 flex items-center gap-2 text-sm">
                     {icon}
                     {log.user_log_type || "Unknown Type"}
-                    <span className="text-slate-400">
-                      {log.user_log_action}
-                    </span>
+                    <span className="text-slate-400">{log.user_log_action}</span>
                   </div>
                 </div>
 
                 {/* Timestamp and IP Address*/}
                 <div className="ml-4 text-right text-xs text-slate-500">
                   <div>{formattedTime}</div>
-                  {user.user_role === "Admin" && log.user_ip_address && (
-                    <div>IP: {log.user_ip_address}</div>
-                  )}
+                  {user.user_role === "Admin" && log.user_ip_address && <div>IP: {log.user_ip_address}</div>}
                 </div>
               </div>
             );
@@ -234,14 +188,13 @@ const Userlogs = () => {
         <p className="text-center text-gray-300">No logs available.</p>
       )}
 
-      {/* Show more / less toggle */}
-      {filteredLogs.length > 5 && (
+      {visibleCount < filteredLogs.length && (
         <div className="mt-6 text-center">
           <button
-            onClick={handleToggle}
             className="text-gray-800 underline hover:text-blue-300 dark:text-white dark:hover:text-blue-400"
+            onClick={() => setVisibleCount((prev) => prev + 5)}
           >
-            {showAll ? "Show Less" : "Show More"}
+            Load More
           </button>
         </div>
       )}
