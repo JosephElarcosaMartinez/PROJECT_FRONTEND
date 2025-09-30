@@ -123,9 +123,9 @@ const Client = () => {
             getUserFullName(client.created_by).toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
-    // Legend counts
-    const activeCount = filteredClients.filter((c) => c.client_status === "Active").length;
-    const removedCount = filteredClients.filter((c) => c.client_status === "Removed").length;
+    // Legend counts (based on all data, not the current search filter)
+    const activeCount = tableData.filter((c) => (c.client_status || "").trim().toLowerCase() === "active").length;
+    const removedCount = tableData.filter((c) => (c.client_status || "").trim().toLowerCase() === "removed").length;
 
     const totalPages = Math.ceil(filteredClients.length / rowsPerPage);
     const paginatedClients = filteredClients.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
@@ -248,14 +248,14 @@ const Client = () => {
                 </button>
             </div>
 
-            {/* Legend: Active and Inactive */}
+            {/* Legend: Active, Inactive, Removed */}
             <div className="mb-4 flex items-center gap-4">
                 <div className="flex items-center gap-2">
                     <span className="inline-block h-3.5 w-2.5 box-full bg-green-500" />
                     <span className="text-sm text-gray-700 dark:text-slate-300">Active: {activeCount}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                    <span className="inline-block h-3.5 w-2.5 box-full bg-gray-400" />
+                    <span className="inline-block h-3.5 w-2.5 box-full bg-red-500" />
                     <span className="text-sm text-gray-700 dark:text-slate-300">Inactive: {removedCount}</span>
                 </div>
             </div>
