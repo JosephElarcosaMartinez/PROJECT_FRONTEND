@@ -1,13 +1,18 @@
 import { useState, useEffect } from "react";
 import { Download, Trash2, FileText, Search, Filter, X } from "lucide-react";
+import { useAuth } from "@/context/auth-context";
 
 const Documents = () => {
+    const { user } = useAuth();
+
     const [error, setError] = useState("");
     const [documents, setDocuments] = useState([]);
     const [search, setSearch] = useState("");
     const [showFilterModal, setShowFilterModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [docToDelete, setDocToDelete] = useState(null);
+    const [users, setUsers] = useState([]);
+
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -32,6 +37,25 @@ const Documents = () => {
         fetchDocs();
     }, []);
 
+    // Fetch users for submitter names
+    useEffect(() => {
+        const fetchUsers = async () => {
+            try {
+                const res = await fetch("http://localhost:3000/api/users", { method: "GET", credentials: "include" });
+                const data = await res.json();
+
+                if (!res.ok) {
+                    throw new Error(data.error || "Failed to fetch users.");
+                } else {
+                    setUsers(data);
+                }
+            } catch (error) {
+                console.error("Error fetching users:", error);
+            }
+        };
+        fetchUsers();
+    }, []);
+
     const toggleFilterModal = () => setShowFilterModal(!showFilterModal);
 
     const confirmDelete = (doc) => {
@@ -47,6 +71,17 @@ const Documents = () => {
             setShowDeleteModal(false);
         }
     };
+
+    // Get submitter name by ID
+    const getSubmitterName = (submittedById) => {
+        const submitter = users.find((u) => u.user_id === submittedById);
+        return submitter
+            ? submitter.user_role === "Staff"
+                ? `${submitter.user_fname} ${submitter.user_mname ? submitter.user_mname[0] + "." : ""} ${submitter.user_lname}`
+                : `Atty. ${submitter.user_fname} ${submitter.user_mname ? submitter.user_mname[0] + "." : ""} ${submitter.user_lname}`
+            : "-";
+    };
+
 
     // Filtered list (by name, type, case id, submitted/tasked by)
     const filteredDocs = documents.filter((doc) => {
@@ -138,7 +173,7 @@ const Documents = () => {
                                         <td className="flex items-center gap-2 px-4 py-4 font-medium text-blue-800">{doc.doc_name || "Untitled"}</td>
                                         <td className="px-4 py-3">{doc.case_id}</td>
                                         <td className="px-4 py-3">{doc.doc_type}</td>
-                                        <td className="px-4 py-3">{doc.doc_submitted_by}</td>
+                                        <td className="px-4 py-3">{getSubmitterName(doc.doc_submitted_by)}</td>
                                         <td className="flex justify-center gap-4 px-4 py-3">
                                             <div className="flex items-center gap-3">
                                                 <a
