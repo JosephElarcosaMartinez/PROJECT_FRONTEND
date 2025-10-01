@@ -26,6 +26,10 @@ const Client = () => {
 
     const [showAllClients, setShowAllClients] = useState(false);
 
+    const handleClientAdded = (newClient) => {
+        setTableData((prev) => [newClient, ...prev]); // put new client on top
+    };
+
     // Fetching clients, users, and contacts data for their relations
     const fetchAll = useCallback(async () => {
         try {
@@ -270,10 +274,10 @@ const Client = () => {
                                     <td className="whitespace-nowrap px-4 py-3">
                                         <span
                                             className={`mr-2 inline-block h-2 w-4 rounded-full ${client.client_status === "Active"
-                                                ? "bg-green-500"
-                                                : client.client_status === "Inactive"
-                                                    ? "bg-gray-400"
-                                                    : "bg-red-500"
+                                                    ? "bg-green-500"
+                                                    : client.client_status === "Inactive"
+                                                        ? "bg-gray-400"
+                                                        : "bg-red-500"
                                                 }`}
                                         ></span>
                                         {client.client_fullname}
@@ -428,10 +432,10 @@ const Client = () => {
                                     <p className="text-gray-600 dark:text-slate-200">
                                         <span
                                             className={`rounded-full px-3 py-0.5 text-xs text-white ${viewClient.client_status === "Active"
-                                                ? "bg-green-600"
-                                                : viewClient.client_status === "Inactive"
-                                                    ? "bg-gray-500"
-                                                    : "bg-red-500"
+                                                    ? "bg-green-600"
+                                                    : viewClient.client_status === "Inactive"
+                                                        ? "bg-gray-500"
+                                                        : "bg-red-500"
                                                 }`}
                                         >
                                             {viewClient.client_status}
@@ -606,6 +610,7 @@ const Client = () => {
                 <AddClient
                     AddClients={AddClients}
                     setAddClients={setAddClients}
+                    onClientAdded={handleClientAdded}
                 />
             )}
         </div>

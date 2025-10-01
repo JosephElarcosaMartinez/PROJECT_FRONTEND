@@ -537,24 +537,24 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
 
                         {/* Payment Summary Cards */}
                         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            <div className="rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-green-100 p-5 shadow-sm dark:border-green-800 dark:from-green-900 dark:to-green-800">
-                                <p className="text-sm font-medium text-green-700 dark:text-green-300">Total Paid</p>
+                            {/* <div className="rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-green-100 p-5 shadow-sm dark:border-green-800 dark:from-green-900 dark:to-green-800">
+                                <p className="text-sm font-medium text-green-700 dark:text-green-300"></p>
                                 <p className="mt-2 text-2xl font-extrabold text-green-800 dark:text-green-200">
                                     {selectedCase?.case_balance !== null && selectedCase?.case_balance !== undefined
-                                        ? formatCurrency(selectedCase.case_fee - selectedCase.case_balance)
+                                        ? formatCurrency(selectedCase.case_balance)
                                         : "₱0.00"}
                                 </p>
-                            </div>
-                            <div className="rounded-xl border border-red-200 bg-gradient-to-r from-red-50 to-red-100 p-5 shadow-sm dark:border-red-800 dark:from-red-900 dark:to-red-800">
+                            </div> */}
+                            {/* <div className="rounded-xl border border-red-200 bg-gradient-to-r from-red-50 to-red-100 p-5 shadow-sm dark:border-red-800 dark:from-red-900 dark:to-red-800">
                                 <p className="text-sm font-medium text-red-700 dark:text-red-300">Remaining Balance</p>
                                 <p className="mt-2 text-2xl font-extrabold text-red-800 dark:text-red-200">
                                     {selectedCase?.case_balance !== null && selectedCase?.case_balance !== undefined
                                         ? formatCurrency(selectedCase.case_balance)
                                         : "₱0.00"}
                                 </p>
-                            </div>
+                            </div> */}
                             <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100 p-5 shadow-sm dark:border-blue-800 dark:from-blue-900 dark:to-blue-800">
-                                <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Fee</p>
+                                <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Case Fee</p>
                                 <p className="mt-2 text-2xl font-extrabold text-blue-800 dark:text-blue-200">
                                     {selectedCase?.case_fee !== null && selectedCase?.case_fee !== undefined
                                         ? formatCurrency(selectedCase.case_fee)

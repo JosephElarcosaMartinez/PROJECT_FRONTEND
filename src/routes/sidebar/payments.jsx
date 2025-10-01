@@ -398,7 +398,7 @@ export const Payments = () => {
                                 />
                                 <p className="mt-1 text-xs text-gray-500">
                                     {selectedCaseBalance !== null
-                                        ? `Remaining Balance: ${formatCurrency(selectedCaseBalance)}`
+                                        ? `Total Case Fee: ${formatCurrency(selectedCaseBalance)}`
                                         : "Select a case to see balance"}
                                 </p>
                             </div>

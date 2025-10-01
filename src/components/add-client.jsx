@@ -4,22 +4,18 @@ import { useClickOutside } from "@/hooks/use-click-outside";
 import { useAuth } from "@/context/auth-context";
 import toast from "react-hot-toast";
 
-const AddClient = ({ AddClients, setAddClients }) => {
+const AddClient = ({ AddClients, setAddClients, onClientAdded }) => {
     const { user } = useAuth();
     const modalRef = useRef(null);
 
     useClickOutside([modalRef], () => setAddClients(null));
 
-    // Toggle between single person client and company client
-    const [clientType, setClientType] = useState("person"); // 'person' | 'company'
+    // Client type toggle
+    const [clientType, setClientType] = useState("person"); // "person" or "company"
 
+    // Client state
     const [clientData, setClientData] = useState({
-        // Person fields
-        client_firstname: "",
-        client_lastname: "",
-        // Company field
-        company_name: "",
-        // Shared fields
+        client_fullname: "",
         client_email: "",
         client_phonenum: "",
         client_address: "",
@@ -27,41 +23,27 @@ const AddClient = ({ AddClients, setAddClients }) => {
         created_by: user?.user_id,
     });
 
-    const [contact, setContact] = useState({
-        contact_firstname: "",
-        contact_lastname: "",
-        contact_email: "",
-        contact_phone: "",
-        contact_address: "",
-        contact_role: "",
+    // For individual clients → split into parts
+    const [personName, setPersonName] = useState({
+        first: "",
+        middle: "",
+        last: "",
     });
 
+    // Contact state
+    const [contact, setContact] = useState({
+        contact_fullname: "",
+        contact_email: "",
+        contact_phone: "",
+        contact_role: "",
+    });
     const [contacts, setContacts] = useState([]);
 
     const handleAddContact = () => {
-        const { contact_firstname, contact_lastname, contact_email, contact_phone, contact_role } = contact;
-        if (!contact_firstname || !contact_lastname || !contact_email || !contact_phone || !contact_role) return;
-
-        const contact_fullname = `${contact_firstname} ${contact_lastname}`.replace(/\s+/g, " ").trim();
-        setContacts([
-            ...contacts,
-            {
-                contact_fullname,
-                contact_email: contact.contact_email,
-                contact_phone: contact.contact_phone,
-                contact_role: contact.contact_role,
-                contact_address: contact.contact_address,
-            },
-        ]);
-
-        setContact({
-            contact_firstname: "",
-            contact_lastname: "",
-            contact_email: "",
-            contact_phone: "",
-            contact_address: "",
-            contact_role: "",
-        });
+        const { contact_fullname, contact_email, contact_phone, contact_role } = contact;
+        if (!contact_fullname || !contact_email || !contact_phone || !contact_role) return;
+        setContacts([...contacts, contact]);
+        setContact({ contact_fullname: "", contact_email: "", contact_phone: "", contact_role: "" });
     };
 
     const handleRemoveContact = (index) => {
@@ -70,54 +52,58 @@ const AddClient = ({ AddClients, setAddClients }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        const toastId = toast.loading("Adding client and contacts...", { duration: 4000 });
 
         try {
-            // Prepare payload depending on client type
-            const client_fullname =
-                clientType === "person"
-                    ? `${clientData.client_firstname || ""} ${clientData.client_lastname || ""}`.replace(/\s+/g, " ").trim()
-                    : clientData.company_name;
-
-            const payload = {
-                client_fullname,
-                client_email: clientData.client_email,
-                client_phonenum: clientData.client_phonenum,
-                client_address: clientData.client_address,
-                created_by: user?.user_id,
-            };
+            // Build fullname depending on type
+            let finalFullname = "";
+            if (clientType === "person") {
+                finalFullname = `${personName.first} ${personName.middle ? personName.middle + " " : ""}${personName.last}`.trim();
+            } else {
+                finalFullname = clientData.client_fullname;
+            }
 
             // 1. Create client
             const resClient = await fetch("http://localhost:3000/api/clients", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 credentials: "include",
-                body: JSON.stringify(payload),
+                body: JSON.stringify({
+                    ...clientData,
+                    client_fullname: finalFullname,
+                }),
             });
 
             if (!resClient.ok) throw new Error("Failed to add client");
+            const newClient = await resClient.json();
 
-            const newClient = await resClient.json(); // assuming it returns the newly created client with `client_id`
+            onClientAdded(newClient);
+            setAddClients(null);
+
+            toast.success("Client added successfully!", { id: toastId, duration: 4000 });
 
             // 2. Create contacts
-            for (const c of contacts) {
+            for (const contact of contacts) {
                 const resContact = await fetch("http://localhost:3000/api/client-contacts", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     credentials: "include",
                     body: JSON.stringify({
-                        ...c,
+                        ...contact,
                         client_id: newClient.client_id,
                     }),
                 });
-
                 if (!resContact.ok) throw new Error("Failed to add one or more contacts");
             }
 
-            toast.success("Client added successfully!");
-            setAddClients(null); // Close modal
+            if (contacts.length > 0) {
+                toast.success("All contacts added successfully!", { id: toastId, duration: 4000 });
+            }
+
+            setAddClients(null);
         } catch (err) {
             console.error(err);
-            alert("Error adding client and contacts: ", err);
+            toast.error("Error adding client and contacts.", { id: toastId, duration: 4000 });
         }
     };
 
@@ -125,7 +111,7 @@ const AddClient = ({ AddClients, setAddClients }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div
                 ref={modalRef}
-                className="relative max-h[90vh] w-full max-w-4xl overflow-y-auto rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800"
+                className="relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-xl bg-white p-8 shadow-lg dark:bg-slate-800"
             >
                 <button
                     onClick={() => setAddClients(null)}
@@ -136,131 +122,119 @@ const AddClient = ({ AddClients, setAddClients }) => {
 
                 <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Add New Client</h2>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <form
+                    onSubmit={handleSubmit}
+                    className="space-y-6"
+                >
                     <div>
-                        <div className="mb-2 flex items-center justify-between">
-                            <h3 className="font-semibold text-blue-700 dark:text-blue-300">Client Information</h3>
-                            {/* Toggle: Person vs Company */}
-                            <div className="inline-flex overflow-hidden rounded-lg border border-gray-300 dark:border-gray-600">
-                                <button
-                                    type="button"
-                                    onClick={() => setClientType("person")}
-                                    className={`px-3 py-1 text-sm ${clientType === "person"
-                                            ? "bg-blue-600 text-white"
-                                            : "bg-transparent text-gray-700 dark:text-gray-200"
-                                        }`}
-                                >
-                                    Person
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setClientType("company")}
-                                    className={`px-3 py-1 text-sm ${clientType === "company"
-                                            ? "bg-blue-600 text-white"
-                                            : "bg-transparent text-gray-700 dark:text-gray-200"
-                                        }`}
-                                >
-                                    Company
-                                </button>
-                            </div>
+                        <h3 className="mb-2 font-semibold text-blue-700 dark:text-blue-300">Client Information</h3>
+
+                        {/* Client Type Toggle */}
+                        <div className="mb-4 inline-flex overflow-hidden rounded-lg border border-gray-300 dark:border-gray-600">
+                            <button
+                                type="button"
+                                onClick={() => setClientType("person")}
+                                className={`rounded-l px-4 py-1 font-medium ${clientType === "person"
+                                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                                        : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-slate-700 dark:text-white"
+                                    }`}
+                            >
+                                Individual
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setClientType("company")}
+                                className={`rounded-r px-4 py-1 font-medium ${clientType === "company"
+                                        ? "bg-blue-600 text-white hover:bg-blue-700"
+                                        : "bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-slate-700 dark:text-white"
+                                    }`}
+                            >
+                                Company
+                            </button>
                         </div>
 
-                        {/* Client fields */}
-                        {clientType === "person" ? (
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-                                <input
-                                    type="text"
-                                    placeholder="First Name"
-                                    value={clientData.client_firstname}
-                                    onChange={(e) => setClientData({ ...clientData, client_firstname: e.target.value })}
-                                    className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                                    required
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Last Name"
-                                    value={clientData.client_lastname}
-                                    onChange={(e) => setClientData({ ...clientData, client_lastname: e.target.value })}
-                                    className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                                    required
-                                />
-                                <input
-                                    type="email"
-                                    placeholder="Email"
-                                    value={clientData.client_email}
-                                    onChange={(e) => setClientData({ ...clientData, client_email: e.target.value })}
-                                    className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                                    required
-                                />
-                                <input
-                                    type="tel"
-                                    placeholder="Phone Number"
-                                    value={clientData.client_phonenum}
-                                    onChange={(e) => setClientData({ ...clientData, client_phonenum: e.target.value })}
-                                    className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Address"
-                                    value={clientData.client_address}
-                                    onChange={(e) => setClientData({ ...clientData, client_address: e.target.value })}
-                                    className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white md:col-span-4"
-                                    required
-                                />
-                            </div>
-                        ) : (
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                            {clientType === "person" ? (
+                                <>
+                                    <input
+                                        type="text"
+                                        placeholder="First Name"
+                                        value={personName.first}
+                                        onChange={(e) => setPersonName({ ...personName, first: e.target.value })}
+                                        className="rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                                        required
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Middle Name"
+                                        value={personName.middle}
+                                        onChange={(e) => setPersonName({ ...personName, middle: e.target.value })}
+                                        className="rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                                    />
+                                    <input
+                                        type="text"
+                                        placeholder="Last Name"
+                                        value={personName.last}
+                                        onChange={(e) => setPersonName({ ...personName, last: e.target.value })}
+                                        className="rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                                        required
+                                    />
+                                </>
+                            ) : (
                                 <input
                                     type="text"
                                     placeholder="Company Name"
-                                    value={clientData.company_name}
-                                    onChange={(e) => setClientData({ ...clientData, company_name: e.target.value })}
-                                    className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                                    value={clientData.client_fullname}
+                                    onChange={(e) => setClientData({ ...clientData, client_fullname: e.target.value })}
+                                    className="col-span-3 rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                                     required
                                 />
-                                <input
-                                    type="email"
-                                    placeholder="Email"
-                                    value={clientData.client_email}
-                                    onChange={(e) => setClientData({ ...clientData, client_email: e.target.value })}
-                                    className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                                    required
-                                />
-                                <input
-                                    type="tel"
-                                    placeholder="Phone Number"
-                                    value={clientData.client_phonenum}
-                                    onChange={(e) => setClientData({ ...clientData, client_phonenum: e.target.value })}
-                                    className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                                />
-                                {/* The grid will automatically move the next item to a new row since this spans all columns */}
-                                <input
-                                    type="text"
-                                    placeholder="Address"
-                                    value={clientData.client_address}
-                                    onChange={(e) => setClientData({ ...clientData, client_address: e.target.value })}
-                                    className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white md:col-span-4"
-                                    required
-                                />
-                            </div>
-                        )}
+                            )}
+                        </div>
+                        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <input
+                                type="email"
+                                placeholder="Email"
+                                value={clientData.client_email}
+                                onChange={(e) => setClientData({ ...clientData, client_email: e.target.value })}
+                                className="rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                                required
+                            />
+                            <input
+                                type="tel"
+                                placeholder="Phone Number"
+                                value={clientData.client_phonenum}
+                                onChange={(e) => setClientData({ ...clientData, client_phonenum: e.target.value })}
+                                className="rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                            />
+                            {/* <input
+                                type="password"
+                                placeholder="Password"
+                                value={clientData.client_password}
+                                onChange={(e) => setClientData({ ...clientData, client_password: e.target.value })}
+                                className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                                required
+                            /> */}
+                        </div>
+                        <div className="mt-2 mt-4 text-gray-500 dark:text-gray-400">
+                            <input
+                                type="text"
+                                placeholder="Address (Optional)"
+                                value={clientData.client_address}
+                                onChange={(e) => setClientData({ ...clientData, client_address: e.target.value })}
+                                className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
+                            />
+                        </div>
                     </div>
 
                     <div>
                         <h3 className="mb-2 font-semibold text-blue-700 dark:text-blue-300">Contact Person</h3>
-                        <div className="grid grid-cols-1 gap-4 md:grid-cols-4 ">
+                        <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
                             <input
                                 type="text"
-                                placeholder="First Name"
-                                value={contact.contact_firstname}
-                                onChange={(e) => setContact({ ...contact, contact_firstname: e.target.value })}
-                                className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
-                            />
-                            <input
-                                type="text"
-                                placeholder="Last Name"
-                                value={contact.contact_lastname}
-                                onChange={(e) => setContact({ ...contact, contact_lastname: e.target.value })}
+                                placeholder="Full Name"
+                                value={contact.contact_fullname}
+                                onChange={(e) => setContact({ ...contact, contact_fullname: e.target.value })}
                                 className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                             />
                             <input
@@ -279,22 +253,15 @@ const AddClient = ({ AddClients, setAddClients }) => {
                             />
                             <input
                                 type="text"
-                                placeholder="Address"
-                                value={contact.contact_address}
-                                onChange={(e) => setContact({ ...contact, contact_address: e.target.value })}
-                                className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white md:col-span-4"
-                            />
-                            <input
-                                type="text"
                                 placeholder="Relation / Role"
                                 value={contact.contact_role}
                                 onChange={(e) => setContact({ ...contact, contact_role: e.target.value })}
-                                className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white md:col-span-3"
+                                className="w-full rounded-lg border px-3 py-2 dark:bg-slate-700 dark:text-white"
                             />
                             <button
                                 type="button"
                                 onClick={handleAddContact}
-                                className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 md:col-span-1"
+                                className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                             >
                                 +
                             </button>
@@ -314,7 +281,10 @@ const AddClient = ({ AddClients, setAddClients }) => {
                                     </thead>
                                     <tbody>
                                         {contacts.map((c, idx) => (
-                                            <tr key={idx} className="border-t">
+                                            <tr
+                                                key={idx}
+                                                className="border-t"
+                                            >
                                                 <td className="px-2 py-1">{c.contact_fullname}</td>
                                                 <td className="px-2 py-1">{c.contact_email}</td>
                                                 <td className="px-2 py-1">{c.contact_phone}</td>
@@ -337,7 +307,10 @@ const AddClient = ({ AddClients, setAddClients }) => {
                     </div>
 
                     <div className="flex justify-end gap-2">
-                        <button type="submit" className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
+                        <button
+                            type="submit"
+                            className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                        >
                             Save
                         </button>
                     </div>
