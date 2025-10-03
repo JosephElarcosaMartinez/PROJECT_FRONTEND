@@ -343,12 +343,12 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                         <strong>Status:</strong>{" "}
                                         <span
                                             className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${selectedCase.case_status === "Pending"
-                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
-                                                    : selectedCase.case_status === "Processing"
-                                                        ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
-                                                        : selectedCase.case_status === "Completed"
-                                                            ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                            : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                : selectedCase.case_status === "Processing"
+                                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
+                                                    : selectedCase.case_status === "Completed"
+                                                        ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
                                                 }`}
                                         >
                                             {selectedCase.case_status}
@@ -392,32 +392,34 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                     </div>
                                 )}
                             </div>
-                            <table className="w-full text-sm">
-                                <thead className="bg-gray-200 text-left dark:bg-slate-700">
-                                    <tr className="text-xs">
-                                        <th className="px-4 py-2">ID</th>
-                                        <th className="px-4 py-2">Name</th>
-                                        <th className="px-4 py-2">Type</th>
-                                        <th className="px-4 py-2">Status</th>
-                                        <th className="px-4 py-2">Due</th>
-                                        <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Submitted by"}</th>
-                                        {selectedCase.case_status !== "Completed" && <th className="px-4 py-2">Actions</th>}
-                                    </tr>
-                                </thead>
 
-                                <tbody className="text-gray-700 dark:text-white">
-                                    {documents.map((doc) => (
-                                        <tr
-                                            key={doc.doc_id}
-                                            className="border-t border-gray-200 dark:border-gray-700"
-                                        >
-                                            <td className="px-4 py-2">{doc.doc_id}</td>
-                                            <td className="px-4 py-2">{doc.doc_name}</td>
-                                            <td className="px-4 py-2">{doc.doc_type}</td>
-                                            <td className="px-4 py-2">{doc.doc_status}</td>
-                                            <td className="px-4 py-2">{doc.doc_due_date ? formatDateTime(doc.doc_due_date) : "N/A"}</td>
-                                            <td className="px-4 py-2">{getSubmitterName(doc.doc_submitted_by)}</td>
-                                            {selectedCase.case_status !== "Completed" && (
+                            {/* Document Table */}
+                            <div className="max-h-40 overflow-y-auto">
+                                <table className="w-full text-sm">
+                                    <thead className="sticky top-0 bg-gray-200 text-left dark:bg-slate-700">
+                                        <tr className="text-xs">
+                                            <th className="px-4 py-2">ID</th>
+                                            <th className="px-4 py-2">Name</th>
+                                            <th className="px-4 py-2">Type</th>
+                                            <th className="px-4 py-2">Status</th>
+                                            <th className="px-4 py-2">Due</th>
+                                            <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Submitted by"}</th>
+                                            <th className="px-4 py-2">Actions</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody className="text-gray-700 dark:text-white">
+                                        {documents.map((doc) => (
+                                            <tr
+                                                key={doc.doc_id}
+                                                className="border-t border-gray-200 dark:border-gray-700"
+                                            >
+                                                <td className="px-4 py-2">{doc.doc_id}</td>
+                                                <td className="px-4 py-2">{doc.doc_name}</td>
+                                                <td className="px-4 py-2">{doc.doc_type}</td>
+                                                <td className="px-4 py-2">{doc.doc_status}</td>
+                                                <td className="px-4 py-2">{doc.doc_due_date ? formatDateTime(doc.doc_due_date) : "N/A"}</td>
+                                                <td className="px-4 py-2">{getSubmitterName(doc.doc_submitted_by)}</td>
                                                 <td className="flex gap-2 space-x-2 px-4 py-2">
                                                     {doc.doc_file && (
                                                         <button
@@ -450,11 +452,11 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                                         <Trash2 size={16} />
                                                     </button>
                                                 </td>
-                                            )}
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                         {/* Add Task Modal */}
