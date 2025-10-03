@@ -10,6 +10,15 @@ import EditCaseModal from "../../components/edit-case";
 
 const Cases = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
+
+    // redirect non-admins
+    useEffect(() => {
+        if (!user) return; // wait until auth state is known
+        if (user.user_role !== "Admin" && user.user_role !== "Lawyer") {
+            navigate("/unauthorized");
+        }
+    }, [user, navigate]);
 
     const [search, setSearch] = useState("");
     const [tableData, setTableData] = useState([]);
@@ -21,7 +30,6 @@ const Cases = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCase, setSelectedCase] = useState(null);
     const addCaseModalRef = useRef();
-    const navigate = useNavigate();
     const [editModalOpen, setEditModalOpen] = useState(false);
     const [caseToEdit, setCaseToEdit] = useState(null);
 
@@ -64,24 +72,26 @@ const Cases = () => {
     const currentCases = filteredCases.slice(startIndex, startIndex + rowsPerPage);
 
     // Fetch cases data from API
-    useEffect(() => {
-        const fetchCases = async () => {
-            try {
-                const cases_endpoint = user?.user_role === "Admin" ? "/cases" : `/cases/user/${user?.user_id}`;
+    const fetchCases = async () => {
+        try {
+            const cases_endpoint = user?.user_role === "Admin" ? "/cases" : `/cases/user/${user?.user_id}`;
 
-                const response = await fetch(`http://localhost:3000/api${cases_endpoint}`,
-                    { credentials: 'include' }
-                );
-                if (!response.ok) {
-                    throw new Error("Failed to fetch cases");
-                }
-                const data = await response.json();
-                setTableData(data);
-            } catch (error) {
-                console.error("Error fetching cases:", error);
-                setError(error.message + ". You might want to check your server connection.");
+            const response = await fetch(`http://localhost:3000/api${cases_endpoint}`, {
+                credentials: "include",
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch cases");
             }
-        };
+            const data = await response.json();
+            setTableData(data);
+        } catch (error) {
+            console.error("Error fetching cases:", error);
+            setError(error.message + ". You might want to check your server connection.");
+        }
+    };
+
+    useEffect(() => {
         fetchCases();
     }, [user]);
 
@@ -128,7 +138,6 @@ const Cases = () => {
             const res = await fetch("http://localhost:3000/api/cases", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                credentials: 'include',
                 body: JSON.stringify(payload),
             });
 
@@ -167,7 +176,6 @@ const Cases = () => {
             const res = await fetch(`http://localhost:3000/api/cases/${updatedCase.case_id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                credentials: 'include',
                 body: JSON.stringify({ ...updatedCase, last_updated_by: user.user_id }),
             });
 
@@ -199,7 +207,7 @@ const Cases = () => {
 
             <div className="mb-6">
                 <h2 className="title">Cases</h2>
-                <p className="text-sm text-gray-500">Manage all case details here.</p>
+                <p className="text-sm dark:text-slate-300">Manage all case details here.</p>
             </div>
 
             {/* Tabs */}
@@ -293,7 +301,7 @@ const Cases = () => {
                                                     ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
                                                     : cases.case_status === "Completed"
                                                         ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                        : "bg-red-100 text-red-700 dark:bg-red-700/50 dark:text-red-300"
+                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
                                                 }`}
                                         >
                                             {cases.case_status}
@@ -322,9 +330,8 @@ const Cases = () => {
                                             </button>
 
                                             {cases.case_status !== "Completed" && cases.case_status !== "Dismissed" && (
-
                                                 <button
-                                                    Title={user.user_role === "Admin" ? "Edit Case" : "Update and Take Case"}
+                                                    title={user.user_role === "Admin" ? "Edit case" : "Update and take case"}
                                                     className="p-1.5 text-yellow-500 hover:text-yellow-700"
                                                     onClick={() => {
                                                         setCaseToEdit({
@@ -392,6 +399,7 @@ const Cases = () => {
                 selectedCase={selectedCase}
                 tableData={tableData}
                 setSelectedCase={setSelectedCase}
+                onCaseUpdated={fetchCases}
             />
 
             {/* Edit Case Modal */}

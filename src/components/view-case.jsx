@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { X, MapPin, ArrowLeft, Trash2, XCircle, CheckCircle, Eye, Pen, Undo } from "lucide-react";
+import { X, MapPin, ArrowLeft, Trash2, XCircle, CheckCircle, Eye, Pen, ArchiveRestore, Undo } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { useAuth } from "@/context/auth-context";
 import CaseActionModal from "./case-action-modal";
@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import AddTask from "./add-task";
 import AddDocument from "./add-document";
 
-const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
+const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) => {
     const { user } = useAuth();
 
     const modalRef = useRef(null);
@@ -151,7 +151,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
     const handleCaseAction = async (type, updatedCase) => {
         if (!selectedCase) return;
         try {
-            const toastId = toast.loading(type === "close" ? "Closing case..." : "Dismissing case...", {
+            const toastId = toast.loading(type === "close" ? "Closing case..." : type === "dismiss" ? "Dismissing case..." : "Archiving case...", {
                 duration: 4000,
             });
 
@@ -161,7 +161,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     ...updatedCase,
-                    case_status: type === "close" ? "Completed" : "Dismissed",
+                    case_status: type === "close" ? "Completed" : type === "dismiss" ? "Dismissed" : "Completed and Archived",
                     last_updated_by: user.user_id,
                 }),
             });
@@ -171,9 +171,14 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                 throw new Error(data.error || "Failed to update case status.");
             }
 
-            toast.success(`Case ${type === "close" ? "closed" : "dismissed"} successfully!`, { id: toastId, duration: 4000 });
-            setSelectedCase({ ...updatedCase, case_status: type === "close" ? "Completed" : "Dismissed" });
+            toast.success(`Case ${type === "close" ? "closed" : type === "dismiss" ? "dismissed" : "archived"} successfully!`, {
+                id: toastId,
+                duration: 4000,
+            });
+
+            setSelectedCase({ ...updatedCase, case_status: type === "close" ? "Completed" : type === "dismiss" ? "Dismissed" : "Archived" });
             setIsActionModalOpen(false);
+            if (onCaseUpdated) onCaseUpdated();
         } catch (error) {
             console.error("Error updating case status:", error);
             toast.error("Failed to update case status. Please try again.");
@@ -338,12 +343,12 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         <strong>Status:</strong>{" "}
                                         <span
                                             className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${selectedCase.case_status === "Pending"
-                                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
-                                                : selectedCase.case_status === "Processing"
-                                                    ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
-                                                    : selectedCase.case_status === "Completed"
-                                                        ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                    : selectedCase.case_status === "Processing"
+                                                        ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
+                                                        : selectedCase.case_status === "Completed"
+                                                            ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                            : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
                                                 }`}
                                         >
                                             {selectedCase.case_status}
@@ -396,7 +401,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                         <th className="px-4 py-2">Status</th>
                                         <th className="px-4 py-2">Due</th>
                                         <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Submitted by"}</th>
-                                        <th className="px-4 py-2">Actions</th>
+                                        {selectedCase.case_status !== "Completed" && <th className="px-4 py-2">Actions</th>}
                                     </tr>
                                 </thead>
 
@@ -412,38 +417,40 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                             <td className="px-4 py-2">{doc.doc_status}</td>
                                             <td className="px-4 py-2">{doc.doc_due_date ? formatDateTime(doc.doc_due_date) : "N/A"}</td>
                                             <td className="px-4 py-2">{getSubmitterName(doc.doc_submitted_by)}</td>
-                                            <td className="flex gap-2 space-x-2 px-4 py-2">
-                                                {doc.doc_file && (
-                                                    <button
-                                                        className="text-blue-600 hover:text-blue-800"
-                                                        onClick={() => window.open(`http://localhost:3000${doc.doc_file}`, "_blank")}
-                                                        title="View File"
-                                                    >
-                                                        <Eye size={16} />
-                                                    </button>
-                                                )}
+                                            {selectedCase.case_status !== "Completed" && (
+                                                <td className="flex gap-2 space-x-2 px-4 py-2">
+                                                    {doc.doc_file && (
+                                                        <button
+                                                            className="text-blue-600 hover:text-blue-800"
+                                                            onClick={() => window.open(`http://localhost:3000${doc.doc_file}`, "_blank")}
+                                                            title="View File"
+                                                        >
+                                                            <Eye size={16} />
+                                                        </button>
+                                                    )}
 
-                                                <button
-                                                    className="text-yellow-600 hover:text-yellow-800"
-                                                    title="Edit Document"
-                                                >
-                                                    <Pen size={16} />
-                                                </button>
-                                                {doc.doc_type !== "Support" && (
+                                                    <button
+                                                        className="text-yellow-600 hover:text-yellow-800"
+                                                        title="Edit Document"
+                                                    >
+                                                        <Pen size={16} />
+                                                    </button>
+                                                    {doc.doc_type !== "Support" && (
+                                                        <button
+                                                            className="text-red-600 hover:text-red-800"
+                                                            title="Reject Document"
+                                                        >
+                                                            <Undo size={16} />
+                                                        </button>
+                                                    )}
                                                     <button
                                                         className="text-red-600 hover:text-red-800"
-                                                        title="Reject Document"
+                                                        title="Delete Document"
                                                     >
-                                                        <Undo size={16} />
+                                                        <Trash2 size={16} />
                                                     </button>
-                                                )}
-                                                <button
-                                                    className="text-red-600 hover:text-red-800"
-                                                    title="Delete Document"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
-                                            </td>
+                                                </td>
+                                            )}
                                         </tr>
                                     ))}
                                 </tbody>
@@ -521,6 +528,22 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
                                 </button>
                             </div>
                         )}
+
+                        {selectedCase.case_status === "Completed" && (
+                            <div className="mt-6 flex items-center justify-end gap-4">
+                                <button
+                                    title="Archive"
+                                    className="inline-flex items-center gap-2 rounded-lg bg-blue-950 px-3 py-2 text-sm text-white hover:bg-blue-800"
+                                    onClick={() => {
+                                        setActionType("archive");
+                                        setIsActionModalOpen(true);
+                                    }}
+                                >
+                                    <ArchiveRestore size={20} />
+                                    Archive
+                                </button>
+                            </div>
+                        )}
                     </>
                 ) : (
                     <>
@@ -537,24 +560,24 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData }) => {
 
                         {/* Payment Summary Cards */}
                         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            {/* <div className="rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-green-100 p-5 shadow-sm dark:border-green-800 dark:from-green-900 dark:to-green-800">
-                                <p className="text-sm font-medium text-green-700 dark:text-green-300"></p>
+                            <div className="rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-green-100 p-5 shadow-sm dark:border-green-800 dark:from-green-900 dark:to-green-800">
+                                <p className="text-sm font-medium text-green-700 dark:text-green-300">Total Paid</p>
                                 <p className="mt-2 text-2xl font-extrabold text-green-800 dark:text-green-200">
                                     {selectedCase?.case_balance !== null && selectedCase?.case_balance !== undefined
-                                        ? formatCurrency(selectedCase.case_balance)
+                                        ? formatCurrency(selectedCase.case_fee - selectedCase.case_balance)
                                         : "₱0.00"}
                                 </p>
-                            </div> */}
-                            {/* <div className="rounded-xl border border-red-200 bg-gradient-to-r from-red-50 to-red-100 p-5 shadow-sm dark:border-red-800 dark:from-red-900 dark:to-red-800">
+                            </div>
+                            <div className="rounded-xl border border-red-200 bg-gradient-to-r from-red-50 to-red-100 p-5 shadow-sm dark:border-red-800 dark:from-red-900 dark:to-red-800">
                                 <p className="text-sm font-medium text-red-700 dark:text-red-300">Remaining Balance</p>
                                 <p className="mt-2 text-2xl font-extrabold text-red-800 dark:text-red-200">
                                     {selectedCase?.case_balance !== null && selectedCase?.case_balance !== undefined
                                         ? formatCurrency(selectedCase.case_balance)
                                         : "₱0.00"}
                                 </p>
-                            </div> */}
+                            </div>
                             <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100 p-5 shadow-sm dark:border-blue-800 dark:from-blue-900 dark:to-blue-800">
-                                <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Case Fee</p>
+                                <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Fee</p>
                                 <p className="mt-2 text-2xl font-extrabold text-blue-800 dark:text-blue-200">
                                     {selectedCase?.case_fee !== null && selectedCase?.case_fee !== undefined
                                         ? formatCurrency(selectedCase.case_fee)

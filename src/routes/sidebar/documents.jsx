@@ -1,10 +1,7 @@
 import { useState, useEffect } from "react";
 import { Download, Trash2, FileText, Search, Filter, X } from "lucide-react";
-import { useAuth } from "@/context/auth-context";
 
 const Documents = () => {
-    const { user } = useAuth();
-
     const [error, setError] = useState("");
     const [documents, setDocuments] = useState([]);
     const [search, setSearch] = useState("");
@@ -12,7 +9,6 @@ const Documents = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [docToDelete, setDocToDelete] = useState(null);
     const [users, setUsers] = useState([]);
-
 
     // Pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -41,16 +37,12 @@ const Documents = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const res = await fetch("http://localhost:3000/api/users", { method: "GET", credentials: "include" });
+                const res = await fetch("http://localhost:3000/api/users", { credentials: "include" });
+                if (!res.ok) throw new Error("Failed to load users");
                 const data = await res.json();
-
-                if (!res.ok) {
-                    throw new Error(data.error || "Failed to fetch users.");
-                } else {
-                    setUsers(data);
-                }
-            } catch (error) {
-                console.error("Error fetching users:", error);
+                setUsers(Array.isArray(data) ? data : []);
+            } catch {
+                setUsers([]);
             }
         };
         fetchUsers();
@@ -72,16 +64,15 @@ const Documents = () => {
         }
     };
 
-    // Get submitter name by ID
+    // Helper to display submitter's name or fallback
     const getSubmitterName = (submittedById) => {
-        const submitter = users.find((u) => u.user_id === submittedById);
-        return submitter
-            ? submitter.user_role === "Staff"
-                ? `${submitter.user_fname} ${submitter.user_mname ? submitter.user_mname[0] + "." : ""} ${submitter.user_lname}`
-                : `Atty. ${submitter.user_fname} ${submitter.user_mname ? submitter.user_mname[0] + "." : ""} ${submitter.user_lname}`
-            : "-";
+        if (!submittedById) return "-";
+        const u = users.find((x) => x.user_id === submittedById);
+        if (!u) return String(submittedById);
+        const m = u.user_mname ? `${u.user_mname[0]}.` : "";
+        if (u.user_role === "Staff") return `${u.user_fname} ${m} ${u.user_lname}`.replace(/\s+/g, " ").trim();
+        return `Atty. ${u.user_fname} ${m} ${u.user_lname}`.replace(/\s+/g, " ").trim();
     };
-
 
     // Filtered list (by name, type, case id, submitted/tasked by)
     const filteredDocs = documents.filter((doc) => {
@@ -225,7 +216,6 @@ const Documents = () => {
                     </div>
                 </div>
             )}
-
 
             {/* Filter Modal */}
             {showFilterModal && (

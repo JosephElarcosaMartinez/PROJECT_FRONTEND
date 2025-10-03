@@ -267,8 +267,8 @@ const Users = () => {
                         key={role}
                         onClick={() => setSelectedRole(role)}
                         className={`rounded-full px-4 py-2 text-sm font-medium ${selectedRole === role
-                                ? "border-none bg-blue-600 text-white"
-                                : "bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200"
+                            ? "border-none bg-blue-600 text-white"
+                            : "bg-gray-200 text-gray-700 dark:bg-slate-700 dark:text-slate-200"
                             }`}
                     >
                         {role}
@@ -328,12 +328,12 @@ const Users = () => {
                                             src={u.user_profile ? `${API_BASE}${u.user_profile}` : default_avatar}
                                             alt={`${u.user_fname || ""} ${u.user_lname || ""}`.trim()}
                                             className={`h-10 w-10 rounded-full border-2 object-cover p-0.5 ${u.user_status === "Active"
-                                                    ? "border-green-500"
-                                                    : u.user_status === "Pending"
-                                                        ? "border-yellow-500"
-                                                        : u.user_status === "Suspended"
-                                                            ? "border-red-500"
-                                                            : "border-gray-300"
+                                                ? "border-green-500"
+                                                : u.user_status === "Pending"
+                                                    ? "border-yellow-500"
+                                                    : u.user_status === "Suspended"
+                                                        ? "border-red-500"
+                                                        : "border-gray-300"
                                                 }`}
                                         />
                                         <span className="font-medium">
@@ -347,12 +347,12 @@ const Users = () => {
                                     <td className="px-4 py-3">
                                         <span
                                             className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${u.user_status === "Active"
-                                                    ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                    : u.user_status === "Pending"
-                                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
-                                                        : u.user_status === "Suspended"
-                                                            ? "bg-red-100 text-red-700 dark:bg-red-700/20 dark:text-red-300"
-                                                            : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                                ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                : u.user_status === "Pending"
+                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                    : u.user_status === "Suspended"
+                                                        ? "bg-red-100 text-red-700 dark:bg-red-700/20 dark:text-red-300"
+                                                        : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
                                                 }`}
                                         >
                                             {u.user_status}

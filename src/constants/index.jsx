@@ -1,6 +1,6 @@
-import { ChartColumn, Folders, Home, ListTodo, Users, Logs, Archive, ShieldUser, CreditCard, FileText } from "lucide-react";
+import { ChartColumn, Folders, Home, ListTodo, Users, Logs, Archive, ShieldUser, FileText, Wallet } from "lucide-react";
 
-export const allNavbarLinks = [
+const allNavbarLinks = [
     { label: "Home", icon: Home, path: "/" },
     { label: "Cases", icon: Folders, path: "/cases" },
     { label: "Documents", icon: FileText, path: "/documents" },
@@ -8,33 +8,30 @@ export const allNavbarLinks = [
     { label: "Tasks", icon: ListTodo, path: "/tasks" },
     { label: "Users", icon: ShieldUser, path: "/users" },
     { label: "Reports", icon: ChartColumn, path: "/reports" },
-    { label: "Logs", icon: Logs, path: "/user-logs" },
+    { label: "Activity Logs", icon: Logs, path: "/user-logs" },
     { label: "Case Archive", icon: Archive, path: "/case-archive" },
-    { label: "Payments", icon: CreditCard, path: "/payments" },
+    { label: "Payments", icon: Wallet, path: "/payments" },
 ];
 
-// Export a function to get filtered links based on role
+// 🔧 Export a function to get filtered links based on role
 export const getNavbarLinks = (role) => {
     if (role === "Admin") {
         return allNavbarLinks;
     }
 
     if (role === "Lawyer") {
-        // Hide Users and Logs
         return allNavbarLinks.filter((link) => link.label !== "Users" && link.label !== "Reports");
     }
 
-    if (role === "Paralegal") {
-        // Only allow Home, Tasks, and Logs
-        return allNavbarLinks.filter((link) => ["Home", "Tasks", "Logs"].includes(link.label));
-    }
-
     if (role === "Staff") {
-        // Only allow Home, Clients, Tasks, and Logs
-        return allNavbarLinks.filter((link) => ["Home", "Clients", "Tasks", "Logs"].includes(link.label));
+        return allNavbarLinks.filter((link) => ["Home", "Clients", "Tasks", "Activity Logs"].includes(link.label));
     }
 
-    return []; // default fallback (no links)
+    if (role === "Paralegal") {
+        return allNavbarLinks.filter((link) => ["Home", "Tasks", "Activity Logs"].includes(link.label));
+    }
+
+    return [];
 };
 
 export const overviewData = [
