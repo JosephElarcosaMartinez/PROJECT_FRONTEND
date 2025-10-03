@@ -161,7 +161,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     ...updatedCase,
-                    case_status: type === "close" ? "Completed" : type === "dismiss" ? "Dismissed" : "Completed and Archived",
+                    case_status: type === "close" ? "Completed" : type === "dismiss" ? "Dismissed" : "Archived",
                     last_updated_by: user.user_id,
                 }),
             });
@@ -392,34 +392,34 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                     </div>
                                 )}
                             </div>
-
-                            {/* Document Table */}
-                            <div className="max-h-40 overflow-y-auto">
-                                <table className="w-full text-sm">
-                                    <thead className="sticky top-0 bg-gray-200 text-left dark:bg-slate-700">
-                                        <tr className="text-xs">
-                                            <th className="px-4 py-2">ID</th>
-                                            <th className="px-4 py-2">Name</th>
-                                            <th className="px-4 py-2">Type</th>
-                                            <th className="px-4 py-2">Status</th>
-                                            <th className="px-4 py-2">Due</th>
-                                            <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Submitted by"}</th>
+                            <table className="w-full text-sm">
+                                <thead className="bg-gray-200 text-left dark:bg-slate-700">
+                                    <tr className="text-xs">
+                                        <th className="px-4 py-2">ID</th>
+                                        <th className="px-4 py-2">Name</th>
+                                        <th className="px-4 py-2">Type</th>
+                                        <th className="px-4 py-2">Status</th>
+                                        <th className="px-4 py-2">Due</th>
+                                        <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Submitted by"}</th>
+                                        {selectedCase.case_status !== "Completed" && selectedCase.case_status !== "Archived" && (
                                             <th className="px-4 py-2">Actions</th>
-                                        </tr>
-                                    </thead>
+                                        )}
+                                    </tr>
+                                </thead>
 
-                                    <tbody className="text-gray-700 dark:text-white">
-                                        {documents.map((doc) => (
-                                            <tr
-                                                key={doc.doc_id}
-                                                className="border-t border-gray-200 dark:border-gray-700"
-                                            >
-                                                <td className="px-4 py-2">{doc.doc_id}</td>
-                                                <td className="px-4 py-2">{doc.doc_name}</td>
-                                                <td className="px-4 py-2">{doc.doc_type}</td>
-                                                <td className="px-4 py-2">{doc.doc_status}</td>
-                                                <td className="px-4 py-2">{doc.doc_due_date ? formatDateTime(doc.doc_due_date) : "N/A"}</td>
-                                                <td className="px-4 py-2">{getSubmitterName(doc.doc_submitted_by)}</td>
+                                <tbody className="text-gray-700 dark:text-white">
+                                    {documents.map((doc) => (
+                                        <tr
+                                            key={doc.doc_id}
+                                            className="border-t border-gray-200 dark:border-gray-700"
+                                        >
+                                            <td className="px-4 py-2">{doc.doc_id}</td>
+                                            <td className="px-4 py-2">{doc.doc_name}</td>
+                                            <td className="px-4 py-2">{doc.doc_type}</td>
+                                            <td className="px-4 py-2">{doc.doc_status}</td>
+                                            <td className="px-4 py-2">{doc.doc_due_date ? formatDateTime(doc.doc_due_date) : "N/A"}</td>
+                                            <td className="px-4 py-2">{getSubmitterName(doc.doc_submitted_by)}</td>
+                                            {selectedCase.case_status !== "Completed" && selectedCase.case_status !== "Archived" && (
                                                 <td className="flex gap-2 space-x-2 px-4 py-2">
                                                     {doc.doc_file && (
                                                         <button
@@ -452,11 +452,11 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                                         <Trash2 size={16} />
                                                     </button>
                                                 </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                            )}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
 
                         {/* Add Task Modal */}
