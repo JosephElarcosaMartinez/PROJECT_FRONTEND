@@ -392,34 +392,34 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                     </div>
                                 )}
                             </div>
-                            <table className="w-full text-sm">
-                                <thead className="bg-gray-200 text-left dark:bg-slate-700">
-                                    <tr className="text-xs">
-                                        <th className="px-4 py-2">ID</th>
-                                        <th className="px-4 py-2">Name</th>
-                                        <th className="px-4 py-2">Type</th>
-                                        <th className="px-4 py-2">Status</th>
-                                        <th className="px-4 py-2">Due</th>
-                                        <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Submitted by"}</th>
-                                        {selectedCase.case_status !== "Completed" && selectedCase.case_status !== "Archived" && (
-                                            <th className="px-4 py-2">Actions</th>
-                                        )}
-                                    </tr>
-                                </thead>
 
-                                <tbody className="text-gray-700 dark:text-white">
-                                    {documents.map((doc) => (
-                                        <tr
-                                            key={doc.doc_id}
-                                            className="border-t border-gray-200 dark:border-gray-700"
-                                        >
-                                            <td className="px-4 py-2">{doc.doc_id}</td>
-                                            <td className="px-4 py-2">{doc.doc_name}</td>
-                                            <td className="px-4 py-2">{doc.doc_type}</td>
-                                            <td className="px-4 py-2">{doc.doc_status}</td>
-                                            <td className="px-4 py-2">{doc.doc_due_date ? formatDateTime(doc.doc_due_date) : "N/A"}</td>
-                                            <td className="px-4 py-2">{getSubmitterName(doc.doc_submitted_by)}</td>
-                                            {selectedCase.case_status !== "Completed" && selectedCase.case_status !== "Archived" && (
+                            {/* Document Table */}
+                            <div className="max-h-40 overflow-y-auto">
+                                <table className="w-full text-sm">
+                                    <thead className="sticky top-0 bg-gray-200 text-left dark:bg-slate-700">
+                                        <tr className="text-xs">
+                                            <th className="px-4 py-2">ID</th>
+                                            <th className="px-4 py-2">Name</th>
+                                            <th className="px-4 py-2">Type</th>
+                                            <th className="px-4 py-2">Status</th>
+                                            <th className="px-4 py-2">Due</th>
+                                            <th className="px-4 py-2">{documents.doc_type === "Tasked" ? "Assigned by" : "Submitted by"}</th>
+                                            <th className="px-4 py-2">Actions</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody className="text-gray-700 dark:text-white">
+                                        {documents.map((doc) => (
+                                            <tr
+                                                key={doc.doc_id}
+                                                className="border-t border-gray-200 dark:border-gray-700"
+                                            >
+                                                <td className="px-4 py-2">{doc.doc_id}</td>
+                                                <td className="px-4 py-2">{doc.doc_name}</td>
+                                                <td className="px-4 py-2">{doc.doc_type}</td>
+                                                <td className="px-4 py-2">{doc.doc_status}</td>
+                                                <td className="px-4 py-2">{doc.doc_due_date ? formatDateTime(doc.doc_due_date) : "N/A"}</td>
+                                                <td className="px-4 py-2">{getSubmitterName(doc.doc_submitted_by)}</td>
                                                 <td className="flex gap-2 space-x-2 px-4 py-2">
                                                     {doc.doc_file && (
                                                         <button
@@ -452,11 +452,11 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                                         <Trash2 size={16} />
                                                     </button>
                                                 </td>
-                                            )}
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
                         {/* Add Task Modal */}
@@ -562,7 +562,7 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
 
                         {/* Payment Summary Cards */}
                         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                            <div className="rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-green-100 p-5 shadow-sm dark:border-green-800 dark:from-green-900 dark:to-green-800">
+                            {/* <div className="rounded-xl border border-green-200 bg-gradient-to-r from-green-50 to-green-100 p-5 shadow-sm dark:border-green-800 dark:from-green-900 dark:to-green-800">
                                 <p className="text-sm font-medium text-green-700 dark:text-green-300">Total Paid</p>
                                 <p className="mt-2 text-2xl font-extrabold text-green-800 dark:text-green-200">
                                     {selectedCase?.case_balance !== null && selectedCase?.case_balance !== undefined
@@ -577,9 +577,9 @@ const ViewModal = ({ selectedCase, setSelectedCase, tableData, onCaseUpdated }) 
                                         ? formatCurrency(selectedCase.case_balance)
                                         : "₱0.00"}
                                 </p>
-                            </div>
+                            </div> */}
                             <div className="rounded-xl border border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100 p-5 shadow-sm dark:border-blue-800 dark:from-blue-900 dark:to-blue-800">
-                                <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Total Fee</p>
+                                <p className="text-sm font-medium text-blue-700 dark:text-blue-300">Case Fee</p>
                                 <p className="mt-2 text-2xl font-extrabold text-blue-800 dark:text-blue-200">
                                     {selectedCase?.case_fee !== null && selectedCase?.case_fee !== undefined
                                         ? formatCurrency(selectedCase.case_fee)
