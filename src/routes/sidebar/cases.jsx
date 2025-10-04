@@ -60,6 +60,7 @@ const Cases = () => {
         const matchesSearch =
             (cases.case_id && cases.case_id.toString().includes(search)) ||
             (cases.ct_name && cases.ct_name.toLowerCase().includes(searchLower)) ||
+            (cases.cc_name && cases.cc_name.toLowerCase().includes(searchLower)) ||
             (cases.client_fullname && cases.client_fullname.toLowerCase().includes(searchLower)) ||
             (cases.case_status && cases.case_status.toLowerCase().includes(searchLower)) ||
             (getLawyerFullName(cases.user_id) && getLawyerFullName(cases.user_id).toLowerCase().includes(searchLower)) ||
@@ -298,12 +299,12 @@ const Cases = () => {
                                         <td className="px-4 py-3">
                                             <span
                                                 className={`inline-block rounded-full px-3 py-1 text-xs font-medium capitalize ${cases.case_status === "Pending"
-                                                        ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
-                                                        : cases.case_status === "Processing"
-                                                            ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
-                                                            : cases.case_status === "Completed"
-                                                                ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
-                                                                : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
+                                                    ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-700/20 dark:text-yellow-300"
+                                                    : cases.case_status === "Processing"
+                                                        ? "bg-blue-100 text-blue-700 dark:bg-blue-700/20 dark:text-blue-300"
+                                                        : cases.case_status === "Completed"
+                                                            ? "bg-green-100 text-green-700 dark:bg-green-700/20 dark:text-green-300"
+                                                            : "bg-gray-100 text-gray-700 dark:bg-gray-700/50 dark:text-gray-300"
                                                     }`}
                                             >
                                                 {cases.case_status}
@@ -372,8 +373,8 @@ const Cases = () => {
                         onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
                         disabled={currentPage === 1}
                         className={`rounded border px-3 py-1 ${currentPage === 1
-                                ? "cursor-not-allowed bg-gray-200 text-gray-400"
-                                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+                            ? "cursor-not-allowed bg-gray-200 text-gray-400"
+                            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
                             }`}
                     >
                         &lt;
@@ -387,8 +388,8 @@ const Cases = () => {
                         onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
                         disabled={currentPage === totalPages}
                         className={`rounded border px-3 py-1 ${currentPage === totalPages
-                                ? "cursor-not-allowed bg-gray-200 text-gray-400"
-                                : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
+                            ? "cursor-not-allowed bg-gray-200 text-gray-400"
+                            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
                             }`}
                     >
                         &gt;

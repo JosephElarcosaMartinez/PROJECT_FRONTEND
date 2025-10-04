@@ -1,203 +1,320 @@
-import React, { useState, useRef } from "react";
-import { Filter, X, Search } from "lucide-react";
+import { useState, useRef, useEffect, use } from "react";
+import { Filter, X } from "lucide-react";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import ViewModal from "../../components/view-case";
+import { useAuth } from "@/context/auth-context";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
-const initialCases = [
-  { id: "C54321", name: "Davis Incorporation", client: "Davis Corp", dateFiled: "11/5/2022", archivedDate: "11/5/2022", category: "Corporate", lawyer: "Mark Reyes", fee: "₱20,000.00", balance: "₱10,000.00", status: "Closed", description: "Corporate filing case from 2022." },
-  { id: "A12345", name: "Smith vs. Henderson", client: "John Smith", dateFiled: "1/15/2023", archivedDate: "N/A", category: "Civil", lawyer: "Anna Cruz", fee: "₱50,000.00", balance: "₱30,000.00", status: "For Review", description: "Civil case involving property dispute." },
-  { id: "B67890", name: "Wilson Property Dispute", client: "Emily Wilson", dateFiled: "2/28/2023", archivedDate: "N/A", category: "Real Estate", lawyer: "James Tan", fee: "₱35,000.00", balance: "₱5,000.00", status: "Pending", description: "Dispute over residential land ownership." },
-  // unique test cases for pagination
-  { id: "C00003", name: "Example Case 3", client: "Test Client", dateFiled: "3/1/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer A", fee: "₱10,000.00", balance: "₱0.00", status: "Closed", description: "" },
-  { id: "C00004", name: "Example Case 4", client: "Test Client", dateFiled: "3/5/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer B", fee: "₱15,000.00", balance: "₱5,000.00", status: "Closed", description: "" },
-  { id: "C00005", name: "Example Case 5", client: "Test Client", dateFiled: "3/8/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer C", fee: "₱18,000.00", balance: "₱8,000.00", status: "Closed", description: "" },
-  { id: "C00006", name: "Example Case 6", client: "Test Client", dateFiled: "3/10/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer D", fee: "₱12,000.00", balance: "₱2,000.00", status: "Closed", description: "" },
-  { id: "C00007", name: "Example Case 7", client: "Test Client", dateFiled: "3/12/2023", archivedDate: "N/A", category: "Civil", lawyer: "Lawyer E", fee: "₱20,000.00", balance: "₱5,000.00", status: "Closed", description: "" },
-];
+const formatDateTime = (dateString) => {
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
 
 const Archives = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // redirect non-admins
+  useEffect(() => {
+    if (!user) return;
+    if (user.user_role !== "Admin" && user.user_role !== "Lawyer") {
+      navigate("/unauthorized", { replace: true });
+    }
+  }, [user, navigate]);
+
   const [search, setSearch] = useState("");
-  const [cases, setCases] = useState(initialCases);
-
   const [selectedCase, setSelectedCase] = useState(null);
-  const viewModalRef = useRef();
-  useClickOutside([viewModalRef], () => setSelectedCase(null));
-
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const filterModalRef = useRef();
-  useClickOutside([filterModalRef], () => setIsFilterOpen(false));
-
   const [clientFilter, setClientFilter] = useState("");
   const [archivedDateFilter, setArchivedDateFilter] = useState("");
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const [archivedCases, setArchivedCases] = useState([]);
+  const [lawyers, setLawyers] = useState([]);
 
-  const handleUnarchive = (id) => {
-    setCases((prev) => prev.filter((item) => item.id !== id));
+  const filterModalRef = useRef();
+  useClickOutside([filterModalRef], () => setIsFilterOpen(false));
+
+  // Fetch archived cases
+  useEffect(() => {
+    const fetchArchivedCases = async () => {
+      try {
+        const endpoint =
+          user.user_role === "Admin" ? "http://localhost:3000/api/cases" : `http://localhost:3000/api/cases/user/${user.user_id}`;
+
+        const res = await fetch(endpoint, {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        const contentType = res.headers.get("content-type");
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await res.text();
+          console.error("Server returned non-JSON:", text.slice(0, 200));
+          throw new Error("Invalid JSON response from server");
+        }
+
+        const data = await res.json();
+
+        // Filter archived only
+        const archived = data.filter((item) => item.case_status && item.case_status.toLowerCase() === "archived");
+
+        setArchivedCases(archived);
+      } catch (err) {
+        console.error("Fetch archived cases error:", err);
+      }
+    };
+    fetchArchivedCases();
+  }, []);
+
+  // Fetching users to identify the name of the lawyer
+  useEffect(() => {
+    const fetchLawyers = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/users", {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!res.ok) throw new Error("Failed to fetch lawyers");
+        const data = await res.json();
+        setLawyers(data);
+      } catch (err) {
+        console.error("Fetch lawyers error:", err);
+      }
+    };
+    fetchLawyers();
+  }, []);
+
+  const getLawyerFullName = (lawyerId) => {
+    const lawyer = lawyers.find((u) => u.user_id === lawyerId);
+    return lawyer
+      ? `${lawyer.user_fname || ""} ${lawyer.user_mname ? lawyer.user_mname[0] + "." : ""} ${lawyer.user_lname || ""}`
+        .replace(/\s+/g, " ")
+        .trim()
+      : "Unassigned";
   };
 
-  const filteredCases = cases.filter((item) => {
-    const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase());
-    const matchesClient = clientFilter
-      ? item.client.toLowerCase().includes(clientFilter.toLowerCase())
-      : true;
+  // Unarchive case
+  const handleUnarchive = async (caseToBeUnarchived) => {
+    const confirm = window.confirm("Are you sure you want to unarchive this case?");
+    if (!confirm) return;
+
+    const toastId = toast.loading("Unarchiving case...", { duration: 4000 });
+
+    try {
+      const res = await fetch(`http://localhost:3000/api/cases/${caseToBeUnarchived.case_id}`, {
+        method: "PUT",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ ...caseToBeUnarchived, case_status: "Completed", last_updated_by: user.user_id }),
+      });
+
+      if (!res.ok) throw new Error("Failed to unarchive case");
+      setArchivedCases((prev) => prev.filter((item) => item.case_id !== caseToBeUnarchived.case_id));
+
+      toast.success("Case unarchived successfully.", { id: toastId, duration: 4000 });
+    } catch (err) {
+      console.error("Error unarchiving case:", err);
+      toast.error("Error unarchiving case", { id: toastId, duration: 4000 });
+    }
+  };
+
+  // Apply filters
+  const filteredCases = archivedCases.filter((item) => {
+    const matchesSearch =
+      item.cc_name?.toLowerCase().includes(search.toLowerCase()) ||
+      item.ct_name?.toLowerCase().includes(search.toLowerCase()) ||
+      item.client_fullname?.toLowerCase().includes(search.toLowerCase()) ||
+      formatDateTime(item.case_date_created).toLowerCase().includes(search.toLowerCase()) ||
+      formatDateTime(item.case_last_updated).toLowerCase().includes(search.toLowerCase()) ||
+      item.case_id.toString().includes(search);
+
+    const matchesClient = clientFilter ? item.client_fullname?.toLowerCase().includes(clientFilter.toLowerCase()) : true;
+
     const matchesArchivedDate = archivedDateFilter
-      ? item.archivedDate.toLowerCase().includes(archivedDateFilter.toLowerCase())
+      ? formatDateTime(item.case_last_updated).toLowerCase().includes(archivedDateFilter.toLowerCase())
       : true;
+
     return matchesSearch && matchesClient && matchesArchivedDate;
   });
 
-  const totalPages = Math.ceil(filteredCases.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentCases = filteredCases.slice(startIndex, startIndex + itemsPerPage);
+  // Refresh after case update from modal
+  const handleCaseUpdated = (updatedCase) => {
+    setArchivedCases((prev) =>
+      prev.map((c) => (c.case_id === updatedCase.case_id ? updatedCase : c))
+    );
+  };
 
   return (
-    <div className="space-y-6 text-gray-800 dark:text-white min-h-screen">
-      <div>
-        <h2 className="title">Archives</h2>
-        <p className="text-sm text-gray-500">Browse and search completed and archived cases</p>
+    <div className="mx-auto">
+      <div className="mb-6">
+        <h2 className="title">Archived Cases</h2>
+        <p className="text-sm dark:text-slate-300">Browse and search all archived cases.</p>
       </div>
 
-      {/* Search + Filter */}
+      {/* Search and Filter */}
       <div className="card mb-5 flex flex-col gap-3 overflow-x-auto p-4 shadow-md md:flex-row md:items-center md:gap-x-3">
-        <div className="focus:ring-0.5 flex flex-grow items-center gap-2 rounded-md border border-gray-300 bg-transparent px-3 py-2 focus-within:border-blue-600 focus-within:ring-blue-400 dark:border-slate-600 dark:focus-within:border-blue-600">
-          <Search
-            size={18}
-            className="text-gray-600 dark:text-gray-400"
-          />
-          <input
-            type="text"
-            placeholder="Search archives..."
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="w-full bg-transparent text-gray-900 placeholder-gray-500 outline-none dark:text-white dark:placeholder-gray-400"
-          />
-        </div>
+        <input
+          type="text"
+          placeholder="Search archived cases..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-base text-slate-900 placeholder:text-slate-500 focus:border-blue-600 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-400"
+        />
         <button
           onClick={() => setIsFilterOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
-          <Filter size={18} /> Filter
+          <Filter size={18} />
+          Filter
         </button>
       </div>
 
       {/* Table */}
-      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-md p-4 overflow-x-auto">
-        <h2 className="text-xl font-semibold mb-4">Archived Cases</h2>
-        <div className="w-full overflow-x-auto rounded-xl border border-gray-200 dark:border-gray-700">
-          <table className="min-w-full text-sm text-left">
-            <thead className="uppercase text-xs border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-700">
-              <tr>
-                <th className="py-3 px-4">Case Number</th>
-                <th className="py-3 px-4">Name</th>
-                <th className="py-3 px-4">Client</th>
-                <th className="py-3 px-4">Date Filed</th>
-                <th className="py-3 px-4">Archived Date</th>
-                <th className="py-3 px-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentCases.map((item) => (
-                <tr key={item.id} className="border-b border-gray-200 dark:border-gray-700 hover:bg-blue-50 dark:hover:bg-slate-700 transition">
-                  <td className="py-3 px-4">{item.id}</td>
-                  <td className="py-3 px-4">{item.name}</td>
-                  <td className="py-3 px-4">{item.client}</td>
-                  <td className="py-3 px-4">{item.dateFiled}</td>
-                  <td className="py-3 px-4">{item.archivedDate}</td>
-                  <td className="py-3 px-4 space-x-2">
-                    <button onClick={() => setSelectedCase(item)} className="text-blue-600 hover:underline">
+      <div className="card overflow-x-auto shadow-md">
+        <table className="min-w-full table-auto text-left text-sm">
+          <thead className="text-xs uppercase dark:text-slate-300">
+            <tr>
+              <th className="px-4 py-3">Case ID</th>
+              <th className="px-4 py-3">Name</th>
+              <th className="px-4 py-3">Client</th>
+              {user.user_role === "Admin" && <th className="px-4 py-3">Lawyer</th>}
+              <th className="px-4 py-3">Date Filed</th>
+              <th className="px-4 py-3">Archived Date</th>
+              <th className="px-4 py-3">Actions</th>
+            </tr>
+          </thead>
+
+          <tbody className="text-slate-950 dark:text-white">
+            {filteredCases.length > 0 ? (
+              filteredCases.map((item) => (
+                <tr
+                  key={item.case_id}
+                  className="border-t border-gray-200 transition hover:bg-blue-100 dark:border-gray-700 dark:hover:bg-blue-950"
+                >
+                  <td className="px-4 py-3">{item.case_id}</td>
+                  <td className="px-4 py-3">{item.ct_name}</td>
+                  <td className="px-4 py-3">{item.client_fullname}</td>
+                  {user.user_role === "Admin" && <td className="px-4 py-3">Atty. {getLawyerFullName(item.user_id)}</td>}
+                  <td className="px-4 py-3">{formatDateTime(item.case_date_created)}</td>
+                  <td className="px-4 py-3">{formatDateTime(item.case_last_updated)}</td>
+                  <td className="space-x-3 px-4 py-3 text-blue-600">
+                    <button
+                      onClick={() => setSelectedCase(item)}
+                      className="hover:underline"
+                    >
                       View
                     </button>
-                    <button onClick={() => handleUnarchive(item.id)} className="text-red-600 hover:underline">
+                    <button
+                      onClick={() => handleUnarchive(item)}
+                      className="text-red-600 hover:underline"
+                    >
                       Unarchive
                     </button>
                   </td>
                 </tr>
-              ))}
-              {currentCases.length === 0 && (
-                <tr>
-                  <td colSpan="6" className="py-4 text-center text-gray-500 dark:text-gray-400">
-                    No archived cases found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan="7"
+                  className="px-4 py-6 text-center text-sm text-slate-500 dark:text-slate-400"
+                >
+                  No archived cases found.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Filter Modal */}
+      {isFilterOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div
+            ref={filterModalRef}
+            className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg dark:bg-slate-800"
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Filter Archives</h2>
+              <X
+                className="cursor-pointer text-slate-500 hover:text-slate-800 dark:text-slate-300"
+                onClick={() => setIsFilterOpen(false)}
+              />
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Client</label>
+                <input
+                  type="text"
+                  value={clientFilter}
+                  onChange={(e) => setClientFilter(e.target.value)}
+                  className="w-full rounded border px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                  placeholder="Enter client name"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Archived Date</label>
+                <input
+                  type="text"
+                  value={archivedDateFilter}
+                  onChange={(e) => setArchivedDateFilter(e.target.value)}
+                  className="w-full rounded border px-3 py-2 text-sm dark:border-slate-600 dark:bg-slate-700 dark:text-white"
+                  placeholder="e.g. Sep 25, 2025"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <button
+                  onClick={() => {
+                    setClientFilter("");
+                    setArchivedDateFilter("");
+                    setIsFilterOpen(false);
+                  }}
+                  className="rounded bg-gray-200 px-4 py-2 text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-white dark:hover:bg-gray-500"
+                >
+                  Clear
+                </button>
+                <button
+                  onClick={() => setIsFilterOpen(false)}
+                  className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
+      )}
 
-        {/* Filter Modal */}
-        {isFilterOpen && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div ref={filterModalRef} className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg w-full max-w-md">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold">Filter Archives</h2>
-                <X className="cursor-pointer text-gray-600 dark:text-gray-300" onClick={() => setIsFilterOpen(false)} />
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Client</label>
-                  <input type="text" value={clientFilter} onChange={(e) => setClientFilter(e.target.value)} className="w-full border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 rounded px-3 py-2 text-sm" placeholder="Enter client name" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Archived Date</label>
-                  <input type="text" value={archivedDateFilter} onChange={(e) => setArchivedDateFilter(e.target.value)} className="w-full border border-gray-300 dark:border-slate-600 bg-gray-100 dark:bg-slate-700 rounded px-3 py-2 text-sm" placeholder="e.g. 11/5/2022 or N/A" />
-                </div>
-                <div className="flex justify-end gap-2 pt-4">
-                  <button className="px-4 py-2 bg-gray-200 dark:bg-slate-600 rounded hover:bg-gray-300" onClick={() => { setClientFilter(""); setArchivedDateFilter(""); setIsFilterOpen(false); }}>
-                    Clear
-                  </button>
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" onClick={() => setIsFilterOpen(false)}>
-                    Apply
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* View Modal */}
-        {selectedCase && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div ref={viewModalRef}>
-              <ViewModal selectedCase={selectedCase} setSelectedCase={setSelectedCase} />
-            </div>
-          </div>
-        )}
-      </div>
-      {/* Pagination */}
-      <div className="flex justify-end items-center gap-3 mt-4">
-        <button
-          onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-          disabled={currentPage === 1}
-          className={`px-3 py-1 border rounded ${currentPage === 1
-            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-            }`}
-        >
-          &lt;
-        </button>
-
-        <span className="text-sm text-gray-700 dark:text-white">
-          Page {currentPage} of {totalPages}
-        </span>
-
-        <button
-          onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-          disabled={currentPage === totalPages}
-          className={`px-3 py-1 border rounded ${currentPage === totalPages
-            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-            : "bg-white hover:bg-gray-100 dark:bg-slate-800 dark:hover:bg-slate-700"
-            }`}
-        >
-          &gt;
-        </button>
-      </div>
+      {/* Case Viewer Modal */}
+      <ViewModal
+        selectedCase={selectedCase}
+        setSelectedCase={setSelectedCase}
+        tableData={archivedCases}
+        onCaseUpdated={handleCaseUpdated}
+      />
     </div>
-
   );
 };
 

@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { useNavigate } from "react-router-dom";
 import defaultAvatar from "../../assets/default-avatar.png";
+import { useAuth } from "../../context/auth-context.jsx";
 
 const data = [
   { name: "Mon", Cases: 400, analytics: 240 },
@@ -88,9 +89,17 @@ const formatDistanceToNow = (date) => {
 
 export const Reports = () => {
   const navigate = useNavigate();
+  const { user } = useAuth() || {};
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showAll, setShowAll] = useState(false); // 🔹 NEW state for toggle
+  // remove toggle in favor of scrollable list
+  // const [showAll, setShowAll] = useState(false);
+
+  // Stat counts
+  const [usersCount, setUsersCount] = useState(0);
+  const [archivedCasesCount, setArchivedCasesCount] = useState(0);
+  const [processingCasesCount, setProcessingCasesCount] = useState(0);
+  const [processingDocumentsCount, setProcessingDocumentsCount] = useState(0);
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -114,8 +123,89 @@ export const Reports = () => {
     fetchLogs();
   }, []);
 
+  // Users count (Admins only)
+  useEffect(() => {
+    const fetchUserCount = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/users/count", {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!res.ok) throw new Error("Failed to fetch user count");
+        const data = await res.json();
+        setUsersCount(data.count ?? 0);
+      } catch (error) {
+        console.error("Failed to fetch user count:", error);
+        setUsersCount(0);
+      }
+    };
+    if (user?.user_role === "Admin") fetchUserCount();
+  }, [user]);
+
+  // Processing cases count (role-based)
+  useEffect(() => {
+    const fetchProcessingCasesCount = async () => {
+      try {
+        const endpoint =
+          user?.user_role === "Admin" || user?.user_role === "Staff"
+            ? "http://localhost:3000/api/cases/count/processing"
+            : `http://localhost:3000/api/cases/count/processing/user/${user.user_id}`;
+        const res = await fetch(endpoint, { method: "GET", credentials: "include" });
+        if (!res.ok) throw new Error("Failed to fetch processing cases count");
+        const data = await res.json();
+        setProcessingCasesCount(data.count ?? 0);
+      } catch (error) {
+        console.error("Failed to fetch processing cases count:", error);
+        setProcessingCasesCount(0);
+      }
+    };
+    if (user) fetchProcessingCasesCount();
+  }, [user]);
+
+  // Archived cases count (role-based)
+  useEffect(() => {
+    const fetchArchivedCasesCount = async () => {
+      try {
+        const endpoint =
+          user?.user_role === "Admin" || user?.user_role === "Staff"
+            ? "http://localhost:3000/api/cases/count/archived"
+            : `http://localhost:3000/api/cases/count/archived/user/${user.user_id}`;
+        const res = await fetch(endpoint, { method: "GET", credentials: "include" });
+        if (!res.ok) throw new Error("Failed to fetch archived cases count");
+        const data = await res.json();
+        setArchivedCasesCount(data.count ?? 0);
+      } catch (error) {
+        console.error("Failed to fetch archived cases count:", error);
+        setArchivedCasesCount(0);
+      }
+    };
+    if (user) fetchArchivedCasesCount();
+  }, [user]);
+
+  // Processing documents count (derived from documents API)
+  useEffect(() => {
+    const fetchProcessingDocumentsCount = async () => {
+      try {
+        const res = await fetch("http://localhost:3000/api/documents", { credentials: "include" });
+        if (!res.ok) throw new Error("Failed to load documents");
+        const data = await res.json();
+        const statuses = new Set(["processing", "in-progress", "to-do", "pending"]);
+        const count = (Array.isArray(data) ? data : []).filter((d) =>
+          statuses.has(String(d.doc_status || "").toLowerCase().trim())
+        ).length;
+        setProcessingDocumentsCount(count);
+      } catch (e) {
+        console.error("Failed to compute processing documents count:", e);
+        setProcessingDocumentsCount(0);
+      }
+    };
+    fetchProcessingDocumentsCount();
+  }, []);
+
   // only show first 5 logs if not expanded
-  const visibleLogs = showAll ? logs : logs.slice(0, 5);
+  // const visibleLogs = showAll ? logs : logs.slice(0, 5);
+  // scrollable list: show all logs
+  const visibleLogs = logs;
 
   return (
     <div className="space-y-6">
@@ -125,22 +215,22 @@ export const Reports = () => {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard
           title="Users"
-          value="1,482"
+          value={usersCount}
           icon={<ShieldUser size={20} className="text-blue-500" />}
         />
         <StatCard
           title="Archived Cases"
-          value="267"
+          value={archivedCasesCount}
           icon={<Archive size={20} className="text-green-500" />}
         />
         <StatCard
           title="Processing Cases"
-          value="24"
+          value={processingCasesCount}
           icon={<FolderKanban size={20} className="text-orange-500" />}
         />
         <StatCard
           title="Processing Documents"
-          value="3,642"
+          value={processingDocumentsCount}
           icon={<FileText size={20} className="text-purple-500" />}
         />
       </div>
@@ -157,8 +247,8 @@ export const Reports = () => {
       </div>
 
       {/* User Activity Logs */}
-      <div className="card">
-        <div className="flex items-center justify-between mb-4">
+      <div className="card p-4">
+        <div className="flex items-center justify-between mb-3 ">
           <h2 className="text-xl font-bold text-slate-900 dark:text-white">
             User Activity
           </h2>
@@ -174,76 +264,68 @@ export const Reports = () => {
           <p className="text-center text-gray-500">Loading logs...</p>
         ) : (
           <>
-            <table className="w-full text-sm border-t">
-              <thead>
-                <tr className="bg-gray-100 text-left text-gray-600">
-                  <th className="p-2">USER</th>
-                  <th className="p-2">ACTION</th>
-                  <th className="p-2">DATE</th>
-                </tr>
-              </thead>
-              <tbody>
-                {visibleLogs.map((log) => (
-                  <tr
-                    key={log.user_log_id}
-                    className="border-b hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
-                    {/* USER */}
-                    <td className="flex items-center gap-2 p-2">
-                      {log.user_profile ? (
-                        <img
-                          src={`http://localhost:3000${log.user_profile}`}
-                          alt={log.user_fullname}
-                          className="h-8 w-8 rounded-full object-cover"
-                        />
-                      ) : (
-                        <div className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-400 text-xs font-bold text-white">
-                          {log.user_fullname?.charAt(0).toUpperCase()}
-                        </div>
-                      )}
-                      <span className="text-slate-900 dark:text-white">
-                        {log.user_fullname}
-                      </span>
-                    </td>
-
-                    {/* ACTION */}
-                    <td className="p-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-gray-600 dark:text-gray-400">
-                          {log.user_log_action}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {formatDistanceToNow(new Date(log.user_log_time))}
-                        </span>
-                      </div>
-                    </td>
-
-                    {/* DATE */}
-                    <td className="p-2 text-slate-700 dark:text-slate-300">
-                      {log.user_log_time
-                        ? new Date(log.user_log_time).toLocaleString("en-US", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })
-                        : ""}
-                    </td>
+            <div className="w-full max-h-80 overflow-y-auto rounded-md border border-gray-200 dark:border-gray-700">
+              <table className="w-full text-sm">
+                <thead className="sticky top-0 bg-gray-100 text-left text-gray-600 dark:bg-gray-800">
+                  <tr>
+                    <th className="p-2">USER</th>
+                    <th className="p-2">ACTION</th>
+                    <th className="p-2">DATE</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {visibleLogs.map((log) => (
+                    <tr
+                      key={log.user_log_id}
+                      className="border-b hover:bg-gray-50 dark:hover:bg-gray-700"
+                    >
+                      {/* USER */}
+                      <td className="flex items-center gap-2 p-2">
+                        {log.user_profile ? (
+                          <img
+                            src={`http://localhost:3000${log.user_profile}`}
+                            alt={log.user_fullname}
+                            className="h-8 w-8 rounded-full object-cover"
+                          />
+                        ) : (
+                          <div className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-400 text-xs font-bold text-white">
+                            {log.user_fullname?.charAt(0).toUpperCase()}
+                          </div>
+                        )}
+                        <span className="text-slate-900 dark:text-white">
+                          {log.user_fullname}
+                        </span>
+                      </td>
 
-            {/* Show more / less toggle */}
-            {logs.length > 5 && (
-              <div className="text-center mt-3">
-                <button
-                  onClick={() => setShowAll(!showAll)}
-                  className="text-gray-800 underline hover:text-blue-300 dark:text-white dark:hover:text-blue-400"
-                >
-                  {showAll ? "Show Less" : "Show More"}
-                </button>
-              </div>
-            )}
+                      {/* ACTION */}
+                      <td className="p-2">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium text-gray-600 dark:text-gray-400">
+                            {log.user_log_action}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {formatDistanceToNow(new Date(log.user_log_time))}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* DATE */}
+                      <td className="p-2 text-slate-700 dark:text-slate-300">
+                        {log.user_log_time
+                          ? new Date(log.user_log_time).toLocaleString("en-US", {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                          })
+                          : ""}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Show more / less toggle removed in favor of scrollable container */}
           </>
         )}
       </div>

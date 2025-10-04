@@ -12,6 +12,7 @@ const DashboardPage = () => {
     const { user } = useAuth();
     const [userLogs, setUserLogs] = useState([]);
     const [userCount, setUserCount] = useState(0);
+    const [clientsCount, setClientsCount] = useState(0);
     const [processingCasesCount, setProcessingCasesCount] = useState(0);
     const [archivedCasesCount, setArchivedCasesCount] = useState(0);
 
@@ -35,6 +36,33 @@ const DashboardPage = () => {
             fetchUserCount();
         }
     }, [user]);
+
+    // // fetching client count (role-based)
+    // useEffect(() => {
+    //     const fetchClientsCount = async () => {
+    //         try {
+    //             const endpoint =
+    //                 user?.user_role === "Admin" || user?.user_role === "Staff"
+    //                     ? "http://localhost:3000/api/clients/count"
+    //                     : `http://localhost:3000/api/clients/count/user/${user.user_id}`;
+
+    //             const res = await fetch(endpoint, {
+    //                 method: "GET",
+    //                 credentials: "include",
+    //             });
+    //             if (!res.ok) throw new Error("Failed to fetch clients count");
+    //             const data = await res.json();
+    //             setClientsCount(data.count);
+    //         } catch (error) {
+    //             console.error("Failed to fetch clients count:", error);
+    //             setClientsCount(0);
+    //         }
+    //     };
+
+    //     if (user) {
+    //         fetchClientsCount();
+    //     }
+    // }, [user]);
 
     // fetching processing cases count with role-based access
     useEffect(() => {
@@ -172,7 +200,7 @@ const DashboardPage = () => {
                             </div>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">91</p>
+                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">21</p>
                         </div>
                     </div>
                 </div>
@@ -190,7 +218,7 @@ const DashboardPage = () => {
                             </div>
                         </div>
                         <div className="card-body bg-slate-100 transition-colors dark:bg-slate-950">
-                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">21</p>
+                            <p className="text-2xl font-bold text-slate-900 transition-colors dark:text-slate-50">{clientsCount}</p>
                         </div>
                     </div>
 
