@@ -37,32 +37,32 @@ const DashboardPage = () => {
         }
     }, [user]);
 
-    // // fetching client count (role-based)
-    // useEffect(() => {
-    //     const fetchClientsCount = async () => {
-    //         try {
-    //             const endpoint =
-    //                 user?.user_role === "Admin" || user?.user_role === "Staff"
-    //                     ? "http://localhost:3000/api/clients/count"
-    //                     : `http://localhost:3000/api/clients/count/user/${user.user_id}`;
+    // fetching client count (role-based)
+    useEffect(() => {
+        const fetchClientsCount = async () => {
+            try {
+                const endpoint =
+                    user?.user_role === "Admin" || user?.user_role === "Staff"
+                        ? "http://localhost:3000/api/clients/count"
+                        : `http://localhost:3000/api/clients/count/user/${user.user_id}`;
 
-    //             const res = await fetch(endpoint, {
-    //                 method: "GET",
-    //                 credentials: "include",
-    //             });
-    //             if (!res.ok) throw new Error("Failed to fetch clients count");
-    //             const data = await res.json();
-    //             setClientsCount(data.count);
-    //         } catch (error) {
-    //             console.error("Failed to fetch clients count:", error);
-    //             setClientsCount(0);
-    //         }
-    //     };
+                const res = await fetch(endpoint, {
+                    method: "GET",
+                    credentials: "include",
+                });
+                if (!res.ok) throw new Error("Failed to fetch clients count");
+                const data = await res.json();
+                setClientsCount(data.count ?? 0);
+            } catch (error) {
+                console.error("Failed to fetch clients count:", error);
+                setClientsCount(0);
+            }
+        };
 
-    //     if (user) {
-    //         fetchClientsCount();
-    //     }
-    // }, [user]);
+        if (user) {
+            fetchClientsCount();
+        }
+    }, [user]);
 
     // fetching processing cases count with role-based access
     useEffect(() => {
