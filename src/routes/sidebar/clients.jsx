@@ -348,10 +348,12 @@ const Client = () => {
                         <span className="inline-block h-3 w-3 rounded-full bg-gray-400" />
                         <span className="text-xs text-slate-500 dark:text-slate-300">Inactive ({inactiveCount})</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="inline-block h-3 w-3 rounded-full bg-red-500" />
-                        <span className="text-xs text-slate-500 dark:text-slate-300">Removed ({removedCount})</span>
-                    </div>
+                    {user?.user_role === "Admin" && showAllClients && (
+                        <div className="flex items-center gap-2">
+                            <span className="inline-block h-3 w-3 rounded-full bg-red-500" />
+                            <span className="text-xs text-slate-500 dark:text-slate-300">Removed ({removedCount})</span>
+                        </div>
+                    )}
                 </div>
 
                 {totalPages > 1 && (
