@@ -28,6 +28,7 @@ import Promotion from "./components/promotion";
 import { UnauthorizedAccess } from "./auth/unauthorized";
 import { Payments } from "./routes/sidebar/payments";
 import Settings from "./components/settings";
+import Tasking from "./routes/sidebar/tasking";
 
 export default function App() {
     const router = createBrowserRouter([
@@ -63,6 +64,7 @@ export default function App() {
                         { path: "documents", element: <Documents /> },
                         { path: "clients", element: <Clients /> },
                         { path: "clients/contacts", element: <ClientContact /> },
+                        { path: "tasking", element: <Tasking /> },
                         { path: "tasks", element: <Tasks /> },
                         { path: "users", element: <Users /> },
                         {
