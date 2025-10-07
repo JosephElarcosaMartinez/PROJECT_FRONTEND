@@ -11,6 +11,9 @@ export default function Tasks() {
   const [casesError, setCasesError] = useState("");
   const [selectedCaseId, setSelectedCaseId] = useState("");
 
+  // NEW: toggle visibility of right-side panel
+  const [showAddPanel, setShowAddPanel] = useState(true);
+
   // Trigger showing AddDocument overlay
   const [addDocCaseId, setAddDocCaseId] = useState(null);
 
@@ -44,58 +47,72 @@ export default function Tasks() {
           <h2 className="text-xl font-bold text-gray-800 dark:text-white sm:text-2xl">Tasks</h2>
           <p className="text-sm text-gray-500">Manage and track all case-related tasks</p>
         </div>
+        {user.user_role === "Staff" && (
+          <button
+            type="button"
+            onClick={() => setShowAddPanel((v) => !v)}
+            className="inline-flex h-9 items-center rounded-md border border-gray-300 px-3 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-slate-700 dark:bg-slate-800 dark:text-gray-100 dark:hover:bg-slate-700"
+          >
+            {showAddPanel ? "Hide panel" : "Show panel"}
+          </button>
+        )}
       </div>
 
-      {/* Simple inline action card */}
-      {user.user_role === "Staff" && (
-        <div className=" ">
-          <div className="mb-3 flex items-center justify-between">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Add Supporting Document</h3>
-          </div>
+      {/* Layout: big space on the left, toggleable panel on the right */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Left content area intentionally spacious */}
+        <div className="lg:col-span-8" />
 
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <div className="flex-2">
-              <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Case</label>
-              <select
-                className="w-full rounded-lg border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-slate-800 dark:text-white"
-                value={selectedCaseId}
-                onChange={(e) => setSelectedCaseId(e.target.value)}
-                disabled={casesLoading}
-              >
-                <option value="">{casesLoading ? "Loading cases..." : "-- Choose a case --"}</option>
-                {casesError && (
-                  <option
-                    value=""
-                    disabled
-                  >
-                    Failed to load cases
-                  </option>
-                )}
-                {cases.filter((c) => c.case_status === "Processing")
-                  .map((c) => (
-                    <option
-                      key={c.case_id}
-                      value={c.case_id}
+        {/* Right sidebar panel */}
+        {user.user_role === "Staff" && (
+          <aside className="lg:col-span-4 lg:sticky lg:top-4">
+            <div className={showAddPanel ? "block" : "hidden"}>
+              <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-100">Add Supporting Document</h3>
+                </div>
+
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                  <div className="flex-2">
+                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">Case</label>
+                    <select
+                      className="w-full rounded-lg border px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-700 dark:bg-slate-800 dark:text-white"
+                      value={selectedCaseId}
+                      onChange={(e) => setSelectedCaseId(e.target.value)}
+                      disabled={casesLoading}
                     >
-                      #{c.case_id} - {c.ct_name || c.case_remarks || "Untitled Case"} ({c.client_fullname})
-                    </option>
-                  ))}
-              </select>
-              {casesError && <p className="mt-1 text-xs text-red-600">{casesError}</p>}
+                      <option value="">{casesLoading ? "Loading cases..." : "-- Choose a case --"}</option>
+                      {casesError && (
+                        <option value="" disabled>
+                          Failed to load cases
+                        </option>
+                      )}
+                      {cases
+                        .filter((c) => c.case_status === "Processing")
+                        .map((c) => (
+                          <option key={c.case_id} value={c.case_id}>
+                            #{c.case_id} - {c.ct_name || c.case_remarks || "Untitled Case"} ({c.client_fullname})
+                          </option>
+                        ))}
+                    </select>
+                    {casesError && <p className="mt-1 text-xs text-red-600">{casesError}</p>}
+                  </div>
+
+                  <button
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                    disabled={!selectedCaseId || !!casesError || casesLoading}
+                    onClick={() => setAddDocCaseId(selectedCaseId)}
+                  >
+                    + Add Supporting Document
+                  </button>
+                </div>
+
+                <p className="mt-2 text-xs text-gray-500">Select a case, then click Add Supporting Document to upload your file.</p>
+              </div>
             </div>
-
-            <button
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-              disabled={!selectedCaseId || !!casesError || casesLoading}
-              onClick={() => setAddDocCaseId(selectedCaseId)}
-            >
-              + Add Supporting Document
-            </button>
-          </div>
-
-          <p className="mt-2 text-xs text-gray-500">Select a case, then click Add Supporting Document to upload your file.</p>
-        </div>
-      )}
+          </aside>
+        )}
+      </div>
 
       {/* AddDocument overlay */}
       {addDocCaseId && (

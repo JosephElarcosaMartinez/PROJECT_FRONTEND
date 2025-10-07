@@ -188,7 +188,7 @@ export const Header = ({ collapsed, setCollapsed }) => {
                         type="text"
                         name="search"
                         id="search"
-                        placeholder="Search cases, clients, documents, or pages..."
+                        placeholder="Search..."
                         className="w-full bg-transparent text-slate-900 outline-0 placeholder:text-slate-500 dark:text-slate-50"
                         value={searchTerm}
                         onChange={handleSearchChange}

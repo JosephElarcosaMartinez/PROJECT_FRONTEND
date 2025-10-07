@@ -28,7 +28,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
         doc_tasked_to: "",
         doc_tasked_by: user?.user_id || "",
         doc_type: "Task", // keep consistent with backend
-        doc_status: "to-do",
+        doc_status: "todo",
         case_id: caseId,
     });
 
@@ -174,7 +174,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                 doc_tasked_to: "",
                 doc_tasked_by: user?.user_id || "",
                 doc_type: "Task",
-                doc_status: "to-do",
+                doc_status: "todo",
                 case_id: caseId,
             });
             setRefDocs([]);
