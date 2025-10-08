@@ -204,7 +204,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                     {/* Tasked To */}
                     <div className="flex flex-col relative">
                         <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">
-                            Tasked To
+                            Tasked To <span className="text-red-500">*</span>
                         </label>
                         <div className="relative">
                             <button
@@ -278,7 +278,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
 
                     {/* Document Name */}
                     <div className="flex flex-col">
-                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Document Name</label>
+                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Document Name  <span className="text-red-500">*</span></label>
                         <input
                             name="doc_name"
                             value={form.doc_name}
@@ -292,7 +292,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
 
                     {/* Priority */}
                     <div className="flex flex-col">
-                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Priority Level</label>
+                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Priority Level <span className="text-red-500">*</span></label>
                         <select
                             name="doc_prio_level"
                             value={form.doc_prio_level}
@@ -314,7 +314,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
 
                     {/* Due Date */}
                     <div className="flex flex-col">
-                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Due Date</label>
+                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Due Date <span className="text-red-500">*</span></label>
                         <input
                             name="doc_due_date"
                             value={form.doc_due_date ? form.doc_due_date.slice(0, 10) : ""}
@@ -327,7 +327,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
 
                     {/* Tag */}
                     <div className="flex flex-col">
-                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Tag</label>
+                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Tag <span className="text-red-500">*</span></label>
                         <input
                             name="doc_tag"
                             value={form.doc_tag}
@@ -354,7 +354,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
 
                 {/* Description & Task */}
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="flex flex-col">
+                    {/* <div className="flex flex-col">
                         <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                         <textarea
                             name="doc_description"
@@ -364,17 +364,17 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                             placeholder="Short description"
                             className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
                         />
-                    </div>
+                    </div> */}
 
-                    <div className="flex flex-col">
-                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Task</label>
+                    <div className="md:col-span-2">
+                        <label className="mb-1 text-sm font-medium text-gray-700 dark:text-gray-300">Task Description  <span className="text-red-500">*</span></label>
                         <textarea
                             name="doc_task"
                             value={form.doc_task}
                             onChange={onChange}
                             rows={3}
                             placeholder="Detailed task instructions"
-                            className="rounded border px-3 py-2 dark:border-gray-600 dark:bg-slate-800 dark:text-white"
+                            className="w-full resize-none rounded-lg border px-3 py-2 dark:border-gray-600 dark:bg-slate-700 dark:text-white"
                             required
                         />
                     </div>
