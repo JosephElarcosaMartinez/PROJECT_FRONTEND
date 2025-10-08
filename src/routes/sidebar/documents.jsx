@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Download, Trash2, FileText, Search, Filter, X } from "lucide-react";
 
+
+const roles = ["All", "Admin", "Lawyer", "Paralegal", "Staff"];
+
 const Documents = () => {
     const [error, setError] = useState("");
     const [documents, setDocuments] = useState([]);

@@ -464,7 +464,7 @@ export default function AddTask({ caseId, onClose, onAdded }) {
                                         {d.doc_file ? (
                                             <a
                                                 className="text-blue-600 hover:underline"
-                                                href={`http://localhost:3000/uploads/${d.doc_type === "Task" ? "taskDocs" : "supportingDocs"}/${d.doc_file}`}
+                                                href={`http://localhost:3000${d.doc_file}`}
                                                 target="_blank"
                                                 rel="noreferrer"
                                             >
