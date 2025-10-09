@@ -124,27 +124,24 @@ export const Tasks = () => {
             </div>
 
             {/* Priority Legend */}
-            <div>
-                <h3 className="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300">Priority Levels:</h3>
-                <div className="flex gap-4">
-                    {[
-                        { color: "bg-red-500", label: "High" },
-                        { color: "bg-yellow-500", label: "Medium" },
-                        { color: "bg-blue-500", label: "Low" },
-                    ].map((p) => (
-                        <div
-                            key={p.label}
-                            className="flex items-center gap-2"
-                        >
-                            <div className={`h-4 w-4 rounded-full ${p.color}`}></div>
-                            <span className="text-sm text-slate-600 dark:text-slate-400">{p.label}</span>
-                        </div>
-                    ))}
-                </div>
+            <div className="flex flex-wrap items-center gap-4">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Priority Levels:
+                </h3>
+                {[
+                    { color: "bg-red-500", label: "High" },
+                    { color: "bg-yellow-500", label: "Medium" },
+                    { color: "bg-blue-500", label: "Low" },
+                ].map((p) => (
+                    <div key={p.label} className="flex items-center gap-2">
+                        <div className={`h-4 w-4 rounded-full ${p.color}`}></div>
+                        <span className="text-sm text-slate-600 dark:text-slate-400">{p.label}</span>
+                    </div>
+                ))}
             </div>
 
             {/* Drag and Drop Columns */}
-            <DndContext onDragEnd={handleDragEnd}>
+            <DndContext onDragEnd={handleDragEnd}>  
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {COLUMNS.map((column) => (
                         <Column

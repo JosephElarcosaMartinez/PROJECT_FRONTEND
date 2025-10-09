@@ -429,57 +429,66 @@ export default function AddTask({ caseId, onClose, onAdded }) {
             </form>
 
             {/* Existing Documents */}
-            <div className="mt-6 overflow-x-auto">
-                <h3 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">Existing Documents</h3>
+            <div className="mt-6">
+                <h3 className="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
+                    Existing Documents
+                </h3>
+
                 {loadingDocs ? (
                     <p className="text-sm text-gray-500 dark:text-gray-400">Loading...</p>
                 ) : docs.length === 0 ? (
                     <p className="text-sm text-gray-500 dark:text-gray-400">No documents found.</p>
                 ) : (
-                    <table className="min-w-full border text-sm dark:border-gray-600">
-                        <thead className="bg-gray-50 dark:bg-slate-800">
-                            <tr>
-                                <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">Name</th>
-                                <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">Type</th>
-                                <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">Priority</th>
-                                <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">Due</th>
-                                <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">Tag</th>
-                                <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">File</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {docs.map((d) => (
-                                <tr
-                                    key={d.doc_id}
-                                    className="odd:bg-white even:bg-gray-50 dark:odd:bg-slate-900 dark:even:bg-slate-800"
-                                >
-                                    <td className="border p-2 dark:border-gray-600 dark:text-gray-200">{d.doc_name}</td>
-                                    <td className="border p-2 dark:border-gray-600 dark:text-gray-200">{d.doc_type}</td>
-                                    <td className="border p-2 dark:border-gray-600 dark:text-gray-200">{d.doc_prio_level || "-"}</td>
-                                    <td className="border p-2 dark:border-gray-600 dark:text-gray-200">
-                                        {d.doc_due_date ? new Date(d.doc_due_date).toLocaleDateString() : "-"}
-                                    </td>
-                                    <td className="border p-2 dark:border-gray-600 dark:text-gray-200">{d.doc_tag || "-"}</td>
-                                    <td className="border p-2 dark:border-gray-600 dark:text-gray-200">
-                                        {d.doc_file ? (
-                                            <a
-                                                className="text-blue-600 hover:underline"
-                                                href={`http://localhost:3000${d.doc_file}`}
-                                                target="_blank"
-                                                rel="noreferrer"
-                                            >
-                                                View
-                                            </a>
-                                        ) : (
-                                            "-"
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    <div className="overflow-x-auto rounded-lg border dark:border-gray-700">
+                        {/* Scrollable Table Container */}
+                        <div className="max-h-40 overflow-y-auto">
+                            <table className="min-w-full text-sm border-collapse">
+                                <thead className="sticky top-0 bg-gray-100 dark:bg-slate-800 z-10">
+                                    <tr>
+                                        <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">Name</th>
+                                        <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">Type</th>
+                                        <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">Priority</th>
+                                        <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">Due</th>
+                                        <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">Tag</th>
+                                        <th className="border p-2 text-left dark:border-gray-600 dark:text-gray-300">File</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {docs.map((d) => (
+                                        <tr
+                                            key={d.doc_id}
+                                            className="odd:bg-white even:bg-gray-50 dark:odd:bg-slate-900 dark:even:bg-slate-800"
+                                        >
+                                            <td className="border p-2 dark:border-gray-600 dark:text-gray-200">{d.doc_name}</td>
+                                            <td className="border p-2 dark:border-gray-600 dark:text-gray-200">{d.doc_type}</td>
+                                            <td className="border p-2 dark:border-gray-600 dark:text-gray-200">{d.doc_prio_level || "-"}</td>
+                                            <td className="border p-2 dark:border-gray-600 dark:text-gray-200">
+                                                {d.doc_due_date ? new Date(d.doc_due_date).toLocaleDateString() : "-"}
+                                            </td>
+                                            <td className="border p-2 dark:border-gray-600 dark:text-gray-200">{d.doc_tag || "-"}</td>
+                                            <td className="border p-2 dark:border-gray-600 dark:text-gray-200">
+                                                {d.doc_file ? (
+                                                    <a
+                                                        className="text-blue-600 hover:underline"
+                                                        href={`http://localhost:3000${d.doc_file}`}
+                                                        target="_blank"
+                                                        rel="noreferrer"
+                                                    >
+                                                        View
+                                                    </a>
+                                                ) : (
+                                                    "-"
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 )}
             </div>
+
         </div>
     );
 }
