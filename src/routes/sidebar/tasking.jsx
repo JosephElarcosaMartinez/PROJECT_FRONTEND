@@ -116,7 +116,7 @@ export const Tasks = () => {
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-5">
             {/* Header */}
             <div>
                 <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">Tasks</h1>
@@ -124,24 +124,27 @@ export const Tasks = () => {
             </div>
 
             {/* Priority Legend */}
-            <div className="flex flex-wrap items-center gap-4">
-                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                    Priority Levels:
-                </h3>
-                {[
-                    { color: "bg-red-500", label: "High" },
-                    { color: "bg-yellow-500", label: "Medium" },
-                    { color: "bg-blue-500", label: "Low" },
-                ].map((p) => (
-                    <div key={p.label} className="flex items-center gap-2">
-                        <div className={`h-4 w-4 rounded-full ${p.color}`}></div>
-                        <span className="text-sm text-slate-600 dark:text-slate-400">{p.label}</span>
-                    </div>
-                ))}
+            <div className="flex items-center gap-6">
+                <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Priority Levels:</h3>
+                <div className="flex gap-4">
+                    {[
+                        { color: "bg-red-500", label: "High" },
+                        { color: "bg-yellow-500", label: "Mid" },
+                        { color: "bg-blue-500", label: "Low" },
+                    ].map((p) => (
+                        <div
+                            key={p.label}
+                            className="flex items-center gap-2"
+                        >
+                            <div className={`h-4 w-4 rounded-full ${p.color}`}></div>
+                            <span className="text-sm text-slate-600 dark:text-slate-400">{p.label}</span>
+                        </div>
+                    ))}
+                </div>
             </div>
 
             {/* Drag and Drop Columns */}
-            <DndContext onDragEnd={handleDragEnd}>  
+            <DndContext onDragEnd={handleDragEnd}>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {COLUMNS.map((column) => (
                         <Column
@@ -154,6 +157,61 @@ export const Tasks = () => {
                 </div>
             </DndContext>
 
+            {/* List of Overdue Tasks */}
+            <div className="mt-10">
+                <h1 className="mb-3 text-lg font-bold text-slate-800 dark:text-slate-100">Overdue Tasks</h1>
+                <div className="overflow-x-auto rounded-xl bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800">
+                    <div className="max-h-[40vh] overflow-y-auto">
+                        <table className="w-full table-auto text-sm">
+                            <thead className="sticky top-0 z-20 bg-gray-100 dark:bg-slate-900/40">
+                                <tr>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
+                                        Task Name
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
+                                        Due Date
+                                    </th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
+                                        Status
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="dark:divide-slate-700">
+                                {tasks.filter(task => task.doc_due_date && new Date(task.doc_due_date) < new Date() && task.doc_status !== STATUS_IDS.DONE).length > 0 ? (
+                                    tasks
+                                        .filter(task => task.doc_due_date && new Date(task.doc_due_date) < new Date() && task.doc_status !== STATUS_IDS.DONE)
+                                        .map((task) => (
+                                            <tr
+                                                key={task.doc_id}
+                                                className="transition-colors odd:bg-white even:bg-gray-50/60 hover:bg-gray-50 dark:odd:bg-slate-800 dark:even:bg-slate-800/60 dark:hover:bg-slate-700/60"
+                                            >
+                                                <td className="max-w-[180px] truncate px-4 font-medium text-slate-800 dark:text-slate-100">
+                                                    {task.doc_name}
+                                                </td>
+                                                <td className="px-4 py-3 text-slate-700 dark:text-slate-200">
+                                                    {new Date(task.doc_due_date).toLocaleDateString()}
+                                                </td>
+                                                <td className="px-4 py-3 capitalize text-slate-800 dark:text-slate-100">
+                                                    {task.doc_status === "todo" ? "To Do" : task.doc_status === "in_progress" ? "In Progress" : "Done"}
+                                                </td>
+                                            </tr>
+                                        ))
+                                ) : (
+                                    <tr>
+                                        <td
+                                            colSpan="3"
+                                            className="px-5 py-8 text-center text-slate-500 dark:text-slate-400"
+                                        >
+                                            No overdue tasks.
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             {/* Task Overview */}
             <div className="mt-10">
                 <h1 className="mb-3 text-lg font-bold text-slate-800 dark:text-slate-100">Task Overview</h1>
@@ -163,19 +221,17 @@ export const Tasks = () => {
                         <table className="w-full table-auto text-sm">
                             <thead className="sticky top-0 z-20 bg-gray-100 dark:bg-slate-900/40">
                                 <tr>
-                                    <th className=" px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
                                         Task Name
                                     </th>
-                                    <th className=" px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
                                         Description
                                     </th>
-                                    <th className=" px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
-                                        Status
-                                    </th>
-                                    <th className=" px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">Status</th>
+                                    <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
                                         Due Date
                                     </th>
-                                    <th className=" px-4 py-3 text-center text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
+                                    <th className="px-4 py-3 text-center text-xs font-semibold uppercase text-slate-600 dark:text-slate-300">
                                         Actions
                                     </th>
                                 </tr>
@@ -212,7 +268,7 @@ export const Tasks = () => {
                                                     <span
                                                         className={`inline-block h-2.5 w-2.5 rounded-full ${task.doc_prio_level === "High"
                                                             ? "bg-red-500"
-                                                            : task.doc_prio_level === "Medium"
+                                                            : task.doc_prio_level === "Mid"
                                                                 ? "bg-yellow-500"
                                                                 : task.doc_prio_level === "Low"
                                                                     ? "bg-blue-500"
