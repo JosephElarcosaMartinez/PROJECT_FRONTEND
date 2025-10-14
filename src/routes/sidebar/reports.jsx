@@ -1,14 +1,6 @@
 import { useEffect, useState } from "react";
 import { ShieldUser, FileText, Archive, FolderKanban } from "lucide-react";
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-} from "recharts";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { useNavigate } from "react-router-dom";
 import defaultAvatar from "../../assets/default-avatar.png";
 import { useAuth } from "../../context/auth-context.jsx";
@@ -26,37 +18,54 @@ const data = [
 const StatCard = ({ title, value, icon }) => (
   <div className="flex flex-col justify-between gap-2 rounded-lg bg-white p-4 shadow dark:bg-slate-900">
     <div className="flex items-center justify-between">
-      <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-        {title}
-      </p>
+      <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{title}</p>
       {icon}
     </div>
-    <h3 className="text-2xl font-semibold text-slate-900 dark:text-white">
-      {value}
-    </h3>
+    <h3 className="text-2xl font-semibold text-slate-900 dark:text-white">{value}</h3>
   </div>
 );
 
 const ChartPlaceholder = ({ title, dataKey }) => (
   <div className="flex flex-col gap-3 rounded-lg bg-white p-4 shadow dark:bg-slate-900">
-    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
-      {title}
-    </h3>
+    <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h3>
     <div className="h-[200px] w-full">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer
+        width="100%"
+        height="100%"
+      >
         <AreaChart
           data={data}
           margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
         >
           <defs>
-            <linearGradient id="colorData" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
-              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+            <linearGradient
+              id="colorData"
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="1"
+            >
+              <stop
+                offset="5%"
+                stopColor="#3b82f6"
+                stopOpacity={0.8}
+              />
+              <stop
+                offset="95%"
+                stopColor="#3b82f6"
+                stopOpacity={0}
+              />
             </linearGradient>
           </defs>
-          <XAxis dataKey="name" stroke="#94a3b8" />
+          <XAxis
+            dataKey="name"
+            stroke="#94a3b8"
+          />
           <YAxis stroke="#94a3b8" />
-          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+          <CartesianGrid
+            strokeDasharray="3 3"
+            stroke="#e2e8f0"
+          />
           <Tooltip />
           <Area
             type="monotone"
@@ -90,6 +99,13 @@ const formatDistanceToNow = (date) => {
 export const Reports = () => {
   const navigate = useNavigate();
   const { user } = useAuth() || {};
+
+  if (!user) return null;
+  if (user.user_role !== "Admin") {
+    navigate("/unauthorized");
+    return null;
+  }
+
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   // remove toggle in favor of scrollable list
@@ -191,7 +207,11 @@ export const Reports = () => {
         const data = await res.json();
         const statuses = new Set(["processing", "in-progress", "to-do", "pending"]);
         const count = (Array.isArray(data) ? data : []).filter((d) =>
-          statuses.has(String(d.doc_status || "").toLowerCase().trim())
+          statuses.has(
+            String(d.doc_status || "")
+              .toLowerCase()
+              .trim(),
+          ),
         ).length;
         setProcessingDocumentsCount(count);
       } catch (e) {
@@ -216,45 +236,64 @@ export const Reports = () => {
         <StatCard
           title="Users"
           value={usersCount}
-          icon={<ShieldUser size={20} className="text-blue-500" />}
+          icon={
+            <ShieldUser
+              size={20}
+              className="text-blue-500"
+            />
+          }
         />
         <StatCard
           title="Archived Cases"
           value={archivedCasesCount}
-          icon={<Archive size={20} className="text-green-500" />}
+          icon={
+            <Archive
+              size={20}
+              className="text-green-500"
+            />
+          }
         />
         <StatCard
           title="Processing Cases"
           value={processingCasesCount}
-          icon={<FolderKanban size={20} className="text-orange-500" />}
+          icon={
+            <FolderKanban
+              size={20}
+              className="text-orange-500"
+            />
+          }
         />
         <StatCard
           title="Processing Documents"
           value={processingDocumentsCount}
-          icon={<FileText size={20} className="text-purple-500" />}
+          icon={
+            <FileText
+              size={20}
+              className="text-purple-500"
+            />
+          }
         />
       </div>
 
       {/* Chart */}
-      <div className="relative rounded-xl bg-white dark:bg-gray-800 p-6 shadow-md">
-        <span className="absolute top-4 right-4 z-10 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">
-          Last 7 Days
-        </span>
+      <div className="relative rounded-xl bg-white p-6 shadow-md dark:bg-gray-800">
+        <span className="absolute right-4 top-4 z-10 rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700">Last 7 Days</span>
 
         <div className="grid grid-cols-4 gap-6 lg:grid-cols-1">
-          <ChartPlaceholder title="Completed Cases" dataKey="Cases" />
+          <ChartPlaceholder
+            title="Completed Cases"
+            dataKey="Cases"
+          />
         </div>
       </div>
 
       {/* User Activity Logs */}
       <div className="card p-4">
-        <div className="flex items-center justify-between mb-3 ">
-          <h2 className="text-xl font-bold text-slate-900 dark:text-white">
-            User Activity
-          </h2>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-slate-900 dark:text-white">User Activity</h2>
           <button
             onClick={() => navigate("/user-logs")}
-            className="text-blue-800 font-bold hover:underline text-xl"
+            className="text-xl font-bold text-blue-800 hover:underline"
           >
             View all
           </button>
@@ -264,7 +303,7 @@ export const Reports = () => {
           <p className="text-center text-gray-500">Loading logs...</p>
         ) : (
           <>
-            <div className="w-full max-h-80 overflow-y-auto rounded-md border border-gray-200 dark:border-gray-700">
+            <div className="max-h-80 w-full overflow-y-auto rounded-md border border-gray-200 dark:border-gray-700">
               <table className="w-full text-sm">
                 <thead className="sticky top-0 bg-gray-100 text-left text-gray-600 dark:bg-gray-800">
                   <tr>
@@ -288,24 +327,18 @@ export const Reports = () => {
                             className="h-8 w-8 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="h-8 w-8 flex items-center justify-center rounded-full bg-gray-400 text-xs font-bold text-white">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-400 text-xs font-bold text-white">
                             {log.user_fullname?.charAt(0).toUpperCase()}
                           </div>
                         )}
-                        <span className="text-slate-900 dark:text-white">
-                          {log.user_fullname}
-                        </span>
+                        <span className="text-slate-900 dark:text-white">{log.user_fullname}</span>
                       </td>
 
                       {/* ACTION */}
                       <td className="p-2">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-gray-600 dark:text-gray-400">
-                            {log.user_log_action}
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            {formatDistanceToNow(new Date(log.user_log_time))}
-                          </span>
+                          <span className="font-medium text-gray-600 dark:text-gray-400">{log.user_log_action}</span>
+                          <span className="text-xs text-gray-500">{formatDistanceToNow(new Date(log.user_log_time))}</span>
                         </div>
                       </td>
 
@@ -324,8 +357,6 @@ export const Reports = () => {
                 </tbody>
               </table>
             </div>
-
-            {/* Show more / less toggle removed in favor of scrollable container */}
           </>
         )}
       </div>
