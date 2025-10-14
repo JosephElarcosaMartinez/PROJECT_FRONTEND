@@ -495,7 +495,7 @@ const Settings = () => {
         { key: "access", label: "Case Access", icon: Lock },
         { key: "case-categories", label: "Case Categories & Types ", icon: List },
         { key: "archive", label: "Archive", icon: Archive },
-        { key: "logs", label: "Logs & Audit Trail", icon: Info },
+        // { key: "logs", label: "Logs & Audit Trail", icon: Info },
     ];
 
     // Display helpers resilient to backend shapes
@@ -949,7 +949,7 @@ const Settings = () => {
                     )
                 }
 
-               {/* Logs & Audit Trail */}
+                {/* Logs & Audit Trail */}
                 {
                     // activeTab === "logs" && (
                     //     <div className="space-y-6">
@@ -1077,7 +1077,7 @@ const Settings = () => {
                     //         </SettingsCard>
                     //     </div>
                     // )
-                } 
+                }
             </main >
         </div >
     );
