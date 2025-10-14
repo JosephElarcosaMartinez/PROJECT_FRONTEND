@@ -64,6 +64,7 @@ const Userlogs = () => {
     if (/archived/i.test(action)) return "bg-slate-700 text-white dark:bg-white dark:text-black";
     if (/case/i.test(action)) return "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300";
     if (/task/i.test(action)) return "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300";
+    if (/support/i.test(action)) return "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300";
     if (/fail|error/i.test(action)) return "bg-red-100 text-red-700";
     return "bg-gray-100 text-gray-700 dark:bg-gray-700/20 dark:text-gray-300";
   };
@@ -83,6 +84,7 @@ const Userlogs = () => {
     if (/updated case/i.test(action)) return "Case Update";
     if (/task added/i.test(action)) return "New Task Added";
     if (/task updated/i.test(action)) return "Task Update";
+    if (/support/i.test(action)) return "Support Document Added";
     if (/fail|error/i.test(action)) return "Error";
     return "Action";
   };
