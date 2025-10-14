@@ -48,7 +48,7 @@ const Userlogs = () => {
     if (type === "case log") return <Scale className="h-5 w-5" />;
     if (type === "archive log") return <Archive className="h-5 w-5" />;
     if (type === "task log") return <ListCheck className="h-5 w-5" />;
-
+    if (type === "support document log") return <ListCheck className="h-5 w-5" />;
     if (/login/.test(action)) return <LogIn className="h-5 w-5" />;
     if (/logout/.test(action)) return <LogOut className="h-5 w-5" />;
     if (/fail|error/.test(action)) return <AlertTriangle className="h-5 w-5 text-red-500" />;
