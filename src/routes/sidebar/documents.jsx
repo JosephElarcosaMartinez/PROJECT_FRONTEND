@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { Download, Trash2, FileText, Search, Filter, X } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 
+const roles = ["All", "Support", "Task"];
+
 const Documents = () => {
     const { user } = useAuth();
 
@@ -137,6 +139,30 @@ const Documents = () => {
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
+            </div>
+
+            {/* Tabs: All | Support | Task */}
+            <div className="flex flex-wrap gap-2">
+                {roles.map((r) => {
+                    const isActive =
+                        (r === "All" && (search === "" || !["support", "task"].includes(search.toLowerCase()))) ||
+                        search.toLowerCase() === r.toLowerCase();
+                    return (
+                        <button
+                            key={r}
+                            onClick={() => {
+                                setCurrentPage(1);
+                                setSearch(r === "All" ? "" : r);
+                            }}
+                            className={`rounded-md px-4 py-1 text-sm font-medium border transition
+          ${isActive
+                                    ? "bg-blue-600 border-blue-600 text-white"
+                                    : "bg-white border-gray-300 text-gray-700 hover:bg-gray-100 dark:bg-slate-800 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-700"}`}
+                        >
+                            {r}
+                        </button>
+                    );
+                })}
             </div>
 
             {/* Document Table */}
